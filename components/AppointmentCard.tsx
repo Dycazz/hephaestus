@@ -9,6 +9,7 @@ interface AppointmentCardProps {
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
+  onReschedule: (id: string) => void
 }
 
 const statusConfig = {
@@ -55,6 +56,7 @@ export function AppointmentCard({
   onSendReminder,
   onMarkComplete,
   onCancel,
+  onReschedule,
 }: AppointmentCardProps) {
   const { badge, label, dot } = statusConfig[appointment.status]
   const canSendReminder = appointment.status === 'scheduled' || appointment.status === 'at_risk'
@@ -188,6 +190,16 @@ export function AppointmentCard({
               className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
             >
               Simulate Reply
+            </button>
+          )}
+
+          {appointment.status === 'rescheduling' && (
+            <button
+              onClick={() => onReschedule(appointment.id)}
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Pick New Time
             </button>
           )}
 

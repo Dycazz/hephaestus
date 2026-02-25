@@ -10,6 +10,7 @@ interface KanbanBoardProps {
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
+  onReschedule: (id: string) => void
 }
 
 interface ColumnProps {
@@ -24,6 +25,7 @@ interface ColumnProps {
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
+  onReschedule: (id: string) => void
 }
 
 function Column({
@@ -38,6 +40,7 @@ function Column({
   onSendReminder,
   onMarkComplete,
   onCancel,
+  onReschedule,
 }: ColumnProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -65,6 +68,7 @@ function Column({
             onSendReminder={onSendReminder}
             onMarkComplete={onMarkComplete}
             onCancel={onCancel}
+            onReschedule={onReschedule}
           />
         ))
       )}
@@ -78,6 +82,7 @@ export function KanbanBoard({
   onSendReminder,
   onMarkComplete,
   onCancel,
+  onReschedule,
 }: KanbanBoardProps) {
   const confirmed = appointments.filter(a => a.status === 'confirmed')
   const pending = appointments.filter(
@@ -102,6 +107,7 @@ export function KanbanBoard({
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
+          onReschedule={onReschedule}
         />
 
         <Column
@@ -116,6 +122,7 @@ export function KanbanBoard({
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
+          onReschedule={onReschedule}
         />
 
         <Column
@@ -130,6 +137,7 @@ export function KanbanBoard({
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
+          onReschedule={onReschedule}
         />
       </div>
 
@@ -152,6 +160,7 @@ export function KanbanBoard({
                 onSendReminder={onSendReminder}
                 onMarkComplete={onMarkComplete}
                 onCancel={onCancel}
+                onReschedule={onReschedule}
               />
             ))}
           </div>

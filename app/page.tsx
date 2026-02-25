@@ -9,6 +9,9 @@ import { KanbanBoard } from '@/components/KanbanBoard'
 import { SMSDrawer } from '@/components/SMSDrawer'
 import { WaitlistModal } from '@/components/WaitlistModal'
 import { ToastContainer } from '@/components/ToastContainer'
+import { AddClientModal } from '@/components/AddClientModal'
+import { RescheduleModal } from '@/components/RescheduleModal'
+import { CalendarView } from '@/components/CalendarView'
 
 export default function Dashboard() {
   const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments)
@@ -16,6 +19,18 @@ export default function Dashboard() {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [waitlistOpen, setWaitlistOpen] = useState(false)
   const [cancelledSlot, setCancelledSlot] = useState<Appointment | null>(null)
+  const [addClientOpen, setAddClientOpen] = useState(false)
+  const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
+  const [view, setView] = useState<'board' | 'calendar'>('board')
+  const [calendarDate, setCalendarDate] = useState<'Today' | 'Tomorrow'>('Today')
+  const [addClientDefaults, setAddClientDefaults] = useState<{
+    time?: string; technician?: string; date?: 'Today' | 'Tomorrow'
+  }>({})
+
+  // All booked time slots as "Date-Time" keys, used to prevent double-booking
+  const existingTimes = appointments
+    .filter(a => a.status !== 'cancelled')
+    .map(a => `${a.scheduledDate}-${a.scheduledTime}`)
 
   const selectedAppointment = appointments.find((a) => a.id === selectedId) ?? null
 
@@ -195,6 +210,56 @@ export default function Dashboard() {
     [appointments, updateAppointment]
   )
 
+  const handleAddClient = useCallback(
+    (appt: Appointment) => {
+      setAppointments(prev => [...prev, appt])
+      setAddClientOpen(false)
+      setAddClientDefaults({})
+      addToast({ type: 'success', message: `📋 ${appt.customerName} added to the schedule!` })
+    },
+    [addToast]
+  )
+
+  const handleAddAtSlot = useCallback(
+    (technician: string, time: string, date: 'Today' | 'Tomorrow') => {
+      setAddClientDefaults({ technician, time, date })
+      setAddClientOpen(true)
+    },
+    []
+  )
+
+  const handleOpenReschedule = useCallback(
+    (id: string) => {
+      const appt = appointments.find(a => a.id === id)
+      if (appt) setRescheduleTarget(appt)
+    },
+    [appointments]
+  )
+
+  const handleReschedule = useCallback(
+    (id: string, newDate: 'Today' | 'Tomorrow', newTime: string) => {
+      const appt = appointments.find(a => a.id === id)
+      if (!appt) return
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      const confirmMsg: SMSMessage = {
+        id: Date.now().toString(),
+        from: 'system',
+        text: `Hi ${appt.customerName.split(' ')[0]}! Your appointment has been rescheduled to ${newDate === 'Today' ? 'today' : 'tomorrow'} at ${newTime} with ${appt.technician}. Reply '1' to confirm the new time.`,
+        timestamp: now,
+        type: 'reminder',
+      }
+      updateAppointment(id, {
+        scheduledDate: newDate,
+        scheduledTime: newTime,
+        status: 'reminder_sent',
+        smsThread: [...appt.smsThread, confirmMsg],
+      })
+      setRescheduleTarget(null)
+      addToast({ type: 'success', message: `🔄 ${appt.customerName} rescheduled to ${newDate} at ${newTime}. Confirmation text sent!` })
+    },
+    [appointments, updateAppointment, addToast]
+  )
+
   const handleNotifyWaitlist = useCallback(() => {
     if (!cancelledSlot) return
     addToast({
@@ -207,17 +272,54 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <Header />
+      <Header onAddClient={() => setAddClientOpen(true)} />
       <StatsBar appointments={appointments} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
-        <KanbanBoard
-          appointments={appointments}
-          onSelectAppointment={setSelectedId}
-          onSendReminder={handleSendReminder}
-          onMarkComplete={handleMarkComplete}
-          onCancel={handleCancel}
-        />
+        {/* View toggle */}
+        <div className="flex items-center gap-2 mb-5">
+          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+            <button
+              onClick={() => setView('board')}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                view === 'board'
+                  ? 'bg-slate-800 text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              🗂 Board
+            </button>
+            <button
+              onClick={() => setView('calendar')}
+              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                view === 'calendar'
+                  ? 'bg-slate-800 text-white shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              📅 Calendar
+            </button>
+          </div>
+        </div>
+
+        {view === 'board' ? (
+          <KanbanBoard
+            appointments={appointments}
+            onSelectAppointment={setSelectedId}
+            onSendReminder={handleSendReminder}
+            onMarkComplete={handleMarkComplete}
+            onCancel={handleCancel}
+            onReschedule={handleOpenReschedule}
+          />
+        ) : (
+          <CalendarView
+            appointments={appointments}
+            calendarDate={calendarDate}
+            onCalendarDateChange={setCalendarDate}
+            onSelectAppointment={setSelectedId}
+            onAddAtSlot={handleAddAtSlot}
+          />
+        )}
       </main>
 
       {selectedAppointment && (
@@ -237,6 +339,26 @@ export default function Dashboard() {
             setWaitlistOpen(false)
             setCancelledSlot(null)
           }}
+        />
+      )}
+
+      {addClientOpen && (
+        <AddClientModal
+          onAdd={handleAddClient}
+          onClose={() => { setAddClientOpen(false); setAddClientDefaults({}) }}
+          existingTimes={existingTimes}
+          defaultTime={addClientDefaults.time}
+          defaultTechnician={addClientDefaults.technician}
+          defaultDate={addClientDefaults.date}
+        />
+      )}
+
+      {rescheduleTarget && (
+        <RescheduleModal
+          appointment={rescheduleTarget}
+          existingTimes={existingTimes}
+          onReschedule={handleReschedule}
+          onClose={() => setRescheduleTarget(null)}
         />
       )}
 
