@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react'
 import { Appointment, Toast, SMSMessage } from '@/types'
-import { mockAppointments } from '@/lib/mockData'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
 import { KanbanBoard } from '@/components/KanbanBoard'
@@ -12,9 +11,12 @@ import { ToastContainer } from '@/components/ToastContainer'
 import { AddClientModal } from '@/components/AddClientModal'
 import { RescheduleModal } from '@/components/RescheduleModal'
 import { CalendarView } from '@/components/CalendarView'
+import { TechnicianPanel } from '@/components/TechnicianPanel'
+import { useAppointments } from '@/hooks/useAppointments'
 
 export default function Dashboard() {
-  const [appointments, setAppointments] = useState<Appointment[]>(mockAppointments)
+  const { appointments, setAppointments, loading, updateAppointment } = useAppointments()
+
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [waitlistOpen, setWaitlistOpen] = useState(false)
@@ -26,6 +28,7 @@ export default function Dashboard() {
   const [addClientDefaults, setAddClientDefaults] = useState<{
     time?: string; technician?: string; date?: 'Today' | 'Tomorrow'
   }>({})
+  const [teamPanelOpen, setTeamPanelOpen] = useState(false)
 
   // All booked time slots as "Date-Time" keys, used to prevent double-booking
   const existingTimes = appointments
@@ -40,13 +43,15 @@ export default function Dashboard() {
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 6000)
   }, [])
 
-  const updateAppointment = useCallback(
+  const handleUpdateAppointment = useCallback(
     (id: string, updates: Partial<Appointment>) => {
       setAppointments((prev) =>
         prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
       )
+      // Persist to DB (non-blocking, optimistic)
+      updateAppointment(id, updates as Record<string, unknown>)
     },
-    []
+    [setAppointments, updateAppointment]
   )
 
   const handleSendReminder = useCallback(
@@ -56,7 +61,7 @@ export default function Dashboard() {
 
       const dateWord = appt.scheduledDate === 'Today' ? 'today' : 'tomorrow'
       const prep = appt.prepChecklist[0] ? ` Please: ${appt.prepChecklist[0]}.` : ''
-      const reminderText = `Hi ${appt.customerName.split(' ')[0]}! This is Mike's Plumbing confirming your ${appt.service} appointment ${dateWord} at ${appt.scheduledTime} with ${appt.technician}.${prep} Reply '1' to confirm or '2' to reschedule.`
+      const reminderText = `Hi ${appt.customerName.split(' ')[0]}! This is ${appt.technician.split(' ')[0]} confirming your ${appt.service} appointment ${dateWord} at ${appt.scheduledTime}.${prep} Reply '1' to confirm or '2' to reschedule.`
 
       const newMsg: SMSMessage = {
         id: Date.now().toString(),
@@ -66,14 +71,14 @@ export default function Dashboard() {
         type: 'reminder',
       }
 
-      updateAppointment(id, {
+      handleUpdateAppointment(id, {
         status: 'reminder_sent',
         smsThread: [...appt.smsThread, newMsg],
       })
 
       addToast({ type: 'info', message: `📱 Reminder sent to ${appt.customerName}` })
     },
-    [appointments, updateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast]
   )
 
   const handleSimulateReply = useCallback(
@@ -100,7 +105,7 @@ export default function Dashboard() {
             type: 'confirmation',
           },
         ]
-        updateAppointment(id, {
+        handleUpdateAppointment(id, {
           status: 'confirmed',
           smsThread: [...appt.smsThread, ...newMsgs],
         })
@@ -126,7 +131,7 @@ export default function Dashboard() {
             type: 'reschedule_link',
           },
         ]
-        updateAppointment(id, {
+        handleUpdateAppointment(id, {
           status: 'rescheduling',
           smsThread: [...appt.smsThread, ...newMsgs],
         })
@@ -137,7 +142,7 @@ export default function Dashboard() {
         setSelectedId(null)
       }
     },
-    [appointments, updateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast]
   )
 
   const handleMarkComplete = useCallback(
@@ -146,8 +151,7 @@ export default function Dashboard() {
       if (!appt) return
 
       if (appt.status === 'completed' && !appt.reviewRequestSent) {
-        // Simulate the 2-hour review request
-        const reviewText = `Thanks for choosing Mike's Plumbing, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? It means the world to us! ⭐ mikesplumbing.com/review`
+        const reviewText = `Thanks for choosing us, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? It means the world to us! ⭐`
         const newMsg: SMSMessage = {
           id: Date.now().toString(),
           from: 'system',
@@ -155,7 +159,7 @@ export default function Dashboard() {
           timestamp: '2 hours after completion',
           type: 'review_request',
         }
-        updateAppointment(id, {
+        handleUpdateAppointment(id, {
           reviewRequestSent: true,
           smsThread: [...appt.smsThread, newMsg],
         })
@@ -166,7 +170,7 @@ export default function Dashboard() {
         return
       }
 
-      updateAppointment(id, { status: 'completed' })
+      handleUpdateAppointment(id, { status: 'completed' })
 
       addToast({
         type: 'success',
@@ -174,7 +178,7 @@ export default function Dashboard() {
         action: {
           label: 'Preview review request →',
           onClick: () => {
-            const reviewText = `Thanks for choosing Mike's Plumbing, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? It means the world to us! ⭐ mikesplumbing.com/review`
+            const reviewText = `Thanks for choosing us, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? ⭐`
             const newMsg: SMSMessage = {
               id: Date.now().toString(),
               from: 'system',
@@ -182,7 +186,7 @@ export default function Dashboard() {
               timestamp: '2 hours after completion',
               type: 'review_request',
             }
-            updateAppointment(id, {
+            handleUpdateAppointment(id, {
               reviewRequestSent: true,
               smsThread: [...appt.smsThread, newMsg],
             })
@@ -195,7 +199,7 @@ export default function Dashboard() {
         },
       })
     },
-    [appointments, updateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast]
   )
 
   const handleCancel = useCallback(
@@ -203,21 +207,58 @@ export default function Dashboard() {
       const appt = appointments.find((a) => a.id === id)
       if (!appt) return
 
-      updateAppointment(id, { status: 'cancelled' })
+      handleUpdateAppointment(id, { status: 'cancelled' })
       setCancelledSlot(appt)
       setWaitlistOpen(true)
     },
-    [appointments, updateAppointment]
+    [appointments, handleUpdateAppointment]
   )
 
   const handleAddClient = useCallback(
-    (appt: Appointment) => {
-      setAppointments(prev => [...prev, appt])
+    async (appt: Appointment) => {
+      // POST to API — build the scheduled_at ISO from the scheduledDate/Time strings
+      const now = new Date()
+      const baseDate = appt.scheduledDate === 'Tomorrow'
+        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+        : new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+      const [timePart, meridiem] = appt.scheduledTime.split(' ')
+      const [hourStr, minuteStr] = timePart.split(':')
+      let hour = parseInt(hourStr)
+      if (meridiem === 'PM' && hour !== 12) hour += 12
+      if (meridiem === 'AM' && hour === 12) hour = 0
+      baseDate.setHours(hour, parseInt(minuteStr ?? '0'), 0, 0)
+
+      const res = await fetch('/api/appointments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: appt.customerName,
+          customerPhone: appt.customerPhone,
+          address: appt.address,
+          service: appt.service,
+          serviceIcon: appt.serviceIcon,
+          serviceColor: appt.serviceColor,
+          technicianName: appt.technician,
+          scheduledAt: baseDate.toISOString(),
+          prepChecklist: appt.prepChecklist,
+        }),
+      })
+
+      if (res.ok) {
+        const json = await res.json()
+        // Use the real DB id but keep the frontend-shaped appt for instant display
+        setAppointments(prev => [...prev, { ...appt, id: json.appointment.id }])
+      } else {
+        // Fallback: show with temp id, will sync on next fetch
+        setAppointments(prev => [...prev, appt])
+      }
+
       setAddClientOpen(false)
       setAddClientDefaults({})
       addToast({ type: 'success', message: `📋 ${appt.customerName} added to the schedule!` })
     },
-    [addToast]
+    [addToast, setAppointments]
   )
 
   const handleAddAtSlot = useCallback(
@@ -248,7 +289,7 @@ export default function Dashboard() {
         timestamp: now,
         type: 'reminder',
       }
-      updateAppointment(id, {
+      handleUpdateAppointment(id, {
         scheduledDate: newDate,
         scheduledTime: newTime,
         status: 'reminder_sent',
@@ -257,7 +298,7 @@ export default function Dashboard() {
       setRescheduleTarget(null)
       addToast({ type: 'success', message: `🔄 ${appt.customerName} rescheduled to ${newDate} at ${newTime}. Confirmation text sent!` })
     },
-    [appointments, updateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast]
   )
 
   const handleNotifyWaitlist = useCallback(() => {
@@ -270,9 +311,19 @@ export default function Dashboard() {
     setCancelledSlot(null)
   }, [cancelledSlot, addToast])
 
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center"
+        style={{ background: 'linear-gradient(to bottom, #0a1628, #0f2040)' }}
+      >
+        <div className="text-blue-300/60 text-sm">Loading appointments…</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-100">
-      <Header onAddClient={() => setAddClientOpen(true)} onManageTeam={() => {}} />
+      <Header onAddClient={() => setAddClientOpen(true)} onManageTeam={() => setTeamPanelOpen(true)} />
       <StatsBar appointments={appointments} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
@@ -283,9 +334,10 @@ export default function Dashboard() {
               onClick={() => setView('board')}
               className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 view === 'board'
-                  ? 'bg-slate-800 text-white shadow-sm'
+                  ? 'text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
+              style={view === 'board' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
             >
               🗂 Board
             </button>
@@ -293,9 +345,10 @@ export default function Dashboard() {
               onClick={() => setView('calendar')}
               className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 view === 'calendar'
-                  ? 'bg-slate-800 text-white shadow-sm'
+                  ? 'text-white shadow-sm'
                   : 'text-slate-500 hover:text-slate-700'
               }`}
+              style={view === 'calendar' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
             >
               📅 Calendar
             </button>
@@ -360,6 +413,10 @@ export default function Dashboard() {
           onReschedule={handleReschedule}
           onClose={() => setRescheduleTarget(null)}
         />
+      )}
+
+      {teamPanelOpen && (
+        <TechnicianPanel onClose={() => setTeamPanelOpen(false)} />
       )}
 
       <ToastContainer
