@@ -1,7 +1,8 @@
 'use client'
 
-import { Wifi, PlusCircle, LogOut, Users } from 'lucide-react'
+import { PlusCircle, LogOut, Users, Settings } from 'lucide-react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { useOrg } from '@/context/OrgContext'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -81,6 +82,15 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
             <span className="text-[11px] font-medium text-emerald-300">Live</span>
           </div>
+
+          <Link
+            href="/settings"
+            title="Settings"
+            className="p-1.5 rounded-lg transition-all duration-150 text-slate-600 hover:text-slate-300 flex items-center"
+            style={{ background: 'transparent' }}
+          >
+            <Settings className="w-4 h-4" />
+          </Link>
 
           <button
             onClick={handleSignOut}
