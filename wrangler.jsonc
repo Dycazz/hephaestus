@@ -1,0 +1,17 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "hephaestus",
+	"main": ".open-next/worker.js",
+	"compatibility_date": "2024-12-18",
+	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+	"assets": {
+		"directory": ".open-next/assets",
+		"binding": "ASSETS"
+	},
+	// Environment variables for production — set these in the Cloudflare dashboard
+	// under Workers & Pages > hephaestus > Settings > Variables and Secrets
+	// DO NOT add secret values here; this file is committed to git.
+	"vars": {
+		"NEXT_PUBLIC_APP_URL": "https://hephaestus.workers.dev"
+	}
+}
