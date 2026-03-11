@@ -44,7 +44,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #060d1a 0%, #0a1628 50%, #0d1f3c 100%)' }}
+      style={{ background: '#111318' }}
     >
       <div className="w-full max-w-md">
         {/* Logo */}
@@ -54,7 +54,7 @@ export default function LoginPage() {
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
-            <p className="text-xs text-blue-300/60">Field Service Command Center</p>
+            <p className="text-xs text-slate-600">Field service management</p>
           </div>
         </div>
 
@@ -62,9 +62,9 @@ export default function LoginPage() {
         <div
           className="rounded-2xl p-8"
           style={{
-            background: 'linear-gradient(135deg, rgba(13,31,60,0.95), rgba(15,32,64,0.95))',
+            background: '#1a1d26',
             border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
           }}
         >
           <h2 className="text-xl font-bold text-white mb-1">Welcome back</h2>
@@ -113,7 +113,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40"
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}

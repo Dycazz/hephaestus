@@ -15,12 +15,12 @@ interface CalendarViewProps {
 }
 
 const statusBlock: Record<string, { bg: string; border: string; text: string; badge: string; badgeText: string }> = {
-  scheduled:     { bg: 'bg-slate-800/70',  border: 'border-slate-500',  text: 'text-slate-200',  badge: 'bg-slate-700/80 text-slate-300',   badgeText: 'Not Sent'     },
-  reminder_sent: { bg: 'bg-amber-900/50',  border: 'border-amber-500',  text: 'text-amber-100',  badge: 'bg-amber-800/60 text-amber-300',   badgeText: '⏳ Pending'   },
-  confirmed:     { bg: 'bg-green-900/50',  border: 'border-green-500',  text: 'text-green-100',  badge: 'bg-green-800/60 text-green-300',   badgeText: '✓ Confirmed'  },
-  rescheduling:  { bg: 'bg-purple-900/50', border: 'border-purple-500', text: 'text-purple-100', badge: 'bg-purple-800/60 text-purple-300', badgeText: '↻ Reschedule' },
-  at_risk:       { bg: 'bg-red-900/50',    border: 'border-red-500',    text: 'text-red-100',    badge: 'bg-red-800/60 text-red-300',       badgeText: '⚠ At Risk'   },
-  completed:     { bg: 'bg-blue-900/50',   border: 'border-blue-500',   text: 'text-blue-100',   badge: 'bg-blue-800/60 text-blue-300',     badgeText: '✓ Done'      },
+  scheduled:     { bg: 'bg-slate-800/70',  border: 'border-slate-500',  text: 'text-slate-200',  badge: 'bg-slate-700/80 text-slate-300',   badgeText: 'Not sent'    },
+  reminder_sent: { bg: 'bg-amber-900/50',  border: 'border-amber-500',  text: 'text-amber-100',  badge: 'bg-amber-800/60 text-amber-300',   badgeText: 'Pending'     },
+  confirmed:     { bg: 'bg-green-900/50',  border: 'border-green-500',  text: 'text-green-100',  badge: 'bg-green-800/60 text-green-300',   badgeText: 'Confirmed'   },
+  rescheduling:  { bg: 'bg-purple-900/50', border: 'border-purple-500', text: 'text-purple-100', badge: 'bg-purple-800/60 text-purple-300', badgeText: 'Rescheduling'},
+  at_risk:       { bg: 'bg-red-900/50',    border: 'border-red-500',    text: 'text-red-100',    badge: 'bg-red-800/60 text-red-300',       badgeText: 'At risk'     },
+  completed:     { bg: 'bg-blue-900/50',   border: 'border-blue-500',   text: 'text-blue-100',   badge: 'bg-blue-800/60 text-blue-300',     badgeText: 'Done'        },
   cancelled:     { bg: 'bg-slate-900/50',  border: 'border-slate-700',  text: 'text-slate-500',  badge: 'bg-slate-800/60 text-slate-500',   badgeText: 'Cancelled'   },
 }
 
@@ -64,7 +64,7 @@ export function CalendarView({
     return (
       <div
         className="rounded-2xl flex items-center justify-center py-20"
-        style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
       >
         <p className="text-sm text-slate-600">No technicians yet. Add team members using the Team button above.</p>
       </div>
@@ -74,7 +74,7 @@ export function CalendarView({
   return (
     <div
       className="rounded-2xl overflow-hidden shadow-xl"
-      style={{ background: 'linear-gradient(180deg, #0d1f3c 0%, #0f2040 100%)', border: '1px solid rgba(255,255,255,0.07)' }}
+      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
     >
       {/* Header bar */}
       <div
@@ -116,7 +116,7 @@ export function CalendarView({
             style={{
               gridTemplateColumns: `88px repeat(${technicians.length}, 1fr)`,
               borderColor: 'rgba(255,255,255,0.07)',
-              background: 'linear-gradient(180deg, #0d1f3c, #0e2240)',
+              background: '#1a1d26',
             }}
           >
             <div className="px-3 py-3 border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }} />

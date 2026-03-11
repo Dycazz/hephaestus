@@ -29,42 +29,29 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
   }
 
   return (
-    <header
-      className="text-white"
-      style={{
-        background: 'linear-gradient(to right, #07101f, #0c1c3a, #07101f)',
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-4 py-3.5 flex items-center justify-between">
+    <header style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="bg-white rounded-xl shadow-lg shadow-black/30 overflow-hidden flex items-center justify-center shrink-0" style={{ width: 40, height: 40 }}>
-            <Image src="/logo.png" alt="Hephaestus" width={36} height={36} className="object-contain" priority />
+          <div className="bg-white rounded-lg overflow-hidden flex items-center justify-center shrink-0" style={{ width: 32, height: 32 }}>
+            <Image src="/logo.png" alt="Hephaestus" width={28} height={28} className="object-contain" priority />
           </div>
-          <div>
-            <span className="text-base font-bold tracking-tight leading-none">Hephaestus</span>
-            <p className="text-[11px] text-blue-300/60 mt-0.5">Field Service Command Center</p>
-          </div>
+          <span className="text-sm font-semibold text-white/90 tracking-tight">Hephaestus</span>
         </div>
 
         {/* Business name + date — centre */}
-        <div className="hidden md:flex flex-col items-center">
-          <p className="text-sm font-semibold text-white/85 leading-none">
+        <div className="hidden md:flex flex-col items-center gap-0.5">
+          <p className="text-sm font-medium text-white/70 leading-none">
             {org?.businessName ?? ''}
           </p>
-          <p className="text-[11px] text-blue-300/50 mt-1">{today}</p>
+          <p className="text-xs text-slate-600">{today}</p>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             onClick={onManageTeam}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 border"
-            style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#bfdbfe' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.12)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-medium text-slate-400 hover:text-slate-200 hover:bg-white/6 transition-all duration-150"
           >
             <Users className="w-3.5 h-3.5" />
             Team
@@ -72,22 +59,18 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
 
           <button
             onClick={onAddClient}
-            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 shadow-md shadow-blue-900/50"
+            className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150"
           >
             <PlusCircle className="w-3.5 h-3.5" />
-            New Appointment
+            New appointment
           </button>
 
-          <div className="hidden sm:flex items-center gap-1.5 rounded-full px-2.5 py-1 border" style={{ background: 'rgba(16,185,129,0.1)', borderColor: 'rgba(16,185,129,0.25)' }}>
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-[11px] font-medium text-emerald-300">Live</span>
-          </div>
+          <div className="w-px h-4 mx-1" style={{ background: 'rgba(255,255,255,0.08)' }} />
 
           <Link
             href="/settings"
             title="Settings"
-            className="p-1.5 rounded-lg transition-all duration-150 text-slate-600 hover:text-slate-300 flex items-center"
-            style={{ background: 'transparent' }}
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-300 hover:bg-white/6 transition-all duration-150"
           >
             <Settings className="w-4 h-4" />
           </Link>
@@ -95,10 +78,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
           <button
             onClick={handleSignOut}
             title="Sign out"
-            className="p-1.5 rounded-lg transition-all duration-150 text-slate-600 hover:text-slate-300"
-            style={{ background: 'transparent' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-300 hover:bg-white/6 transition-all duration-150"
           >
             <LogOut className="w-4 h-4" />
           </button>

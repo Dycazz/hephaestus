@@ -42,7 +42,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: 'linear-gradient(135deg, #060d1a 0%, #0a1628 50%, #0d1f3c 100%)' }}
+      style={{ background: '#111318' }}
     >
       <div className="w-full max-w-md">
         {/* Logo */}
@@ -52,13 +52,13 @@ export default function SignupPage() {
           </div>
           <div className="text-center">
             <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
-            <p className="text-xs text-blue-300/60">Field Service Command Center</p>
+            <p className="text-xs text-slate-600">Field service management</p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl shadow-2xl p-8 border border-slate-700/50"
-          style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)' }}
+        <div className="rounded-2xl p-8"
+          style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
         >
           <h2 className="text-xl font-bold text-white mb-1">Create your account</h2>
           <p className="text-sm text-slate-400 mb-6">Free trial — no credit card required</p>

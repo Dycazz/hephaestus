@@ -14,37 +14,37 @@ interface AppointmentCardProps {
 
 const statusConfig = {
   scheduled: {
-    badge: 'bg-slate-800 text-slate-300 border-slate-600',
-    label: 'Not Sent',
+    badge: 'bg-slate-800/80 text-slate-400 border-slate-700',
+    label: 'Not sent',
     dot: 'bg-slate-500',
   },
   reminder_sent: {
-    badge: 'bg-amber-900/50 text-amber-400 border-amber-700/60',
-    label: 'Awaiting Reply',
-    dot: 'bg-amber-400 animate-pulse',
+    badge: 'bg-amber-900/40 text-amber-400 border-amber-800/60',
+    label: 'Awaiting reply',
+    dot: 'bg-amber-400',
   },
   confirmed: {
-    badge: 'bg-green-900/50 text-green-400 border-green-700/60',
-    label: 'Confirmed ✓',
-    dot: 'bg-green-500',
+    badge: 'bg-emerald-900/40 text-emerald-400 border-emerald-800/60',
+    label: 'Confirmed',
+    dot: 'bg-emerald-500',
   },
   rescheduling: {
-    badge: 'bg-purple-900/50 text-purple-400 border-purple-700/60',
+    badge: 'bg-purple-900/40 text-purple-400 border-purple-800/60',
     label: 'Rescheduling',
     dot: 'bg-purple-400',
   },
   at_risk: {
-    badge: 'bg-red-900/50 text-red-400 border-red-700/60',
-    label: 'No Response',
-    dot: 'bg-red-500 animate-pulse',
+    badge: 'bg-red-900/40 text-red-400 border-red-800/60',
+    label: 'No response',
+    dot: 'bg-red-500',
   },
   completed: {
-    badge: 'bg-blue-900/50 text-blue-400 border-blue-700/60',
+    badge: 'bg-indigo-900/40 text-indigo-400 border-indigo-800/60',
     label: 'Completed',
-    dot: 'bg-blue-500',
+    dot: 'bg-indigo-400',
   },
   cancelled: {
-    badge: 'bg-slate-800 text-slate-500 border-slate-700',
+    badge: 'bg-slate-800/60 text-slate-600 border-slate-700/60',
     label: 'Cancelled',
     dot: 'bg-slate-600',
   },
@@ -65,8 +65,8 @@ export function AppointmentCard({
 
   return (
     <div
-      className="rounded-xl shadow-sm hover:shadow-xl hover:shadow-blue-900/30 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.07)' }}
+      className="rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)' }}
     >
       {/* Top accent bar */}
       <div
@@ -124,7 +124,7 @@ export function AppointmentCard({
           <div className="mb-3 p-2.5 rounded-lg border"
             style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
           >
-            <p className="text-xs font-semibold text-amber-400 mb-1.5">📋 Prep Checklist Sent</p>
+            <p className="text-xs font-semibold text-amber-400 mb-1.5">Prep checklist</p>
             <ul className="space-y-1">
               {appointment.prepChecklist.map((item, i) => (
                 <li key={i} className="flex items-start gap-1.5 text-xs text-amber-300/80">
@@ -155,7 +155,7 @@ export function AppointmentCard({
             style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
           >
             <Star className="w-3.5 h-3.5" />
-            Google review request sent!
+            Review request sent
           </div>
         )}
 

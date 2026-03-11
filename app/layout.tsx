@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Hephaestus — Field Service Command Center",
-  description: "Automated SMS confirmations, prep checklists, and Google review requests for field service businesses.",
+  title: "Hephaestus — Field Service Management",
+  description: "Appointment scheduling, automated SMS reminders, and job management for field service businesses.",
 };
 
 export default function RootLayout({

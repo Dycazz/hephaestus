@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
-  Check, Plus, Trash2, Edit2, X, Phone, Star, ExternalLink,
+  Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
   Zap, Shield, Building2,
 } from 'lucide-react'
 
@@ -17,7 +17,7 @@ interface OrgData {
   slug: string
   plan: 'trial' | 'starter' | 'pro'
   reviewUrl: string | null
-  twilioPhoneNumber: string | null
+  twilioPhoneNumber?: string | null
   createdAt: string
 }
 
@@ -77,7 +77,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="rounded-2xl p-6"
-      style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.07)' }}
+      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
     >
       {children}
     </div>
@@ -233,7 +233,6 @@ export default function SettingsPage() {
   // General form
   const [businessName, setBusinessName] = useState('')
   const [reviewUrl, setReviewUrl] = useState('')
-  const [twilioPhone, setTwilioPhone] = useState('')
   const [generalSaving, setGeneralSaving] = useState(false)
   const [generalSaved, setGeneralSaved] = useState(false)
   const [generalError, setGeneralError] = useState<string | null>(null)
@@ -262,7 +261,6 @@ export default function SettingsPage() {
           })
           setBusinessName(o.business_name ?? '')
           setReviewUrl(o.review_url ?? '')
-          setTwilioPhone(o.twilio_phone_number ?? '')
         }
         setRole(r ?? 'viewer')
       })
@@ -289,7 +287,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/org', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName, reviewUrl, twilioPhoneNumber: twilioPhone }),
+        body: JSON.stringify({ businessName, reviewUrl }),
       })
       const json = await res.json()
       if (!res.ok) { setGeneralError(json.error ?? 'Failed to save'); return }
@@ -297,14 +295,13 @@ export default function SettingsPage() {
         ...prev,
         businessName: json.org.business_name,
         reviewUrl: json.org.review_url,
-        twilioPhoneNumber: json.org.twilio_phone_number,
       } : prev)
       setGeneralSaved(true)
       setTimeout(() => setGeneralSaved(false), 2500)
     } finally {
       setGeneralSaving(false)
     }
-  }, [businessName, reviewUrl, twilioPhone])
+  }, [businessName, reviewUrl])
 
   const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
     setServiceSaving(true)
@@ -359,10 +356,10 @@ export default function SettingsPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%)' }}>
+    <div className="min-h-screen" style={{ background: '#111318' }}>
 
       {/* Header */}
-      <header style={{ background: 'linear-gradient(to right, #07101f, #0c1c3a, #07101f)', borderBottom: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 24px rgba(0,0,0,0.4)' }}>
+      <header style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
         <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -480,23 +477,6 @@ export default function SettingsPage() {
                         <ExternalLink className="w-3 h-3" /> Test link
                       </a>
                     )}
-                  </SectionCard>
-
-                  <SectionCard>
-                    <div className="flex items-center gap-2 mb-5">
-                      <Phone className="w-4 h-4 text-emerald-400/70" />
-                      <h2 className="text-sm font-semibold text-white">SMS / Twilio</h2>
-                    </div>
-                    <div>
-                      <FieldLabel>Twilio phone number</FieldLabel>
-                      <TextInput value={twilioPhone} onChange={setTwilioPhone} placeholder="+15551234567" />
-                      <p className="text-[11px] text-slate-600 mt-1.5">
-                        The number customers receive SMS reminders from. Format: +1XXXXXXXXXX.
-                      </p>
-                    </div>
-                    <div className="mt-4 px-3 py-2.5 rounded-lg border text-xs text-slate-500 border-white/5 bg-white/2">
-                      Your Twilio Account SID, Auth Token, and CRON_SECRET are set as server-side environment variables and are never exposed here.
-                    </div>
                   </SectionCard>
 
                   {generalError && (

@@ -80,7 +80,7 @@ export default function Dashboard() {
       })
       logMessages(id, [{ direction: 'outbound', body: reminderText, messageType: 'reminder' }])
 
-      addToast({ type: 'info', message: `📱 Reminder sent to ${appt.customerName}` })
+      addToast({ type: 'info', message: `Reminder sent to ${appt.customerName}` })
     },
     [appointments, handleUpdateAppointment, addToast, logMessages]
   )
@@ -119,7 +119,7 @@ export default function Dashboard() {
         ])
         addToast({
           type: 'success',
-          message: `✅ ${appt.customerName} confirmed! Card moved to Ready to Roll.`,
+          message: `${appt.customerName} confirmed the appointment.`,
         })
         setSelectedId(null)
       } else {
@@ -149,7 +149,7 @@ export default function Dashboard() {
         ])
         addToast({
           type: 'warning',
-          message: `🔄 ${appt.customerName} wants to reschedule. Link sent — no phone tag needed!`,
+          message: `${appt.customerName} requested a reschedule. Link sent.`,
         })
         setSelectedId(null)
       }
@@ -178,7 +178,7 @@ export default function Dashboard() {
         logMessages(id, [{ direction: 'outbound', body: reviewText, messageType: 'review_request' }])
         addToast({
           type: 'success',
-          message: `⭐ Review request sent to ${appt.customerName}!`,
+          message: `Review request sent to ${appt.customerName}.`,
         })
         return
       }
@@ -187,11 +187,11 @@ export default function Dashboard() {
 
       addToast({
         type: 'success',
-        message: `🎉 Job complete! Google review request queued for 2 hours.`,
+        message: `Job marked complete. Review request queued for 2 hours.`,
         action: {
-          label: 'Preview review request →',
+          label: 'Send review request now →',
           onClick: () => {
-            const reviewText = `Thanks for choosing us, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? ⭐`
+            const reviewText = `Thanks for choosing us, ${appt.customerName.split(' ')[0]}! If ${appt.technician} took good care of you today, could you spare 30 seconds to leave a Google review? It means a lot to us.`
             const newMsg: SMSMessage = {
               id: Date.now().toString(),
               from: 'system',
@@ -207,7 +207,7 @@ export default function Dashboard() {
             setSelectedId(id)
             addToast({
               type: 'success',
-              message: `⭐ Review request sent to ${appt.customerName}!`,
+              message: `Review request sent to ${appt.customerName}.`,
             })
           },
         },
@@ -271,7 +271,7 @@ export default function Dashboard() {
 
       setAddClientOpen(false)
       setAddClientDefaults({})
-      addToast({ type: 'success', message: `📋 ${appt.customerName} added to the schedule!` })
+      addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
     },
     [addToast, setAppointments]
   )
@@ -312,7 +312,7 @@ export default function Dashboard() {
       })
       logMessages(id, [{ direction: 'outbound', body: confirmMsg.text, messageType: 'reminder' }])
       setRescheduleTarget(null)
-      addToast({ type: 'success', message: `🔄 ${appt.customerName} rescheduled to ${newDate} at ${newTime}. Confirmation text sent!` })
+      addToast({ type: 'success', message: `${appt.customerName} rescheduled to ${newDate} at ${newTime}.` })
     },
     [appointments, handleUpdateAppointment, addToast, logMessages]
   )
@@ -321,7 +321,7 @@ export default function Dashboard() {
     if (!cancelledSlot) return
     addToast({
       type: 'success',
-      message: `📲 Waitlist notified about the ${cancelledSlot.scheduledTime} opening. Revenue recovered!`,
+      message: `Waitlist notified about the ${cancelledSlot.scheduledTime} opening.`,
     })
     setWaitlistOpen(false)
     setCancelledSlot(null)
@@ -330,7 +330,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ background: 'linear-gradient(to bottom, #0a1628, #0f2040)' }}
+        style={{ background: '#111318' }}
       >
         <Loader2 className="w-8 h-8 text-blue-500/60 animate-spin" />
         <p className="text-blue-300/40 text-sm font-medium tracking-wide">Loading your schedule…</p>
@@ -339,7 +339,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%)' }}>
+    <div className="min-h-screen" style={{ background: '#111318' }}>
       <Header onAddClient={() => setAddClientOpen(true)} onManageTeam={() => setTeamPanelOpen(true)} />
       <StatsBar appointments={appointments} />
 

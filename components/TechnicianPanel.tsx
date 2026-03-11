@@ -125,17 +125,17 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
       <div
         className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col"
-        style={{ background: 'linear-gradient(180deg, #0d1f3c 0%, #0a1628 100%)', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
+        style={{ background: '#0d0f17', borderLeft: '1px solid rgba(255,255,255,0.07)' }}
       >
         {/* Header */}
         <div className="text-white px-5 py-4 flex items-center justify-between shrink-0"
-          style={{ background: 'linear-gradient(to right, #0a1628, #0d2045)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+          style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.07)' }}
         >
           <div>
             <h2 className="font-bold text-base">Manage Team</h2>
-            <p className="text-xs text-blue-300/60 mt-0.5">Add, edit, or remove technicians</p>
+            <p className="text-xs text-slate-500 mt-0.5">Add, edit, or remove technicians</p>
           </div>
-          <button onClick={onClose} className="text-blue-300/60 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-slate-600 hover:text-slate-300 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -222,10 +222,10 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
             <button
               onClick={startNew}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
-              style={{ background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' }}
+              style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)' }}
             >
               <Plus className="w-4 h-4" />
-              Add Technician
+              Add technician
             </button>
           </div>
         )}
@@ -293,7 +293,7 @@ function TechForm({
           onClick={onSave}
           disabled={saving}
           className="flex-1 py-2 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60"
-          style={{ background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' }}
+          style={{ background: '#2563eb' }}
         >
           {saving ? 'Saving…' : 'Save'}
         </button>
