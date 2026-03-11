@@ -10,8 +10,8 @@ export async function middleware(request: NextRequest) {
   const isConfigured = supabaseUrl.startsWith('https://') && !supabaseUrl.includes('YOUR_PROJECT_ID')
 
   if (!isConfigured) {
-    // Dev mode without Supabase: allow /dashboard, redirect root to /dashboard
-    if (pathname === '/') return NextResponse.redirect(new URL('/dashboard', request.url))
+    // Supabase not configured: redirect root to /login
+    if (pathname === '/') return NextResponse.redirect(new URL('/login', request.url))
     return NextResponse.next({ request })
   }
 
