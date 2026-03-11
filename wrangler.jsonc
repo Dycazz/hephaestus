@@ -12,6 +12,7 @@
 	// under Workers & Pages > hephaestus > Settings > Variables and Secrets
 	// DO NOT add secret values here; this file is committed to git.
 	"vars": {
-		"NEXT_PUBLIC_APP_URL": "https://hephaestus.workers.dev"
+		"NEXT_PUBLIC_APP_URL": "https://hephaestus.workers.dev",
+		"NEXT_PUBLIC_SUPABASE_URL": "https://rmkqhreathqywwdgdgue.supabase.co"
 	}
 }
