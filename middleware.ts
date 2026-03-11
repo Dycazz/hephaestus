@@ -10,8 +10,6 @@ export async function middleware(request: NextRequest) {
   const isConfigured = supabaseUrl.startsWith('https://') && !supabaseUrl.includes('YOUR_PROJECT_ID') && !!supabaseAnonKey
 
   if (!isConfigured) {
-    // Supabase not configured: redirect root to /login
-    if (pathname === '/') return NextResponse.redirect(new URL('/login', request.url))
     return NextResponse.next({ request })
   }
 
@@ -50,9 +48,9 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
-  // Redirect root
-  if (pathname === '/') {
-    return NextResponse.redirect(new URL(user ? '/dashboard' : '/login', request.url))
+  // Authenticated users at root go straight to dashboard
+  if (pathname === '/' && user) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse
