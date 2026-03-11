@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   // If Supabase is not yet configured, skip auth checks and let all routes through
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? ''
-  const isConfigured = supabaseUrl.startsWith('https://') && !supabaseUrl.includes('YOUR_PROJECT_ID')
+  const isConfigured = supabaseUrl.startsWith('https://') && !supabaseUrl.includes('YOUR_PROJECT_ID') && !!supabaseAnonKey
 
   if (!isConfigured) {
     // Supabase not configured: redirect root to /login
