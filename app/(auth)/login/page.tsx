@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
@@ -59,8 +59,13 @@ export default function LoginPage() {
         </div>
 
         {/* Card */}
-        <div className="rounded-2xl shadow-2xl p-8 border border-slate-700/50"
-          style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)' }}
+        <div
+          className="rounded-2xl p-8"
+          style={{
+            background: 'linear-gradient(135deg, rgba(13,31,60,0.95), rgba(15,32,64,0.95))',
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 25px 50px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+          }}
         >
           <h2 className="text-xl font-bold text-white mb-1">Welcome back</h2>
           <p className="text-sm text-slate-400 mb-6">Sign in to your dashboard</p>
@@ -108,8 +113,9 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 shadow-lg shadow-blue-900/40"
             >
+              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>

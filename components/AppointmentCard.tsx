@@ -65,8 +65,8 @@ export function AppointmentCard({
 
   return (
     <div
-      className="rounded-xl shadow-sm hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-200 overflow-hidden"
-      style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.06)' }}
+      className="rounded-xl shadow-sm hover:shadow-xl hover:shadow-blue-900/30 hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.07)' }}
     >
       {/* Top accent bar */}
       <div
@@ -163,12 +163,15 @@ export function AppointmentCard({
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border"
+            style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' }}
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
             {appointment.smsThread.length > 0 && (
-              <span className="ml-0.5 bg-slate-600 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center">
+              <span className="ml-0.5 bg-slate-600/80 text-blue-200 text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                 {appointment.smsThread.length}
               </span>
             )}
@@ -177,7 +180,7 @@ export function AppointmentCard({
           {canSendReminder && (
             <button
               onClick={() => onSendReminder(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-blue-900/40"
             >
               Send Reminder
             </button>
@@ -186,7 +189,7 @@ export function AppointmentCard({
           {canComplete && (
             <button
               onClick={() => onMarkComplete(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-emerald-900/40"
             >
               <Check className="w-3.5 h-3.5" />
               Complete
@@ -196,7 +199,7 @@ export function AppointmentCard({
           {appointment.status === 'reminder_sent' && (
             <button
               onClick={() => onSelect(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg transition-all duration-150"
             >
               Simulate Reply
             </button>
@@ -205,7 +208,7 @@ export function AppointmentCard({
           {appointment.status === 'rescheduling' && (
             <button
               onClick={() => onReschedule(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-purple-900/40"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Pick New Time
@@ -215,7 +218,7 @@ export function AppointmentCard({
           {canCancel && (
             <button
               onClick={() => onCancel(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800/80 hover:bg-red-900/30 hover:text-red-400 text-slate-500 rounded-lg transition-colors ml-auto"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium hover:bg-red-900/25 hover:text-red-400 hover:border-red-800/50 text-slate-600 rounded-lg transition-all duration-150 ml-auto border border-transparent"
             >
               <XCircle className="w-3.5 h-3.5" />
               Cancel

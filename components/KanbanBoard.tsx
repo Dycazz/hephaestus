@@ -20,6 +20,7 @@ interface ColumnProps {
   count: number
   accentColor: string
   headerBg: string
+  accentBorder: string
   appointments: Appointment[]
   onSelectAppointment: (id: string) => void
   onSendReminder: (id: string) => void
@@ -35,6 +36,7 @@ function Column({
   count,
   accentColor,
   headerBg,
+  accentBorder,
   appointments,
   onSelectAppointment,
   onSendReminder,
@@ -44,20 +46,24 @@ function Column({
 }: ColumnProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className={`rounded-xl border ${headerBg} p-3 flex items-center justify-between`}>
-        <div className="flex items-center gap-2">
+      <div className={`rounded-xl border ${headerBg} p-3 flex items-center justify-between border-l-4 ${accentBorder}`}>
+        <div className="flex items-center gap-2.5">
           {icon}
           <div>
             <p className="font-semibold text-sm text-white">{title}</p>
-            <p className="text-xs text-white/60">{subtitle}</p>
+            <p className="text-xs text-white/50">{subtitle}</p>
           </div>
         </div>
-        <span className={`text-lg font-bold ${accentColor}`}>{count}</span>
+        <span className={`text-2xl font-bold tabular-nums ${accentColor}`}>{count}</span>
       </div>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-700 p-6 text-center text-xs text-slate-600">
-          No appointments
+        <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center flex flex-col items-center gap-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
+          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mb-1">
+            {icon}
+          </div>
+          <p className="text-xs font-medium text-slate-600">No appointments here</p>
+          <p className="text-[11px] text-slate-700">{subtitle}</p>
         </div>
       ) : (
         appointments.map((appt) => (
@@ -98,10 +104,11 @@ export function KanbanBoard({
         <Column
           title="Ready to Roll"
           subtitle="Confirmed & prepped"
-          icon={<CheckCircle className="w-5 h-5 text-green-600" />}
+          icon={<CheckCircle className="w-4 h-4 text-green-500" />}
           count={confirmed.length}
-          accentColor="text-green-600"
-          headerBg="bg-green-900/20 border-green-800/50"
+          accentColor="text-green-500"
+          headerBg="bg-green-900/15 border-green-900/40"
+          accentBorder="border-l-green-600"
           appointments={confirmed}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}
@@ -113,10 +120,11 @@ export function KanbanBoard({
         <Column
           title="Awaiting Response"
           subtitle="Reminder sent, no reply yet"
-          icon={<Clock className="w-5 h-5 text-amber-500" />}
+          icon={<Clock className="w-4 h-4 text-amber-500" />}
           count={pending.length}
-          accentColor="text-amber-600"
-          headerBg="bg-amber-900/20 border-amber-800/50"
+          accentColor="text-amber-500"
+          headerBg="bg-amber-900/15 border-amber-900/40"
+          accentBorder="border-l-amber-500"
           appointments={pending}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}
@@ -128,10 +136,11 @@ export function KanbanBoard({
         <Column
           title="Needs Attention"
           subtitle="No response — step in now"
-          icon={<AlertTriangle className="w-5 h-5 text-red-500" />}
+          icon={<AlertTriangle className="w-4 h-4 text-red-500" />}
           count={atRisk.length}
-          accentColor="text-red-600"
-          headerBg="bg-red-900/20 border-red-800/50"
+          accentColor="text-red-500"
+          headerBg="bg-red-900/15 border-red-900/40"
+          accentBorder="border-l-red-600"
           appointments={atRisk}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}

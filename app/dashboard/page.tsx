@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { LayoutGrid, CalendarDays, Loader2 } from 'lucide-react'
 import { Appointment, Toast, SMSMessage } from '@/types'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
@@ -328,10 +329,11 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center"
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4"
         style={{ background: 'linear-gradient(to bottom, #0a1628, #0f2040)' }}
       >
-        <div className="text-blue-300/60 text-sm">Loading appointments…</div>
+        <Loader2 className="w-8 h-8 text-blue-500/60 animate-spin" />
+        <p className="text-blue-300/40 text-sm font-medium tracking-wide">Loading your schedule…</p>
       </div>
     )
   }
@@ -344,28 +346,30 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* View toggle */}
         <div className="flex items-center gap-2 mb-5">
-          <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="flex items-center gap-0.5 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <button
               onClick={() => setView('board')}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
                 view === 'board'
-                  ? 'text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
-              style={view === 'board' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
+              style={view === 'board' ? { background: 'linear-gradient(135deg, #1e3a6e, #1e40af)', boxShadow: '0 2px 8px rgba(30,58,110,0.5)' } : undefined}
             >
-              🗂 Board
+              <LayoutGrid className="w-3.5 h-3.5" />
+              Board
             </button>
             <button
               onClick={() => setView('calendar')}
-              className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
                 view === 'calendar'
-                  ? 'text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'text-white shadow-md'
+                  : 'text-slate-500 hover:text-slate-300'
               }`}
-              style={view === 'calendar' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
+              style={view === 'calendar' ? { background: 'linear-gradient(135deg, #1e3a6e, #1e40af)', boxShadow: '0 2px 8px rgba(30,58,110,0.5)' } : undefined}
             >
-              📅 Calendar
+              <CalendarDays className="w-3.5 h-3.5" />
+              Calendar
             </button>
           </div>
         </div>
