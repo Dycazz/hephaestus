@@ -30,8 +30,14 @@ export default function LoginPage() {
         // and ensures fresh auth cookies are sent with the new request.
         window.location.href = '/dashboard'
       }
-    } catch {
-      setError('Connection error. Please check your internet and try again.')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      // Detect missing env vars (Supabase URL not baked into the build)
+      if (msg.includes('URL and API key are required') || msg.includes('supabaseUrl')) {
+        setError('App configuration error: Supabase credentials are missing from this deployment. Please contact support or try the local version.')
+      } else {
+        setError(msg || 'Connection error — please check your internet and try again.')
+      }
       setLoading(false)
     }
   }
