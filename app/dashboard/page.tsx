@@ -15,7 +15,7 @@ import { TechnicianPanel } from '@/components/TechnicianPanel'
 import { useAppointments } from '@/hooks/useAppointments'
 
 export default function Dashboard() {
-  const { appointments, setAppointments, loading, updateAppointment } = useAppointments()
+  const { appointments, setAppointments, loading, updateAppointment, logMessages } = useAppointments()
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -75,10 +75,11 @@ export default function Dashboard() {
         status: 'reminder_sent',
         smsThread: [...appt.smsThread, newMsg],
       })
+      logMessages(id, [{ direction: 'outbound', body: reminderText, messageType: 'reminder' }])
 
       addToast({ type: 'info', message: `📱 Reminder sent to ${appt.customerName}` })
     },
-    [appointments, handleUpdateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast, logMessages]
   )
 
   const handleSimulateReply = useCallback(
@@ -109,6 +110,10 @@ export default function Dashboard() {
           status: 'confirmed',
           smsThread: [...appt.smsThread, ...newMsgs],
         })
+        logMessages(id, [
+          { direction: 'inbound', body: '1', messageType: 'customer_reply' },
+          { direction: 'outbound', body: newMsgs[1].text, messageType: 'confirmation' },
+        ])
         addToast({
           type: 'success',
           message: `✅ ${appt.customerName} confirmed! Card moved to Ready to Roll.`,
@@ -135,6 +140,10 @@ export default function Dashboard() {
           status: 'rescheduling',
           smsThread: [...appt.smsThread, ...newMsgs],
         })
+        logMessages(id, [
+          { direction: 'inbound', body: '2', messageType: 'customer_reply' },
+          { direction: 'outbound', body: newMsgs[1].text, messageType: 'reschedule_link' },
+        ])
         addToast({
           type: 'warning',
           message: `🔄 ${appt.customerName} wants to reschedule. Link sent — no phone tag needed!`,
@@ -142,7 +151,7 @@ export default function Dashboard() {
         setSelectedId(null)
       }
     },
-    [appointments, handleUpdateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast, logMessages]
   )
 
   const handleMarkComplete = useCallback(
@@ -163,6 +172,7 @@ export default function Dashboard() {
           reviewRequestSent: true,
           smsThread: [...appt.smsThread, newMsg],
         })
+        logMessages(id, [{ direction: 'outbound', body: reviewText, messageType: 'review_request' }])
         addToast({
           type: 'success',
           message: `⭐ Review request sent to ${appt.customerName}!`,
@@ -190,6 +200,7 @@ export default function Dashboard() {
               reviewRequestSent: true,
               smsThread: [...appt.smsThread, newMsg],
             })
+            logMessages(id, [{ direction: 'outbound', body: reviewText, messageType: 'review_request' }])
             setSelectedId(id)
             addToast({
               type: 'success',
@@ -199,7 +210,7 @@ export default function Dashboard() {
         },
       })
     },
-    [appointments, handleUpdateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast, logMessages]
   )
 
   const handleCancel = useCallback(
@@ -295,10 +306,11 @@ export default function Dashboard() {
         status: 'reminder_sent',
         smsThread: [...appt.smsThread, confirmMsg],
       })
+      logMessages(id, [{ direction: 'outbound', body: confirmMsg.text, messageType: 'reminder' }])
       setRescheduleTarget(null)
       addToast({ type: 'success', message: `🔄 ${appt.customerName} rescheduled to ${newDate} at ${newTime}. Confirmation text sent!` })
     },
-    [appointments, handleUpdateAppointment, addToast]
+    [appointments, handleUpdateAppointment, addToast, logMessages]
   )
 
   const handleNotifyWaitlist = useCallback(() => {

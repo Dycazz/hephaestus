@@ -29,10 +29,12 @@ export async function GET(request: NextRequest) {
     .select(`
       *,
       clients ( id, name, phone, address ),
-      technicians ( id, name, initials, color )
+      technicians ( id, name, initials, color ),
+      sms_messages ( id, direction, body, message_type, created_at )
     `)
     .not('status', 'eq', 'cancelled')
     .order('scheduled_at', { ascending: true })
+    .order('created_at', { referencedTable: 'sms_messages', ascending: true })
 
   if (date) {
     // Filter to a specific calendar day

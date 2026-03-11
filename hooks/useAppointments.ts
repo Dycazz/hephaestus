@@ -60,6 +60,12 @@ function mapDbAppointment(row: Record<string, unknown>): Appointment {
   }
 }
 
+export type SmsLogEntry = {
+  direction: 'inbound' | 'outbound'
+  body: string
+  messageType: 'reminder' | 'confirmation' | 'customer_reply' | 'reschedule_link' | 'review_request' | 'general'
+}
+
 export function useAppointments() {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
@@ -118,5 +124,27 @@ export function useAppointments() {
     setAppointments(prev => [...prev, appt])
   }, [])
 
-  return { appointments, setAppointments, loading, error, updateAppointment, addAppointment, refetch: fetchAppointments }
+  /**
+   * Persists one or more SMS messages to the sms_messages table without
+   * invoking Twilio. Used for simulated replies and local reminder logging.
+   * Fires-and-forgets — UI is already updated optimistically.
+   */
+  const logMessages = useCallback(async (appointmentId: string, messages: SmsLogEntry[]) => {
+    await Promise.all(
+      messages.map(m =>
+        fetch('/api/sms/log', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            appointmentId,
+            direction: m.direction,
+            body: m.body,
+            messageType: m.messageType,
+          }),
+        })
+      )
+    )
+  }, [])
+
+  return { appointments, setAppointments, loading, error, updateAppointment, addAppointment, logMessages, refetch: fetchAppointments }
 }
