@@ -322,20 +322,20 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0a1628 0%, #0d1f3c 100%)' }}>
       <Header onAddClient={() => setAddClientOpen(true)} onManageTeam={() => setTeamPanelOpen(true)} />
       <StatsBar appointments={appointments} />
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* View toggle */}
         <div className="flex items-center gap-2 mb-5">
-          <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-xl p-1 shadow-sm">
+          <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
             <button
               onClick={() => setView('board')}
               className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 view === 'board'
                   ? 'text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
               style={view === 'board' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
             >
@@ -346,7 +346,7 @@ export default function Dashboard() {
               className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
                 view === 'calendar'
                   ? 'text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700'
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
               style={view === 'calendar' ? { background: 'linear-gradient(135deg, #0a1628, #1e3a6e)' } : undefined}
             >

@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Wrench, Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff } from 'lucide-react'
+import { AnvilIcon } from '@/components/AnvilIcon'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -37,27 +38,31 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4"
+      style={{ background: 'linear-gradient(135deg, #060d1a 0%, #0a1628 50%, #0d1f3c 100%)' }}
+    >
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="bg-blue-500 rounded-xl p-2.5">
-            <Wrench className="w-7 h-7 text-white" />
+          <div className="bg-blue-600 rounded-xl p-2.5 shadow-lg shadow-blue-900/50">
+            <AnvilIcon className="w-7 h-7 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
-            <p className="text-xs text-slate-400">Field Service Command Center</p>
+            <p className="text-xs text-blue-300/60">Field Service Command Center</p>
           </div>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <h2 className="text-xl font-bold text-slate-800 mb-1">Create your account</h2>
-          <p className="text-sm text-slate-500 mb-6">Free trial — no credit card required</p>
+        <div className="rounded-2xl shadow-2xl p-8 border border-slate-700/50"
+          style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)' }}
+        >
+          <h2 className="text-xl font-bold text-white mb-1">Create your account</h2>
+          <p className="text-sm text-slate-400 mb-6">Free trial — no credit card required</p>
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Business Name</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1">Business Name</label>
               <input
                 type="text"
                 value={businessName}
@@ -65,24 +70,24 @@ export default function SignupPage() {
                 placeholder="Mike's Plumbing & HVAC"
                 required
                 minLength={2}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Work Email</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1">Work Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@yourcompany.com"
                 required
-                className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+              <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -91,12 +96,12 @@ export default function SignupPage() {
                   placeholder="Min 8 characters"
                   required
                   minLength={8}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                  className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -104,7 +109,7 @@ export default function SignupPage() {
             </div>
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg px-3 py-2 text-sm text-red-600">
+              <div className="bg-red-900/40 border border-red-700/60 rounded-lg px-3 py-2 text-sm text-red-400">
                 {error}
               </div>
             )}
@@ -112,7 +117,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
+              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
             >
               {loading ? 'Creating account…' : 'Create free account'}
             </button>
@@ -120,7 +125,7 @@ export default function SignupPage() {
 
           <p className="text-center text-sm text-slate-500 mt-6">
             Already have an account?{' '}
-            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+            <Link href="/login" className="text-blue-400 font-semibold hover:underline">
               Sign in
             </Link>
           </p>

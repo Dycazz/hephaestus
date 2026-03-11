@@ -14,39 +14,39 @@ interface AppointmentCardProps {
 
 const statusConfig = {
   scheduled: {
-    badge: 'bg-slate-100 text-slate-600 border-slate-300',
+    badge: 'bg-slate-800 text-slate-300 border-slate-600',
     label: 'Not Sent',
-    dot: 'bg-slate-400',
+    dot: 'bg-slate-500',
   },
   reminder_sent: {
-    badge: 'bg-amber-100 text-amber-700 border-amber-300',
+    badge: 'bg-amber-900/50 text-amber-400 border-amber-700/60',
     label: 'Awaiting Reply',
     dot: 'bg-amber-400 animate-pulse',
   },
   confirmed: {
-    badge: 'bg-green-100 text-green-700 border-green-300',
+    badge: 'bg-green-900/50 text-green-400 border-green-700/60',
     label: 'Confirmed ✓',
     dot: 'bg-green-500',
   },
   rescheduling: {
-    badge: 'bg-purple-100 text-purple-700 border-purple-300',
+    badge: 'bg-purple-900/50 text-purple-400 border-purple-700/60',
     label: 'Rescheduling',
     dot: 'bg-purple-400',
   },
   at_risk: {
-    badge: 'bg-red-100 text-red-700 border-red-300',
+    badge: 'bg-red-900/50 text-red-400 border-red-700/60',
     label: 'No Response',
     dot: 'bg-red-500 animate-pulse',
   },
   completed: {
-    badge: 'bg-blue-100 text-blue-700 border-blue-300',
+    badge: 'bg-blue-900/50 text-blue-400 border-blue-700/60',
     label: 'Completed',
     dot: 'bg-blue-500',
   },
   cancelled: {
-    badge: 'bg-slate-100 text-slate-500 border-slate-300',
+    badge: 'bg-slate-800 text-slate-500 border-slate-700',
     label: 'Cancelled',
-    dot: 'bg-slate-400',
+    dot: 'bg-slate-600',
   },
 }
 
@@ -64,7 +64,10 @@ export function AppointmentCard({
   const canCancel = !['completed', 'cancelled'].includes(appointment.status)
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+    <div
+      className="rounded-xl shadow-sm hover:shadow-lg hover:shadow-blue-900/20 transition-all duration-200 overflow-hidden"
+      style={{ background: 'linear-gradient(135deg, #0d1f3c, #0f2040)', border: '1px solid rgba(255,255,255,0.06)' }}
+    >
       {/* Top accent bar */}
       <div
         className={`h-1 w-full ${
@@ -86,10 +89,10 @@ export function AppointmentCard({
           <div className="flex items-center gap-2">
             <span className="text-2xl">{appointment.serviceIcon}</span>
             <div>
-              <p className="font-semibold text-slate-800 text-sm leading-tight">
+              <p className="font-semibold text-white text-sm leading-tight">
                 {appointment.customerName}
               </p>
-              <p className="text-xs text-slate-500">{appointment.service}</p>
+              <p className="text-xs text-slate-400">{appointment.service}</p>
             </div>
           </div>
           <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs font-medium ${badge}`}>
@@ -100,33 +103,35 @@ export function AppointmentCard({
 
         {/* Details */}
         <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-slate-300">
+            <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <span className="font-medium">
               {appointment.scheduledDate} at {appointment.scheduledTime}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-slate-300">
+            <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <span>{appointment.technician}</span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-600">
-            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-slate-300">
+            <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <span className="truncate">{appointment.address}</span>
           </div>
         </div>
 
         {/* Prep Checklist */}
         {appointment.prepChecklist.length > 0 && (
-          <div className="mb-3 p-2.5 bg-amber-50 rounded-lg border border-amber-100">
-            <p className="text-xs font-semibold text-amber-700 mb-1.5">📋 Prep Checklist Sent</p>
+          <div className="mb-3 p-2.5 rounded-lg border"
+            style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
+          >
+            <p className="text-xs font-semibold text-amber-400 mb-1.5">📋 Prep Checklist Sent</p>
             <ul className="space-y-1">
               {appointment.prepChecklist.map((item, i) => (
-                <li key={i} className="flex items-start gap-1.5 text-xs text-amber-800">
+                <li key={i} className="flex items-start gap-1.5 text-xs text-amber-300/80">
                   {appointment.status === 'confirmed' ? (
-                    <CheckSquare className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
+                    <CheckSquare className="w-3.5 h-3.5 text-green-400 mt-0.5 shrink-0" />
                   ) : (
-                    <Square className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+                    <Square className="w-3.5 h-3.5 text-amber-500/60 mt-0.5 shrink-0" />
                   )}
                   {item}
                 </li>
@@ -137,14 +142,18 @@ export function AppointmentCard({
 
         {/* At-risk note */}
         {appointment.status === 'at_risk' && appointment.notes && (
-          <div className="mb-3 px-2.5 py-2 bg-red-50 rounded-lg border border-red-200 text-xs text-red-700 font-medium">
+          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-red-400 font-medium"
+            style={{ background: 'rgba(220,38,38,0.12)', borderColor: 'rgba(185,28,28,0.4)' }}
+          >
             {appointment.notes}
           </div>
         )}
 
         {/* Review sent badge */}
         {appointment.reviewRequestSent && (
-          <div className="mb-3 px-2.5 py-2 bg-yellow-50 rounded-lg border border-yellow-200 text-xs text-yellow-700 font-medium flex items-center gap-1.5">
+          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-amber-400 font-medium flex items-center gap-1.5"
+            style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
+          >
             <Star className="w-3.5 h-3.5" />
             Google review request sent!
           </div>
@@ -154,7 +163,7 @@ export function AppointmentCard({
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors"
+            className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition-colors"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
@@ -206,7 +215,7 @@ export function AppointmentCard({
           {canCancel && (
             <button
               onClick={() => onCancel(appointment.id)}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-100 hover:bg-red-50 hover:text-red-600 text-slate-500 rounded-lg transition-colors ml-auto"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-slate-800/80 hover:bg-red-900/30 hover:text-red-400 text-slate-500 rounded-lg transition-colors ml-auto"
             >
               <XCircle className="w-3.5 h-3.5" />
               Cancel

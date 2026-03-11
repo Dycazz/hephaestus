@@ -17,14 +17,15 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
 
-      <div className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col"
-        style={{ background: '#f8fafc' }}
+      <div
+        className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col"
+        style={{ background: '#0a1628', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
       >
         {/* Header */}
         <div className="text-white px-4 py-4 flex items-start justify-between shrink-0"
-          style={{ background: 'linear-gradient(to right, #0a1628, #0d2045)' }}
+          style={{ background: 'linear-gradient(to right, #0a1628, #0d2045)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <div className="flex items-center gap-3">
             <div className="bg-blue-500 rounded-full p-2 shadow-lg shadow-blue-500/30">
@@ -47,10 +48,13 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
         </div>
 
         {/* SMS Thread */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-100">
+        <div
+          className="flex-1 overflow-y-auto p-4 space-y-3"
+          style={{ background: '#0d1830' }}
+        >
           {appointment.smsThread.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-slate-400 gap-2">
-              <MessageSquare className="w-10 h-10 opacity-30" />
+            <div className="flex flex-col items-center justify-center h-full text-slate-500 gap-2">
+              <MessageSquare className="w-10 h-10 opacity-20" />
               <p className="text-sm">No messages yet</p>
               <p className="text-xs">Send a reminder to start the conversation</p>
             </div>
@@ -62,11 +66,14 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
                     ? msg.type === 'review_request'
                       ? 'bg-amber-500 text-white rounded-tl-sm'
                       : 'text-white rounded-tl-sm'
-                    : 'bg-white text-slate-800 border border-slate-200 rounded-tr-sm'
+                    : 'rounded-tr-sm'
                 }`}
-                  style={msg.from === 'system' && msg.type !== 'review_request'
-                    ? { background: 'linear-gradient(135deg, #1e40af, #1d4ed8)' }
-                    : undefined
+                  style={
+                    msg.from === 'customer'
+                      ? { background: '#1e293b', color: '#e2e8f0', border: '1px solid rgba(255,255,255,0.08)' }
+                      : msg.from === 'system' && msg.type !== 'review_request'
+                      ? { background: 'linear-gradient(135deg, #1e40af, #1d4ed8)' }
+                      : undefined
                   }
                 >
                   {msg.type === 'review_request' && (
@@ -95,10 +102,14 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
         </div>
 
         {/* Action Panel */}
-        <div className="shrink-0 border-t border-slate-200 bg-white p-4 space-y-3">
+        <div className="shrink-0 p-4 space-y-3"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.06)', background: '#0d1f3c' }}
+        >
           {canSimulate && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 p-3">
-              <p className="text-xs font-semibold text-amber-700 mb-2">🎮 Simulate Customer Reply</p>
+            <div className="rounded-xl p-3"
+              style={{ background: 'rgba(217,119,6,0.12)', border: '1px solid rgba(180,83,9,0.4)' }}
+            >
+              <p className="text-xs font-semibold text-amber-400 mb-2">🎮 Simulate Customer Reply</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => onSimulateReply(appointment.id, '1')}
@@ -117,8 +128,10 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
           )}
 
           {canComplete && (
-            <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3">
-              <p className="text-xs font-semibold text-emerald-700 mb-2">✓ Mark Job Complete</p>
+            <div className="rounded-xl p-3"
+              style={{ background: 'rgba(5,150,105,0.12)', border: '1px solid rgba(4,120,87,0.4)' }}
+            >
+              <p className="text-xs font-semibold text-emerald-400 mb-2">✓ Mark Job Complete</p>
               <button
                 onClick={() => { onMarkComplete(appointment.id); onClose() }}
                 className="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-lg transition-colors"
@@ -129,8 +142,10 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
           )}
 
           {canSendReview && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 p-3">
-              <p className="text-xs font-semibold text-amber-700 mb-2">⭐ Send Google Review Request</p>
+            <div className="rounded-xl p-3"
+              style={{ background: 'rgba(217,119,6,0.12)', border: '1px solid rgba(180,83,9,0.4)' }}
+            >
+              <p className="text-xs font-semibold text-amber-400 mb-2">⭐ Send Google Review Request</p>
               <button
                 onClick={() => onMarkComplete(appointment.id)}
                 className="w-full py-2 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold rounded-lg transition-colors"

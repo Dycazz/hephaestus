@@ -121,12 +121,15 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose} />
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
 
-      <div className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col bg-white">
+      <div
+        className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col"
+        style={{ background: 'linear-gradient(180deg, #0d1f3c 0%, #0a1628 100%)', borderLeft: '1px solid rgba(255,255,255,0.06)' }}
+      >
         {/* Header */}
         <div className="text-white px-5 py-4 flex items-center justify-between shrink-0"
-          style={{ background: 'linear-gradient(to right, #0a1628, #0d2045)' }}
+          style={{ background: 'linear-gradient(to right, #0a1628, #0d2045)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}
         >
           <div>
             <h2 className="font-bold text-base">Manage Team</h2>
@@ -146,7 +149,9 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
           ) : (
             <>
               {technicians.map(tech => (
-                <div key={tech.id} className="rounded-xl border border-slate-200 overflow-hidden">
+                <div key={tech.id} className="rounded-xl overflow-hidden"
+                  style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
+                >
                   {editingId === tech.id ? (
                     <TechForm
                       form={form}
@@ -162,19 +167,19 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                         {tech.initials || getInitials(tech.name)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-sm text-slate-800">{tech.name}</p>
+                        <p className="font-semibold text-sm text-white">{tech.name}</p>
                         {tech.phone && <p className="text-xs text-slate-400">{tech.phone}</p>}
                       </div>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => startEdit(tech)}
-                          className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors"
                         >
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDelete(tech.id)}
-                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -185,16 +190,18 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
               ))}
 
               {technicians.length === 0 && editingId !== 'new' && (
-                <div className="text-center py-8 text-slate-400">
-                  <User className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                <div className="text-center py-8 text-slate-500">
+                  <User className="w-10 h-10 mx-auto mb-2 opacity-20" />
                   <p className="text-sm">No technicians yet</p>
                 </div>
               )}
 
               {/* Add new form */}
               {editingId === 'new' && (
-                <div className="rounded-xl border-2 border-blue-200 overflow-hidden">
-                  <div className="px-3 pt-3 pb-1 text-xs font-semibold text-blue-700">New Technician</div>
+                <div className="rounded-xl overflow-hidden"
+                  style={{ border: '1px solid rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.05)' }}
+                >
+                  <div className="px-3 pt-3 pb-1 text-xs font-semibold text-blue-400">New Technician</div>
                   <TechForm
                     form={form}
                     setForm={setForm}
@@ -211,7 +218,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
         {/* Footer */}
         {editingId !== 'new' && (
-          <div className="shrink-0 border-t border-slate-200 p-4">
+          <div className="shrink-0 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
             <button
               onClick={startNew}
               className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
@@ -240,35 +247,35 @@ function TechForm({
   return (
     <div className="p-3 space-y-3">
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Full Name *</label>
+        <label className="block text-xs font-semibold text-slate-400 mb-1">Full Name *</label>
         <input
           type="text"
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
           placeholder="e.g. Alex Torres"
-          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Phone (optional)</label>
+        <label className="block text-xs font-semibold text-slate-400 mb-1">Phone (optional)</label>
         <input
           type="tel"
           value={form.phone}
           onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
           placeholder="(555) 000-0000"
-          className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-2">Colour</label>
+        <label className="block text-xs font-semibold text-slate-400 mb-2">Colour</label>
         <div className="flex gap-2">
           {COLOR_OPTIONS.map(c => (
             <button
               key={c.value}
               onClick={() => setForm(f => ({ ...f, color: c.value }))}
-              className={`w-7 h-7 rounded-full ${c.cls} flex items-center justify-center transition-transform ${form.color === c.value ? 'ring-2 ring-offset-2 ring-blue-500 scale-110' : 'hover:scale-110'}`}
+              className={`w-7 h-7 rounded-full ${c.cls} flex items-center justify-center transition-transform ${form.color === c.value ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-blue-500 scale-110' : 'hover:scale-110'}`}
               title={c.label}
             >
               {form.color === c.value && <Check className="w-3.5 h-3.5 text-white" />}
@@ -277,7 +284,9 @@ function TechForm({
         </div>
       </div>
 
-      {error && <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">{error}</p>}
+      {error && (
+        <p className="text-xs text-red-400 bg-red-900/30 border border-red-700/50 rounded-lg px-3 py-2">{error}</p>
+      )}
 
       <div className="flex gap-2">
         <button
@@ -290,7 +299,7 @@ function TechForm({
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-lg transition-colors"
+          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg transition-colors"
         >
           Cancel
         </button>

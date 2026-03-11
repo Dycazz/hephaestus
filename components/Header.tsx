@@ -1,6 +1,7 @@
 'use client'
 
-import { Wrench, Wifi, PlusCircle, LogOut, Users } from 'lucide-react'
+import { Wifi, PlusCircle, LogOut, Users } from 'lucide-react'
+import { AnvilIcon } from '@/components/AnvilIcon'
 import { useOrg } from '@/context/OrgContext'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -34,7 +35,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
         {/* Brand */}
         <div className="flex items-center gap-3">
           <div className="bg-blue-500 rounded-xl p-2 shadow-lg shadow-blue-500/30">
-            <Wrench className="w-6 h-6 text-white" />
+            <AnvilIcon className="w-6 h-6 text-white" />
           </div>
           <div>
             <div className="flex items-center gap-2">
