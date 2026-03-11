@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff } from 'lucide-react'
-import { AnvilIcon } from '@/components/AnvilIcon'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -38,11 +38,11 @@ export default function LoginPage() {
     >
       <div className="w-full max-w-md">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-8">
-          <div className="bg-blue-600 rounded-xl p-2.5 shadow-lg shadow-blue-900/50">
-            <AnvilIcon className="w-7 h-7 text-white" />
+        <div className="flex flex-col items-center mb-8 gap-3">
+          <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden flex items-center justify-center" style={{ width: 96, height: 96 }}>
+            <Image src="/logo.png" alt="Hephaestus" width={88} height={88} className="object-contain" priority />
           </div>
-          <div>
+          <div className="text-center">
             <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
             <p className="text-xs text-blue-300/60">Field Service Command Center</p>
           </div>

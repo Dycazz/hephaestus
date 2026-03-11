@@ -1,7 +1,7 @@
 'use client'
 
 import { Wifi, PlusCircle, LogOut, Users } from 'lucide-react'
-import { AnvilIcon } from '@/components/AnvilIcon'
+import Image from 'next/image'
 import { useOrg } from '@/context/OrgContext'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
@@ -34,8 +34,8 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="bg-blue-500 rounded-xl p-2 shadow-lg shadow-blue-500/30">
-            <AnvilIcon className="w-6 h-6 text-white" />
+          <div className="bg-white rounded-xl shadow-lg shadow-black/20 overflow-hidden flex items-center justify-center" style={{ width: 44, height: 44 }}>
+            <Image src="/logo.png" alt="Hephaestus" width={40} height={40} className="object-contain" priority />
           </div>
           <div>
             <div className="flex items-center gap-2">
