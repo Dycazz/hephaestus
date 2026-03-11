@@ -32,7 +32,8 @@ export interface Appointment {
   serviceColor: string
   scheduledTime: string
   scheduledDate: string
-  technician: string
+  technician: string        // display name
+  technicianId?: string     // DB uuid — set when creating, used for API calls
   address: string
   status: AppointmentStatus
   prepChecklist: string[]

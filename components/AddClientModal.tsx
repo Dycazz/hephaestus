@@ -3,14 +3,16 @@
 import { useState } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 import { Appointment } from '@/types'
-import { technicians as techList, timeSlots as allTimeSlots } from '@/lib/mockData'
+import { timeSlots as allTimeSlots } from '@/lib/mockData'
+import type { Technician } from '@/hooks/useTechnicians'
 
 interface AddClientModalProps {
   onAdd: (appointment: Appointment) => void
   onClose: () => void
+  technicians: Technician[]
   existingTimes: string[]
   defaultTime?: string
-  defaultTechnician?: string
+  defaultTechnicianId?: string
   defaultDate?: 'Today' | 'Tomorrow'
 }
 
@@ -43,17 +45,30 @@ const prepPresets: Record<string, string[]> = {
   ],
 }
 
-export function AddClientModal({ onAdd, onClose, existingTimes, defaultTime, defaultTechnician, defaultDate }: AddClientModalProps) {
-  const [name, setName]           = useState('')
-  const [phone, setPhone]         = useState('')
-  const [service, setService]     = useState('Plumbing')
-  const [date, setDate]           = useState<'Today' | 'Tomorrow'>(defaultDate ?? 'Today')
-  const [time, setTime]           = useState(defaultTime ?? '9:00 AM')
-  const [technician, setTechnician] = useState(defaultTechnician ?? techList[0])
-  const [address, setAddress]     = useState('')
+export function AddClientModal({
+  onAdd,
+  onClose,
+  technicians,
+  existingTimes,
+  defaultTime,
+  defaultTechnicianId,
+  defaultDate,
+}: AddClientModalProps) {
+  const [name, setName]       = useState('')
+  const [phone, setPhone]     = useState('')
+  const [service, setService] = useState('Plumbing')
+  const [date, setDate]       = useState<'Today' | 'Tomorrow'>(defaultDate ?? 'Today')
+  const [time, setTime]       = useState(defaultTime ?? '9:00 AM')
+  const [address, setAddress] = useState('')
   const [checklist, setChecklist] = useState<string[]>(prepPresets['Plumbing'])
-  const [newItem, setNewItem]     = useState('')
-  const [errors, setErrors]       = useState<Record<string, string>>({})
+  const [newItem, setNewItem] = useState('')
+  const [errors, setErrors]   = useState<Record<string, string>>({})
+
+  // Resolve the initially selected technician from props; fall back to first in list
+  const initialTech = defaultTechnicianId
+    ? (technicians.find(t => t.id === defaultTechnicianId) ?? technicians[0] ?? null)
+    : (technicians[0] ?? null)
+  const [technician, setTechnicianState] = useState<Technician | null>(initialTech)
 
   const handleServiceChange = (s: string) => {
     setService(s)
@@ -91,7 +106,8 @@ export function AddClientModal({ onAdd, onClose, existingTimes, defaultTime, def
       serviceColor: cfg.color,
       scheduledTime: time,
       scheduledDate: date,
-      technician,
+      technician: technician?.name ?? 'Unassigned',
+      technicianId: technician?.id,
       address: address.trim(),
       status: 'scheduled',
       prepChecklist: checklist,
@@ -163,15 +179,22 @@ export function AddClientModal({ onAdd, onClose, existingTimes, defaultTime, def
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-600 mb-1 block">Technician</label>
-              <select
-                value={technician}
-                onChange={e => setTechnician(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {techList.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+              {technicians.length === 0 ? (
+                <p className="text-xs text-slate-400 pt-2">No technicians — add via Team</p>
+              ) : (
+                <select
+                  value={technician?.id ?? ''}
+                  onChange={e => {
+                    const found = technicians.find(t => t.id === e.target.value) ?? null
+                    setTechnicianState(found)
+                  }}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {technicians.map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
           </div>
 

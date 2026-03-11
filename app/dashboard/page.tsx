@@ -13,9 +13,11 @@ import { RescheduleModal } from '@/components/RescheduleModal'
 import { CalendarView } from '@/components/CalendarView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
 import { useAppointments } from '@/hooks/useAppointments'
+import { useTechnicians } from '@/hooks/useTechnicians'
 
 export default function Dashboard() {
   const { appointments, setAppointments, loading, updateAppointment, logMessages } = useAppointments()
+  const { technicians, refetch: refetchTechnicians } = useTechnicians()
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
@@ -26,7 +28,7 @@ export default function Dashboard() {
   const [view, setView] = useState<'board' | 'calendar'>('board')
   const [calendarDate, setCalendarDate] = useState<'Today' | 'Tomorrow'>('Today')
   const [addClientDefaults, setAddClientDefaults] = useState<{
-    time?: string; technician?: string; date?: 'Today' | 'Tomorrow'
+    time?: string; technicianId?: string; date?: 'Today' | 'Tomorrow'
   }>({})
   const [teamPanelOpen, setTeamPanelOpen] = useState(false)
 
@@ -250,6 +252,7 @@ export default function Dashboard() {
           service: appt.service,
           serviceIcon: appt.serviceIcon,
           serviceColor: appt.serviceColor,
+          technicianId: appt.technicianId,
           technicianName: appt.technician,
           scheduledAt: baseDate.toISOString(),
           prepChecklist: appt.prepChecklist,
@@ -273,8 +276,8 @@ export default function Dashboard() {
   )
 
   const handleAddAtSlot = useCallback(
-    (technician: string, time: string, date: 'Today' | 'Tomorrow') => {
-      setAddClientDefaults({ technician, time, date })
+    (technicianId: string, _technicianName: string, time: string, date: 'Today' | 'Tomorrow') => {
+      setAddClientDefaults({ technicianId, time, date })
       setAddClientOpen(true)
     },
     []
@@ -379,6 +382,7 @@ export default function Dashboard() {
         ) : (
           <CalendarView
             appointments={appointments}
+            technicians={technicians}
             calendarDate={calendarDate}
             onCalendarDateChange={setCalendarDate}
             onSelectAppointment={setSelectedId}
@@ -411,9 +415,10 @@ export default function Dashboard() {
         <AddClientModal
           onAdd={handleAddClient}
           onClose={() => { setAddClientOpen(false); setAddClientDefaults({}) }}
+          technicians={technicians}
           existingTimes={existingTimes}
           defaultTime={addClientDefaults.time}
-          defaultTechnician={addClientDefaults.technician}
+          defaultTechnicianId={addClientDefaults.technicianId}
           defaultDate={addClientDefaults.date}
         />
       )}
@@ -428,7 +433,7 @@ export default function Dashboard() {
       )}
 
       {teamPanelOpen && (
-        <TechnicianPanel onClose={() => setTeamPanelOpen(false)} />
+        <TechnicianPanel onClose={() => { setTeamPanelOpen(false); refetchTechnicians() }} />
       )}
 
       <ToastContainer
