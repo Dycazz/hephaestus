@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { validateTwilioSignature } from '@/lib/sms'
 import { confirmationTemplate, rescheduleTemplate } from '@/lib/sms-templates'
 import { sendSMS } from '@/lib/sms'
+import { notifyDispatcherSmsReply } from '@/lib/notifications'
 
 /**
  * POST /api/sms/webhook
@@ -81,6 +82,33 @@ export async function POST(request: NextRequest) {
       to_number: toNumber,
       delivery_status: 'delivered',
     })
+
+    // Notify all dispatchers/owners in the org who have a push token
+    try {
+      const { data: staffWithTokens } = await supabase
+        .from('profiles')
+        .select('expo_push_token')
+        .eq('org_id', org.id)
+        .in('role', ['owner', 'dispatcher'])
+        .not('expo_push_token', 'is', null)
+
+      if (staffWithTokens && staffWithTokens.length > 0) {
+        const clientData = appt.clients as { name: string } | null
+        const customerName = clientData?.name ?? 'A customer'
+        for (const staff of staffWithTokens) {
+          if (staff.expo_push_token) {
+            await notifyDispatcherSmsReply({
+              pushToken: staff.expo_push_token,
+              customerName,
+              message: body,
+              appointmentId: appt.id,
+            })
+          }
+        }
+      }
+    } catch (notifErr) {
+      console.error('[Push] Failed to notify dispatchers:', notifErr)
+    }
   }
 
   const reply = body.replace(/\s+/g, '').toLowerCase()

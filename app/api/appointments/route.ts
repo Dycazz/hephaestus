@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { notifyTechnicianAssigned } from '@/lib/notifications'
 
 const CreateAppointmentSchema = z.object({
   clientId: z.string().uuid().optional(),
@@ -121,5 +122,42 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Fire-and-forget push notification to the assigned technician (if they have a token)
+  if (d.technicianId && appt) {
+    try {
+      const { data: techProfile } = await supabase
+        .from('profiles')
+        .select('expo_push_token')
+        .eq('id', d.technicianId)
+        .maybeSingle()
+
+      if (techProfile?.expo_push_token) {
+        const scheduledAt = new Date(d.scheduledAt)
+        const scheduledTime = scheduledAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        const now = new Date()
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const tmrw = new Date(today); tmrw.setDate(today.getDate() + 1)
+        const apptDay = new Date(scheduledAt.getFullYear(), scheduledAt.getMonth(), scheduledAt.getDate())
+        const scheduledDate =
+          apptDay.getTime() === today.getTime() ? 'Today' :
+          apptDay.getTime() === tmrw.getTime() ? 'Tomorrow' :
+          scheduledAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+
+        await notifyTechnicianAssigned({
+          pushToken: techProfile.expo_push_token,
+          customerName: d.customerName,
+          service: d.service,
+          scheduledDate,
+          scheduledTime,
+          appointmentId: appt.id,
+        })
+      }
+    } catch (notifErr) {
+      // Push notification failure must never block the response
+      console.error('[Push] Failed to notify technician:', notifErr)
+    }
+  }
+
   return NextResponse.json({ appointment: appt }, { status: 201 })
 }
