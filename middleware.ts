@@ -39,7 +39,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect unauthenticated users away from /dashboard/* and /settings/*
-  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/settings'))) {
+  if (!user && (pathname.startsWith('/dashboard') || pathname.startsWith('/settings') || pathname.startsWith('/analytics'))) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
