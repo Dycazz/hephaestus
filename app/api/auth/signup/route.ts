@@ -2,8 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
-const SignupSchema = z.object({
+// New-org signup
+const NewOrgSchema = z.object({
   businessName: z.string().min(2).max(100),
+  email: z.string().email(),
+  password: z.string().min(8),
+})
+
+// Invited-user signup — joins an existing org via invitation token
+const InviteSchema = z.object({
+  invitationToken: z.string().uuid(),
   email: z.string().email(),
   password: z.string().min(8),
 })
@@ -18,8 +26,78 @@ function slugify(name: string) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => null)
-  const parsed = SignupSchema.safeParse(body)
 
+  // ── Invitation-based signup ───────────────────────────────────────────────
+  if (body?.invitationToken) {
+    const parsed = InviteSchema.safeParse(body)
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
+        { status: 400 }
+      )
+    }
+
+    const { invitationToken, email, password } = parsed.data
+    const supabaseAdmin = await createClient(true)
+
+    // Validate invitation token
+    const { data: invitation, error: inviteError } = await supabaseAdmin
+      .from('invitations')
+      .select('id, org_id, email, role, accepted_at, expires_at')
+      .eq('token', invitationToken)
+      .single()
+
+    if (inviteError || !invitation) {
+      return NextResponse.json({ error: 'Invalid invitation token' }, { status: 400 })
+    }
+    if (invitation.accepted_at) {
+      return NextResponse.json({ error: 'Invitation already accepted' }, { status: 400 })
+    }
+    if (new Date(invitation.expires_at) < new Date()) {
+      return NextResponse.json({ error: 'Invitation has expired' }, { status: 400 })
+    }
+    if (invitation.email !== email.toLowerCase().trim()) {
+      return NextResponse.json(
+        { error: 'Email does not match the invitation' },
+        { status: 400 }
+      )
+    }
+
+    // Create auth user
+    const supabase = await createClient()
+    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
+    if (authError || !authData.user) {
+      return NextResponse.json(
+        { error: authError?.message ?? 'Failed to create account' },
+        { status: 400 }
+      )
+    }
+
+    const userId = authData.user.id
+
+    // Create profile linked to the org with the invited role
+    const { error: profileError } = await supabaseAdmin.from('profiles').insert({
+      id: userId,
+      org_id: invitation.org_id,
+      role: invitation.role,
+    })
+
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(userId)
+      return NextResponse.json({ error: 'Failed to set up account' }, { status: 500 })
+    }
+
+    // Mark invitation as accepted
+    await supabaseAdmin
+      .from('invitations')
+      .update({ accepted_at: new Date().toISOString() })
+      .eq('id', invitation.id)
+
+    return NextResponse.json({ success: true }, { status: 201 })
+  }
+
+  // ── New-org signup ────────────────────────────────────────────────────────
+  const parsed = NewOrgSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Invalid input' },

@@ -75,7 +75,7 @@ export async function GET() {
   // ── Technician breakdown ──────────────────────────────────────────────────
   const byTech: Record<string, { name: string; total: number; completed: number }> = {}
   for (const a of appts) {
-    const tech = (a.technicians as { id: string; name: string } | null)
+    const tech = (a.technicians as unknown as { id: string; name: string } | null)
     if (!tech) continue
     if (!byTech[tech.id]) byTech[tech.id] = { name: tech.name, total: 0, completed: 0 }
     byTech[tech.id].total++
