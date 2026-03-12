@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { LayoutGrid, CalendarDays, Loader2 } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { LayoutGrid, CalendarDays, Loader2, Eye } from 'lucide-react'
 import { Appointment, Toast, SMSMessage } from '@/types'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
@@ -17,7 +18,29 @@ import { useAppointments } from '@/hooks/useAppointments'
 import { useTechnicians } from '@/hooks/useTechnicians'
 
 export default function Dashboard() {
-  const { appointments, setAppointments, loading, updateAppointment, logMessages } = useAppointments()
+  const router = useRouter()
+
+  // Read view_as from URL synchronously on first client render (lazy init)
+  const [viewAs] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return new URLSearchParams(window.location.search).get('view_as')
+  })
+  const [viewAsOrgName, setViewAsOrgName] = useState<string | null>(null)
+
+  // Fetch the org name for the admin banner
+  useEffect(() => {
+    if (!viewAs) return
+    fetch(`/api/admin/orgs/${viewAs}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.org) {
+          setViewAsOrgName(data.org.business_name ?? data.org.name ?? viewAs)
+        }
+      })
+      .catch(() => setViewAsOrgName(viewAs))
+  }, [viewAs])
+
+  const { appointments, setAppointments, loading, updateAppointment, logMessages } = useAppointments(viewAs)
   const { technicians, refetch: refetchTechnicians } = useTechnicians()
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -350,6 +373,27 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen" style={{ background: '#111318' }}>
+      {/* Admin impersonation banner */}
+      {viewAs && (
+        <div
+          className="flex items-center justify-between px-5 py-2.5 text-sm font-semibold"
+          style={{ background: 'linear-gradient(90deg, #92400e, #78350f)', borderBottom: '1px solid #b45309', color: '#fef3c7' }}
+        >
+          <div className="flex items-center gap-2">
+            <Eye className="w-4 h-4 text-amber-400" />
+            <span>Admin view: <span className="text-amber-300">{viewAsOrgName ?? '…'}</span></span>
+            <span className="text-amber-600/70 text-xs font-normal">— read-only impersonation</span>
+          </div>
+          <button
+            onClick={() => router.push('/admin')}
+            className="flex items-center gap-1 text-xs text-amber-400 hover:text-amber-200 transition-colors px-2 py-1 rounded"
+            style={{ background: 'rgba(0,0,0,0.2)' }}
+          >
+            ← Exit to admin
+          </button>
+        </div>
+      )}
+
       <Header onAddClient={() => setAddClientOpen(true)} onManageTeam={() => setTeamPanelOpen(true)} />
       <StatsBar appointments={appointments} />
 

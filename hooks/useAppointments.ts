@@ -66,14 +66,15 @@ export type SmsLogEntry = {
   messageType: 'reminder' | 'confirmation' | 'customer_reply' | 'reschedule_link' | 'review_request' | 'general'
 }
 
-export function useAppointments() {
+export function useAppointments(viewAs?: string | null) {
   const [appointments, setAppointments] = useState<Appointment[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   const fetchAppointments = useCallback(async () => {
     try {
-      const res = await fetch('/api/appointments')
+      const url = viewAs ? `/api/appointments?view_as=${viewAs}` : '/api/appointments'
+      const res = await fetch(url)
       if (!res.ok) throw new Error('Failed to load appointments')
       const json = await res.json()
       setAppointments((json.appointments as Record<string, unknown>[]).map(mapDbAppointment))
@@ -83,7 +84,7 @@ export function useAppointments() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [viewAs])
 
   useEffect(() => {
     fetchAppointments()

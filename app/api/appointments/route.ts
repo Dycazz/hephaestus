@@ -23,9 +23,26 @@ export async function GET(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
-  const date = searchParams.get('date')   // ISO date string to filter by day
+  const date = searchParams.get('date')       // ISO date string to filter by day
+  const viewAs = searchParams.get('view_as')  // org_id override for admin impersonation
 
-  let query = supabase
+  // Determine which client + org filter to use
+  let queryClient = supabase
+  let orgFilter: string | null = null
+
+  if (viewAs) {
+    // Only admins can use view_as — check is_admin flag
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    queryClient = await createClient(true)  // service role bypasses RLS
+    orgFilter = viewAs
+  }
+
+  let query = queryClient
     .from('appointments')
     .select(`
       *,
@@ -36,6 +53,10 @@ export async function GET(request: NextRequest) {
     .not('status', 'eq', 'cancelled')
     .order('scheduled_at', { ascending: true })
     .order('created_at', { referencedTable: 'sms_messages', ascending: true })
+
+  if (orgFilter) {
+    query = query.eq('org_id', orgFilter)
+  }
 
   if (date) {
     // Filter to a specific calendar day
