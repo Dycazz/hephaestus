@@ -15,7 +15,7 @@ interface OrgData {
   id: string
   businessName: string | null
   slug: string
-  plan: 'trial' | 'starter' | 'pro'
+  plan: 'trial' | 'starter' | 'pro' | 'enterprise'
   reviewUrl: string | null
   twilioPhoneNumber?: string | null
   createdAt: string
@@ -52,9 +52,10 @@ const COLOR_OPTIONS: { name: string; value: string; hex: string }[] = [
 ]
 
 const PLAN_FEATURES = {
-  trial:   { label: 'Free Trial',   color: '#94a3b8', jobs: '25 jobs',  sms: '50 SMS',  techs: '2 techs'  },
-  starter: { label: 'Starter',      color: '#3b82f6', jobs: '200 jobs', sms: '500 SMS', techs: '5 techs'  },
-  pro:     { label: 'Pro',          color: '#a855f7', jobs: 'Unlimited', sms: 'Unlimited', techs: 'Unlimited' },
+  trial:      { label: 'Free Trial',   color: '#94a3b8', jobs: '25 jobs',    sms: '50 SMS',      techs: '2 techs'      },
+  starter:    { label: 'Starter',      color: '#3b82f6', jobs: '200 jobs',   sms: '500 SMS',     techs: '5 techs'      },
+  pro:        { label: 'Pro',          color: '#a855f7', jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'    },
+  enterprise: { label: 'Enterprise',   color: '#f59e0b', jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'    },
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -635,8 +636,8 @@ export default function SettingsPage() {
                     </div>
                   </SectionCard>
 
-                  {/* Upgrade cards */}
-                  {org?.plan !== 'pro' && (
+                  {/* Upgrade cards — only show for trial/starter */}
+                  {(org?.plan === 'trial' || org?.plan === 'starter') && (
                     <SectionCard>
                       <h2 className="text-sm font-semibold text-white mb-4">Upgrade your plan</h2>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
