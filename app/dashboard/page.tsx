@@ -27,9 +27,16 @@ export default function Dashboard() {
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
   const [view, setView] = useState<'board' | 'calendar'>('board')
-  const [calendarDate, setCalendarDate] = useState<'Today' | 'Tomorrow'>('Today')
+  const [calendarDate, setCalendarDate] = useState<string>(() => {
+    // Use local date, not UTC, so it always matches wall-clock "today"
+    const now = new Date()
+    const y = now.getFullYear()
+    const m = String(now.getMonth() + 1).padStart(2, '0')
+    const d = String(now.getDate()).padStart(2, '0')
+    return `${y}-${m}-${d}`
+  })
   const [addClientDefaults, setAddClientDefaults] = useState<{
-    time?: string; technicianId?: string; date?: 'Today' | 'Tomorrow'
+    time?: string; technicianId?: string; date?: string  // ISO date YYYY-MM-DD
   }>({})
   const [teamPanelOpen, setTeamPanelOpen] = useState(false)
 
@@ -62,7 +69,7 @@ export default function Dashboard() {
       const appt = appointments.find((a) => a.id === id)
       if (!appt) return
 
-      const dateWord = appt.scheduledDate === 'Today' ? 'today' : 'tomorrow'
+      const dateWord = appt.scheduledDate === 'Today' ? 'today' : appt.scheduledDate === 'Tomorrow' ? 'tomorrow' : `on ${appt.scheduledDate}`
       const prep = appt.prepChecklist[0] ? ` Please: ${appt.prepChecklist[0]}.` : ''
       const reminderText = `Hi ${appt.customerName.split(' ')[0]}! This is ${appt.technician.split(' ')[0]} confirming your ${appt.service} appointment ${dateWord} at ${appt.scheduledTime}.${prep} Reply '1' to confirm or '2' to reschedule.`
 
@@ -104,7 +111,7 @@ export default function Dashboard() {
           {
             id: (Date.now() + 1).toString(),
             from: 'system',
-            text: `Perfect, you're all confirmed for ${appt.scheduledDate === 'Today' ? 'today' : 'tomorrow'} at ${appt.scheduledTime}! ${appt.technician} will see you then. 🔧`,
+            text: `Perfect, you're all confirmed for ${appt.scheduledDate === 'Today' ? 'today' : appt.scheduledDate === 'Tomorrow' ? 'tomorrow' : appt.scheduledDate} at ${appt.scheduledTime}! ${appt.technician} will see you then. 🔧`,
             timestamp: now,
             type: 'confirmation',
           },
@@ -230,18 +237,21 @@ export default function Dashboard() {
 
   const handleAddClient = useCallback(
     async (appt: Appointment) => {
-      // POST to API — build the scheduled_at ISO from the scheduledDate/Time strings
-      const now = new Date()
-      const baseDate = appt.scheduledDate === 'Tomorrow'
-        ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
-        : new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
-      const [timePart, meridiem] = appt.scheduledTime.split(' ')
-      const [hourStr, minuteStr] = timePart.split(':')
-      let hour = parseInt(hourStr)
-      if (meridiem === 'PM' && hour !== 12) hour += 12
-      if (meridiem === 'AM' && hour === 12) hour = 0
-      baseDate.setHours(hour, parseInt(minuteStr ?? '0'), 0, 0)
+      // AddClientModal pre-computes scheduledAt; fall back to parsing for legacy callers
+      let scheduledAtISO = appt.scheduledAt
+      if (!scheduledAtISO) {
+        const now = new Date()
+        const baseDate = appt.scheduledDate === 'Tomorrow'
+          ? new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+          : new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        const [timePart, meridiem] = appt.scheduledTime.split(' ')
+        const [hourStr, minuteStr] = timePart.split(':')
+        let hour = parseInt(hourStr)
+        if (meridiem === 'PM' && hour !== 12) hour += 12
+        if (meridiem === 'AM' && hour === 12) hour = 0
+        baseDate.setHours(hour, parseInt(minuteStr ?? '0'), 0, 0)
+        scheduledAtISO = baseDate.toISOString()
+      }
 
       const res = await fetch('/api/appointments', {
         method: 'POST',
@@ -255,7 +265,7 @@ export default function Dashboard() {
           serviceColor: appt.serviceColor,
           technicianId: appt.technicianId,
           technicianName: appt.technician,
-          scheduledAt: baseDate.toISOString(),
+          scheduledAt: scheduledAtISO,
           prepChecklist: appt.prepChecklist,
         }),
       })
@@ -277,7 +287,7 @@ export default function Dashboard() {
   )
 
   const handleAddAtSlot = useCallback(
-    (technicianId: string, _technicianName: string, time: string, date: 'Today' | 'Tomorrow') => {
+    (technicianId: string, _technicianName: string, time: string, date: string) => {
       setAddClientDefaults({ technicianId, time, date })
       setAddClientOpen(true)
     },

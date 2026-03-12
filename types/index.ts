@@ -40,6 +40,7 @@ export interface Appointment {
   smsThread: SMSMessage[]
   reviewRequestSent: boolean
   notes?: string
+  scheduledAt?: string  // full ISO datetime — populated by AddClientModal for instant API posting
 }
 
 export interface Toast {

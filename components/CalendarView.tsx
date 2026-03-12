@@ -1,6 +1,6 @@
 'use client'
 
-import { Plus, Clock } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Clock } from 'lucide-react'
 import { Appointment } from '@/types'
 import { timeSlots } from '@/lib/mockData'
 import type { Technician } from '@/hooks/useTechnicians'
@@ -8,11 +8,59 @@ import type { Technician } from '@/hooks/useTechnicians'
 interface CalendarViewProps {
   appointments: Appointment[]
   technicians: Technician[]
-  calendarDate: 'Today' | 'Tomorrow'
-  onCalendarDateChange: (date: 'Today' | 'Tomorrow') => void
+  calendarDate: string  // ISO date YYYY-MM-DD
+  onCalendarDateChange: (date: string) => void
   onSelectAppointment: (id: string) => void
-  onAddAtSlot: (technicianId: string, technicianName: string, time: string, date: 'Today' | 'Tomorrow') => void
+  onAddAtSlot: (technicianId: string, technicianName: string, time: string, date: string) => void
 }
+
+// ─── Date helpers ──────────────────────────────────────────────────────────────
+
+function toISODate(date: Date): string {
+  // Use local time (not UTC) so "Today" always matches the user's wall-clock date
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+function formatDisplayDate(iso: string): string {
+  const todayDate = new Date()
+  const todayISO = toISODate(todayDate)
+  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowISO = toISODate(tomorrowDate)
+  if (iso === todayISO) return 'Today'
+  if (iso === tomorrowISO) return 'Tomorrow'
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function formatHeaderDate(iso: string): string {
+  const todayDate = new Date()
+  const todayISO = toISODate(todayDate)
+  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowISO = toISODate(tomorrowDate)
+  if (iso === todayISO) return 'Today'
+  if (iso === tomorrowISO) return 'Tomorrow'
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function addDays(iso: string, days: number): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  const d = new Date(year, month - 1, day)
+  d.setDate(d.getDate() + days)
+  return toISODate(d)
+}
+
+// ─── Styling maps ─────────────────────────────────────────────────────────────
 
 const statusBlock: Record<string, { bg: string; border: string; text: string; badge: string; badgeText: string }> = {
   scheduled:     { bg: 'bg-slate-800/70',  border: 'border-slate-500',  text: 'text-slate-200',  badge: 'bg-slate-700/80 text-slate-300',   badgeText: 'Not sent'    },
@@ -24,7 +72,6 @@ const statusBlock: Record<string, { bg: string; border: string; text: string; ba
   cancelled:     { bg: 'bg-slate-900/50',  border: 'border-slate-700',  text: 'text-slate-500',  badge: 'bg-slate-800/60 text-slate-500',   badgeText: 'Cancelled'   },
 }
 
-/** Map the technician color string to a Tailwind bg class for the avatar. */
 const colorBg: Record<string, string> = {
   blue:    'bg-blue-500',
   purple:  'bg-purple-500',
@@ -48,17 +95,19 @@ export function CalendarView({
   onSelectAppointment,
   onAddAtSlot,
 }: CalendarViewProps) {
+  const todayISO = toISODate(new Date())
+  const displayDate = formatDisplayDate(calendarDate)
+
+  // Filter appointments for the currently shown date
   const dayAppts = appointments.filter(
-    a => a.scheduledDate === calendarDate && a.status !== 'cancelled'
+    a => a.scheduledDate === displayDate && a.status !== 'cancelled'
   )
 
   const getAppt = (techName: string, time: string) =>
     dayAppts.find(a => a.technician === techName && a.scheduledTime === time) ?? null
 
   const techJobCount = (techName: string) =>
-    appointments.filter(
-      a => a.technician === techName && a.scheduledDate === calendarDate && a.status !== 'cancelled'
-    ).length
+    dayAppts.filter(a => a.technician === techName).length
 
   if (technicians.length === 0) {
     return (
@@ -88,21 +137,42 @@ export function CalendarView({
             {dayAppts.length} job{dayAppts.length !== 1 ? 's' : ''}
           </span>
         </div>
-        <div className="flex gap-1">
-          {(['Today', 'Tomorrow'] as const).map(d => (
+
+        {/* Date navigation */}
+        <div className="flex items-center gap-1">
+          {/* Prev day */}
+          <button
+            onClick={() => onCalendarDateChange(addDays(calendarDate, -1))}
+            disabled={calendarDate <= todayISO}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            title="Previous day"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {/* Today quick-jump */}
+          {calendarDate !== todayISO && (
             <button
-              key={d}
-              onClick={() => onCalendarDateChange(d)}
-              className={`px-3 py-1 rounded-lg text-xs font-semibold border transition-all duration-150 ${
-                calendarDate === d
-                  ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-900/40'
-                  : 'text-slate-400 border-white/10 hover:border-white/20 hover:text-slate-200'
-              }`}
-              style={calendarDate !== d ? { background: 'rgba(255,255,255,0.04)' } : undefined}
+              onClick={() => onCalendarDateChange(todayISO)}
+              className="px-2 py-1 rounded-lg text-xs font-medium text-blue-300 hover:bg-blue-500/10 transition-all border border-blue-500/20"
             >
-              {d}
+              Today
             </button>
-          ))}
+          )}
+
+          {/* Current date label */}
+          <span className="px-3 py-1 text-sm font-semibold text-white/90 min-w-[90px] text-center">
+            {formatHeaderDate(calendarDate)}
+          </span>
+
+          {/* Next day */}
+          <button
+            onClick={() => onCalendarDateChange(addDays(calendarDate, 1))}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all"
+            title="Next day"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Plus, Trash2 } from 'lucide-react'
 import { Appointment } from '@/types'
 import { timeSlots as allTimeSlots } from '@/lib/mockData'
@@ -13,36 +13,57 @@ interface AddClientModalProps {
   existingTimes: string[]
   defaultTime?: string
   defaultTechnicianId?: string
-  defaultDate?: 'Today' | 'Tomorrow'
+  defaultDate?: string  // ISO date string YYYY-MM-DD (defaults to today)
 }
 
-const serviceConfig: Record<string, { icon: string; color: string }> = {
-  Plumbing:   { icon: '🔧', color: 'blue' },
-  HVAC:       { icon: '❄️', color: 'cyan' },
-  Electrical: { icon: '⚡', color: 'yellow' },
-  Heating:    { icon: '🔥', color: 'orange' },
+// ─── Date helpers ──────────────────────────────────────────────────────────────
+
+function toISODate(date: Date): string {
+  // Use local time (not UTC) so "Today" always matches the user's wall-clock date
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
-const prepPresets: Record<string, string[]> = {
-  Plumbing: [
-    'Clear all items from under the sink',
-    'Turn off water supply valve under sink',
-    'Have towels nearby — minor water spillage may occur',
-  ],
-  HVAC: [
-    'Clear 3-ft clearance around your outdoor AC unit',
-    'Locate your air filter — we will inspect and replace if needed',
-    'Clear access to attic if applicable',
-  ],
-  Electrical: [
-    'Ensure breaker panel is fully accessible',
-    'Have a list of outlets or switches needing work',
-  ],
-  Heating: [
-    'Locate your furnace or boiler',
-    'Clear 2-ft access around the heating unit',
-    'Note any error codes on your thermostat',
-  ],
+function formatDisplayDate(iso: string): string {
+  const todayDate = new Date()
+  const todayISO = toISODate(todayDate)
+  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowISO = toISODate(tomorrowDate)
+  if (iso === todayISO) return 'Today'
+  if (iso === tomorrowISO) return 'Tomorrow'
+  const [year, month, day] = iso.split('-').map(Number)
+  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+function buildScheduledAt(dateISO: string, timeStr: string): string {
+  const [year, month, day] = dateISO.split('-').map(Number)
+  const [timePart, meridiem] = timeStr.split(' ')
+  const [hourStr, minuteStr] = timePart.split(':')
+  let hour = parseInt(hourStr)
+  if (meridiem === 'PM' && hour !== 12) hour += 12
+  if (meridiem === 'AM' && hour === 12) hour = 0
+  return new Date(year, month - 1, day, hour, parseInt(minuteStr ?? '0'), 0).toISOString()
+}
+
+// ─── Fallback if API not yet available ────────────────────────────────────────
+
+const fallbackServices: ServiceOption[] = [
+  { name: 'Plumbing',   icon: '🔧', color: 'blue',   prepTemplates: ['Clear all items from under the sink', 'Turn off water supply valve under sink', 'Have towels nearby'] },
+  { name: 'HVAC',       icon: '❄️', color: 'cyan',   prepTemplates: ['Clear 3-ft clearance around your outdoor AC unit', 'Locate your air filter', 'Clear access to attic if applicable'] },
+  { name: 'Electrical', icon: '⚡', color: 'yellow', prepTemplates: ['Ensure breaker panel is fully accessible', 'Have a list of outlets or switches needing work'] },
+  { name: 'Heating',    icon: '🔥', color: 'orange', prepTemplates: ['Locate your furnace or boiler', 'Clear 2-ft access around the heating unit', 'Note any error codes on your thermostat'] },
+]
+
+interface ServiceOption {
+  name: string
+  icon: string
+  color: string
+  prepTemplates: string[]
 }
 
 export function AddClientModal({
@@ -54,15 +75,23 @@ export function AddClientModal({
   defaultTechnicianId,
   defaultDate,
 }: AddClientModalProps) {
-  const [name, setName]       = useState('')
-  const [phone, setPhone]     = useState('')
-  const [service, setService] = useState('Plumbing')
-  const [date, setDate]       = useState<'Today' | 'Tomorrow'>(defaultDate ?? 'Today')
-  const [time, setTime]       = useState(defaultTime ?? '9:00 AM')
-  const [address, setAddress] = useState('')
-  const [checklist, setChecklist] = useState<string[]>(prepPresets['Plumbing'])
-  const [newItem, setNewItem] = useState('')
-  const [errors, setErrors]   = useState<Record<string, string>>({})
+  const todayDate = new Date()
+  const todayISO = toISODate(todayDate)
+  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
+  const tomorrowISO = toISODate(tomorrowDate)
+
+  const [name, setName]         = useState('')
+  const [phone, setPhone]       = useState('')
+  const [dateISO, setDateISO]   = useState<string>(defaultDate ?? todayISO)
+  const [time, setTime]         = useState(defaultTime ?? '9:00 AM')
+  const [address, setAddress]   = useState('')
+  const [checklist, setChecklist] = useState<string[]>(fallbackServices[0].prepTemplates)
+  const [newItem, setNewItem]   = useState('')
+  const [errors, setErrors]     = useState<Record<string, string>>({})
+
+  const [services, setServices] = useState<ServiceOption[]>(fallbackServices)
+  const [service, setService]   = useState<ServiceOption>(fallbackServices[0])
+  const [servicesLoading, setServicesLoading] = useState(true)
 
   // Resolve the initially selected technician from props; fall back to first in list
   const initialTech = defaultTechnicianId
@@ -70,9 +99,32 @@ export function AddClientModal({
     : (technicians[0] ?? null)
   const [technician, setTechnicianState] = useState<Technician | null>(initialTech)
 
-  const handleServiceChange = (s: string) => {
-    setService(s)
-    setChecklist(prepPresets[s] ?? [])
+  // Load services from the DB
+  useEffect(() => {
+    fetch('/api/services')
+      .then(r => r.ok ? r.json() : null)
+      .then(json => {
+        if (!json?.services?.length) return
+        const loaded: ServiceOption[] = json.services.map((s: Record<string, unknown>) => ({
+          name: s.name as string,
+          icon: (s.icon ?? '') as string,
+          color: (s.color ?? 'blue') as string,
+          prepTemplates: Array.isArray(s.prep_templates)
+            ? s.prep_templates as string[]
+            : JSON.parse((s.prep_templates as string | null) ?? '[]'),
+        }))
+        setServices(loaded)
+        setService(loaded[0])
+        setChecklist(loaded[0].prepTemplates)
+      })
+      .catch(() => { /* keep fallback */ })
+      .finally(() => setServicesLoading(false))
+  }, [])
+
+  const handleServiceChange = (name: string) => {
+    const svc = services.find(s => s.name === name) ?? services[0]
+    setService(svc)
+    setChecklist(svc.prepTemplates)
   }
 
   const addChecklistItem = () => {
@@ -96,16 +148,18 @@ export function AddClientModal({
 
   const handleSubmit = () => {
     if (!validate()) return
-    const cfg = serviceConfig[service]
+    const displayDate = formatDisplayDate(dateISO)
+    const scheduledAt = buildScheduledAt(dateISO, time)
     const newAppt: Appointment = {
       id: `appt-${Date.now()}`,
       customerName: name.trim(),
       customerPhone: phone.trim(),
-      service,
-      serviceIcon: cfg.icon,
-      serviceColor: cfg.color,
+      service: service.name,
+      serviceIcon: service.icon,
+      serviceColor: service.color,
       scheduledTime: time,
-      scheduledDate: date,
+      scheduledDate: displayDate,
+      scheduledAt,
       technician: technician?.name ?? 'Unassigned',
       technicianId: technician?.id,
       address: address.trim(),
@@ -117,7 +171,9 @@ export function AddClientModal({
     onAdd(newAppt)
   }
 
-  const isBooked = (t: string) => existingTimes.includes(`${date}-${t}`)
+  // existingTimes are "DisplayDate-Time" e.g. "Today-9:00 AM" or "Mar 15-9:00 AM"
+  const displayDate = formatDisplayDate(dateISO)
+  const isBooked = (t: string) => existingTimes.includes(`${displayDate}-${t}`)
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -168,12 +224,13 @@ export function AddClientModal({
             <div>
               <label className="text-xs font-semibold text-slate-600 mb-1 block">Service</label>
               <select
-                value={service}
+                value={service.name}
                 onChange={e => handleServiceChange(e.target.value)}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={servicesLoading}
+                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
               >
-                {Object.keys(serviceConfig).map(s => (
-                  <option key={s} value={s}>{serviceConfig[s].icon} {s}</option>
+                {services.map(s => (
+                  <option key={s.name} value={s.name}>{s.icon} {s.name}</option>
                 ))}
               </select>
             </div>
@@ -198,23 +255,43 @@ export function AddClientModal({
             </div>
           </div>
 
-          {/* Date */}
+          {/* Date picker */}
           <div>
             <label className="text-xs font-semibold text-slate-600 mb-2 block">Date</label>
-            <div className="flex gap-2">
-              {(['Today', 'Tomorrow'] as const).map(d => (
-                <button
-                  key={d}
-                  onClick={() => setDate(d)}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    date === d
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Quick-select buttons */}
+              <button
+                onClick={() => setDateISO(todayISO)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                  dateISO === todayISO
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => setDateISO(tomorrowISO)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
+                  dateISO === tomorrowISO
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                }`}
+              >
+                Tomorrow
+              </button>
+              {/* Custom date input */}
+              <input
+                type="date"
+                value={dateISO}
+                min={todayISO}
+                onChange={e => e.target.value && setDateISO(e.target.value)}
+                className={`border rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                  dateISO !== todayISO && dateISO !== tomorrowISO
+                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
+                    : 'border-slate-300 text-slate-600'
+                }`}
+              />
             </div>
           </div>
 
