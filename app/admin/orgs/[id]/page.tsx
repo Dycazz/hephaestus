@@ -41,7 +41,7 @@ interface Appointment {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  trial: '#94a3b8', starter: '#60a5fa', pro: '#c084fc', enterprise: '#f59e0b',
+  trial: '#94a3b8', starter: '#60a5fa', pro: '#c084fc', enterprise: '#f59e0b', gifted: '#10b981',
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -292,7 +292,7 @@ export default function OrgDetailPage() {
           {/* Plan */}
           <ActionCard title="Change Plan">
             <div className="space-y-2">
-              {['trial', 'starter', 'pro', 'enterprise'].map(p => (
+              {['trial', 'starter', 'pro', 'enterprise', 'gifted'].map(p => (
                 <button
                   key={p}
                   onClick={() => handlePlanChange(p)}
@@ -311,7 +311,14 @@ export default function OrgDetailPage() {
                     border: '1px solid rgba(255,255,255,0.07)',
                   }}
                 >
-                  <span className="capitalize">{p}</span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="capitalize">{p}</span>
+                    {p === 'gifted' && org.plan !== 'gifted' && (
+                      <span className="text-[9px] font-medium px-1 py-0.5 rounded bg-emerald-900/40 text-emerald-400 border border-emerald-700/40">
+                        admin only
+                      </span>
+                    )}
+                  </span>
                   {org.plan === p && <CheckCircle2 className="w-4 h-4" style={{ color: PLAN_COLORS[p] }} />}
                 </button>
               ))}

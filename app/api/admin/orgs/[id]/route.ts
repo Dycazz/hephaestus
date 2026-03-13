@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
-const PLANS = ['trial', 'starter', 'pro', 'enterprise'] as const
+const PLANS = ['trial', 'starter', 'pro', 'enterprise', 'gifted'] as const
 
 const PatchSchema = z.object({
   plan: z.enum(PLANS).optional(),

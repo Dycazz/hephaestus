@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest) {
 
   const { data: org, error } = await supabase
     .from('organizations')
-    .select('id, name, business_name, slug, plan, review_url, twilio_phone_number, created_at')
+    .select('id, name, business_name, slug, plan, review_url, twilio_phone_number, created_at, stripe_customer_id, subscription_status, subscription_period_end, trial_ends_at')
     .eq('id', profile.org_id)
     .single()
 

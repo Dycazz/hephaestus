@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { notifyTechnicianAssigned } from '@/lib/notifications'
+import { checkLimit, getOrgPlanAccess } from '@/lib/plan-access'
 
 const CreateAppointmentSchema = z.object({
   clientId: z.string().uuid().optional(),
@@ -15,6 +16,10 @@ const CreateAppointmentSchema = z.object({
   technicianName: z.string().min(1),
   scheduledAt: z.string().datetime(),
   prepChecklist: z.array(z.string()).default([]),
+  // Scheduling v2
+  durationMinutes: z.number().int().min(15).max(480).default(60),
+  recurrenceRule: z.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly']).default('none'),
+  recurrenceEndDate: z.string().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -98,6 +103,29 @@ export async function POST(request: NextRequest) {
 
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
+  // ── Plan access check ────────────────────────────────────────────────────
+  const planAccess = await getOrgPlanAccess(profile.org_id, supabase)
+  if (planAccess.suspended) {
+    return NextResponse.json({ error: 'Your account has been suspended. Please contact support.' }, { status: 403 })
+  }
+
+  const jobLimit = await checkLimit(profile.org_id, 'jobs', supabase)
+  if (!jobLimit.allowed) {
+    const isExpired = !planAccess.active
+    return NextResponse.json(
+      {
+        error: isExpired
+          ? 'Your subscription has expired. Please renew to create new appointments.'
+          : `Monthly job limit reached (${jobLimit.current}/${jobLimit.limit}). Upgrade your plan to create more appointments.`,
+        limitReached: true,
+        current: jobLimit.current,
+        limit: jobLimit.limit,
+      },
+      { status: 403 }
+    )
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
   // Upsert client record
   let clientId = d.clientId
   if (!clientId) {
@@ -138,11 +166,46 @@ export async function POST(request: NextRequest) {
       status: 'scheduled',
       address: d.address,
       prep_checklist: d.prepChecklist,
+      duration_minutes: d.durationMinutes,
+      recurrence_rule: d.recurrenceRule,
+      recurrence_end_date: d.recurrenceEndDate ?? null,
     })
     .select()
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // ── Generate recurring child appointments ──────────────────────────────────
+  let recurringCount = 0
+  if (d.recurrenceRule !== 'none' && appt) {
+    const endDate = d.recurrenceEndDate
+      ? new Date(d.recurrenceEndDate + 'T23:59:59')
+      : (() => { const e = new Date(d.scheduledAt); e.setFullYear(e.getFullYear() + 1); return e })()
+
+    const children: Record<string, unknown>[] = []
+    let current = new Date(d.scheduledAt)
+
+    while (children.length < 52) {
+      if (d.recurrenceRule === 'daily')          current = new Date(current.getTime() + 86400000)
+      else if (d.recurrenceRule === 'weekly')    current = new Date(current.getTime() + 7 * 86400000)
+      else if (d.recurrenceRule === 'biweekly')  current = new Date(current.getTime() + 14 * 86400000)
+      else if (d.recurrenceRule === 'monthly') { current = new Date(current); current.setMonth(current.getMonth() + 1) }
+      if (current > endDate) break
+      children.push({
+        org_id: profile.org_id, client_id: clientId,
+        technician_id: d.technicianId ?? null,
+        service: d.service, service_icon: d.serviceIcon, service_color: d.serviceColor,
+        scheduled_at: current.toISOString(), status: 'scheduled', address: d.address,
+        prep_checklist: d.prepChecklist, duration_minutes: d.durationMinutes,
+        recurrence_rule: d.recurrenceRule, recurrence_end_date: d.recurrenceEndDate ?? null,
+        parent_appointment_id: appt.id,
+      })
+    }
+    if (children.length > 0) {
+      await supabase.from('appointments').insert(children)
+      recurringCount = children.length
+    }
+  }
 
   // Fire-and-forget push notification to the assigned technician (if they have a token)
   if (d.technicianId && appt) {
@@ -180,5 +243,5 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ appointment: appt }, { status: 201 })
+  return NextResponse.json({ appointment: appt, recurringCount }, { status: 201 })
 }

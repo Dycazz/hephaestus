@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { checkLimit, getOrgPlanAccess } from '@/lib/plan-access'
 
 export async function GET(_request: NextRequest) {
   const supabase = await createClient()
@@ -35,6 +36,29 @@ export async function POST(request: NextRequest) {
 
   const { data: profile } = await supabase.from('profiles').select('org_id').eq('id', user.id).single()
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+
+  // ── Plan access check ────────────────────────────────────────────────────
+  const planAccess = await getOrgPlanAccess(profile.org_id, supabase)
+  if (planAccess.suspended) {
+    return NextResponse.json({ error: 'Your account has been suspended. Please contact support.' }, { status: 403 })
+  }
+
+  const techLimit = await checkLimit(profile.org_id, 'techs', supabase)
+  if (!techLimit.allowed) {
+    const isExpired = !planAccess.active
+    return NextResponse.json(
+      {
+        error: isExpired
+          ? 'Your subscription has expired. Please renew to add technicians.'
+          : `Technician limit reached (${techLimit.current}/${techLimit.limit}). Upgrade your plan to add more technicians.`,
+        limitReached: true,
+        current: techLimit.current,
+        limit: techLimit.limit,
+      },
+      { status: 403 }
+    )
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   const d = parsed.data
   const initials = d.initials ?? d.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)

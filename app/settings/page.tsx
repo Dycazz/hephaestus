@@ -6,7 +6,7 @@ import Image from 'next/image'
 import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
-  Zap, Shield, Building2,
+  Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw,
 } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -15,10 +15,15 @@ interface OrgData {
   id: string
   businessName: string | null
   slug: string
-  plan: 'trial' | 'starter' | 'pro' | 'enterprise'
+  plan: 'trial' | 'starter' | 'pro' | 'enterprise' | 'gifted'
   reviewUrl: string | null
   twilioPhoneNumber?: string | null
   createdAt: string
+  // Subscription fields
+  stripeCustomerId: string | null
+  subscriptionStatus: string | null      // 'active' | 'past_due' | 'canceled' | null
+  subscriptionPeriodEnd: string | null
+  trialEndsAt: string | null
 }
 
 interface Service {
@@ -51,11 +56,21 @@ const COLOR_OPTIONS: { name: string; value: string; hex: string }[] = [
   { name: 'Pink',    value: 'pink',    hex: '#ec4899' },
 ]
 
+// Plan display data — pricing matches Stripe products
 const PLAN_FEATURES = {
-  trial:      { label: 'Free Trial',   color: '#94a3b8', jobs: '25 jobs',    sms: '50 SMS',      techs: '2 techs'      },
-  starter:    { label: 'Starter',      color: '#3b82f6', jobs: '200 jobs',   sms: '500 SMS',     techs: '5 techs'      },
-  pro:        { label: 'Pro',          color: '#a855f7', jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'    },
-  enterprise: { label: 'Enterprise',   color: '#f59e0b', jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'    },
+  trial:      { label: 'Free Trial',   color: '#94a3b8', price: null,  jobs: '25 jobs',    sms: '50 SMS',      techs: '2 techs'   },
+  starter:    { label: 'Starter',      color: '#3b82f6', price: 24.99, jobs: '200 jobs',   sms: '500 SMS',     techs: '5 techs'   },
+  pro:        { label: 'Pro',          color: '#a855f7', price: 49.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
+  enterprise: { label: 'Enterprise',   color: '#f59e0b', price: 99.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
+  gifted:     { label: 'Gifted',       color: '#10b981', price: null,  jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
+} as const
+
+// Tiers shown as upgrade options
+const UPGRADE_TIERS: ('starter' | 'pro' | 'enterprise')[] = ['starter', 'pro', 'enterprise']
+
+// Plan tier rank for comparison
+const PLAN_RANK: Record<string, number> = {
+  trial: 0, starter: 1, pro: 2, enterprise: 3, gifted: 4,
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -219,6 +234,317 @@ function ServiceForm({
   )
 }
 
+// ── Plan Tab ───────────────────────────────────────────────────────────────
+
+function PlanTab({ org, role }: { org: OrgData; role: string }) {
+  const [billingLoading, setBillingLoading] = useState<string | null>(null)
+  const [billingError, setBillingError] = useState<string | null>(null)
+
+  const planInfo = PLAN_FEATURES[org.plan]
+  const currentRank = PLAN_RANK[org.plan] ?? 0
+  const isOwner = role === 'owner'
+  const isGifted = org.plan === 'gifted'
+
+  const isActivePaidPlan =
+    (org.plan === 'starter' || org.plan === 'pro' || org.plan === 'enterprise') &&
+    org.subscriptionStatus === 'active' &&
+    !!org.subscriptionPeriodEnd &&
+    new Date(org.subscriptionPeriodEnd) > new Date()
+
+  const isPastDue =
+    (org.plan === 'starter' || org.plan === 'pro' || org.plan === 'enterprise') &&
+    org.subscriptionStatus === 'past_due'
+
+  const isExpiredPaid =
+    (org.plan === 'starter' || org.plan === 'pro' || org.plan === 'enterprise') &&
+    !isActivePaidPlan && !isPastDue
+
+  const trialActive =
+    org.plan === 'trial' &&
+    !!org.trialEndsAt &&
+    new Date(org.trialEndsAt) > new Date()
+
+  const trialExpired = org.plan === 'trial' && !trialActive
+
+  // Upgrade: redirect to Stripe Checkout
+  const handleUpgrade = async (planKey: 'starter' | 'pro' | 'enterprise') => {
+    if (!isOwner) return
+    setBillingError(null)
+    setBillingLoading(planKey)
+    try {
+      const res = await fetch('/api/billing/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan: planKey }),
+      })
+      const json = await res.json()
+      if (!res.ok) { setBillingError(json.error ?? 'Failed to start checkout'); return }
+      if (json.url) window.location.href = json.url
+    } catch {
+      setBillingError('Something went wrong. Please try again.')
+    } finally {
+      setBillingLoading(null)
+    }
+  }
+
+  // Manage billing: redirect to Stripe Portal
+  const handleManageBilling = async () => {
+    if (!isOwner) return
+    setBillingError(null)
+    setBillingLoading('portal')
+    try {
+      const res = await fetch('/api/billing/portal', { method: 'POST' })
+      const json = await res.json()
+      if (!res.ok) { setBillingError(json.error ?? 'Failed to open billing portal'); return }
+      if (json.url) window.location.href = json.url
+    } catch {
+      setBillingError('Something went wrong. Please try again.')
+    } finally {
+      setBillingLoading(null)
+    }
+  }
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Current Plan Card ── */}
+      <SectionCard>
+        <div className="flex items-center gap-2 mb-5">
+          <CreditCard className="w-4 h-4 text-slate-500" />
+          <h2 className="text-sm font-semibold text-white">Current plan</h2>
+        </div>
+
+        {/* Plan header row */}
+        <div className="flex items-center gap-4 p-4 rounded-xl border" style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
+          <div
+            className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: `${planInfo.color}20`, border: `1px solid ${planInfo.color}40` }}
+          >
+            {isGifted
+              ? <Gift className="w-5 h-5" style={{ color: planInfo.color }} />
+              : <Zap  className="w-5 h-5" style={{ color: planInfo.color }} />
+            }
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-lg font-bold text-white">{planInfo.label}</p>
+              {planInfo.price != null && (
+                <span className="text-sm font-semibold text-slate-400">${planInfo.price}/mo</span>
+              )}
+              {isGifted && (
+                <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/20">
+                  Complimentary
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500">
+              Member since {new Date(org.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+
+          {/* Status badge */}
+          {org.plan === 'trial' && trialActive && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/20 shrink-0">
+              Trial active
+            </span>
+          )}
+          {org.plan === 'trial' && trialExpired && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/20 shrink-0">
+              Trial expired
+            </span>
+          )}
+          {isActivePaidPlan && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-green-500/15 text-green-400 border border-green-500/20 shrink-0">
+              Active
+            </span>
+          )}
+          {isPastDue && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-red-500/15 text-red-400 border border-red-500/20 shrink-0">
+              Payment past due
+            </span>
+          )}
+          {isExpiredPaid && (
+            <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/15 text-slate-400 border border-slate-500/20 shrink-0">
+              Expired
+            </span>
+          )}
+        </div>
+
+        {/* Renewal / trial expiry info */}
+        {isActivePaidPlan && org.subscriptionPeriodEnd && (
+          <p className="text-xs text-slate-500 mt-3 flex items-center gap-1.5">
+            <RefreshCw className="w-3 h-3" />
+            Renews {new Date(org.subscriptionPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
+        )}
+        {org.plan === 'trial' && trialActive && org.trialEndsAt && (
+          <p className="text-xs text-amber-500/70 mt-3">
+            Trial ends {new Date(org.trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          </p>
+        )}
+
+        {/* Usage limits grid */}
+        <div className="grid grid-cols-3 gap-3 mt-4">
+          {[
+            { label: 'Jobs / month', value: planInfo.jobs  },
+            { label: 'SMS credits',  value: planInfo.sms   },
+            { label: 'Technicians',  value: planInfo.techs },
+          ].map(item => (
+            <div key={item.label} className="p-3 rounded-xl border text-center" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
+              <p className="text-base font-bold text-white">{item.value}</p>
+              <p className="text-[11px] text-slate-600 mt-0.5">{item.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Past due warning banner */}
+        {isPastDue && (
+          <div className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl border border-red-700/40 bg-red-900/20">
+            <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-red-300">Payment failed</p>
+              <p className="text-xs text-red-400/70 mt-0.5">
+                Your last payment didn&apos;t go through. Update your payment method to keep your plan active.
+              </p>
+              {isOwner && (
+                <button
+                  onClick={handleManageBilling}
+                  disabled={!!billingLoading}
+                  className="mt-2 text-xs font-semibold text-red-300 hover:text-red-200 underline underline-offset-2 disabled:opacity-50"
+                >
+                  {billingLoading === 'portal' ? 'Opening…' : 'Update payment method →'}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Expired paid plan notice */}
+        {isExpiredPaid && (
+          <div className="mt-4 flex items-start gap-2.5 px-4 py-3 rounded-xl border border-amber-700/30 bg-amber-900/15">
+            <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-amber-300">Subscription ended</p>
+              <p className="text-xs text-amber-400/70 mt-0.5">
+                Your {planInfo.label} subscription has ended. You&apos;re now on trial limits. Re-subscribe below to restore full access.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Manage billing button */}
+        {(isActivePaidPlan || isPastDue) && isOwner && (
+          <button
+            onClick={handleManageBilling}
+            disabled={!!billingLoading}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold border transition-all disabled:opacity-60"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#e2e8f0' }}
+          >
+            {billingLoading === 'portal'
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Opening billing portal…</>
+              : <><CreditCard className="w-4 h-4" /> Manage billing</>
+            }
+          </button>
+        )}
+
+        {/* Non-owner notice */}
+        {!isOwner && (
+          <p className="text-xs text-slate-600 mt-4">
+            Only org owners can manage billing. Contact your owner to upgrade.
+          </p>
+        )}
+      </SectionCard>
+
+      {/* ── Upgrade / Subscribe Cards ── */}
+      {!isGifted && !isActivePaidPlan && !isPastDue && isOwner && (
+        <SectionCard>
+          <h2 className="text-sm font-semibold text-white mb-1">
+            {trialExpired || isExpiredPaid ? 'Subscribe to restore access' : 'Upgrade your plan'}
+          </h2>
+          <p className="text-xs text-slate-500 mb-4">
+            All plans are billed monthly. Cancel anytime from the billing portal.
+          </p>
+
+          {billingError && (
+            <div className="mb-4 px-3 py-2.5 rounded-lg border border-red-700/40 bg-red-900/20 text-xs text-red-400">
+              {billingError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {UPGRADE_TIERS
+              .filter(p => isExpiredPaid || PLAN_RANK[p] > currentRank)
+              .map(p => {
+                const info = PLAN_FEATURES[p]
+                const isLoading = billingLoading === p
+                return (
+                  <div
+                    key={p}
+                    className="p-4 rounded-xl border flex flex-col transition-all"
+                    style={{ borderColor: `${info.color}30`, background: `${info.color}08` }}
+                  >
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${info.color}20` }}>
+                        <Zap className="w-4 h-4" style={{ color: info.color }} />
+                      </div>
+                      <span className="text-sm font-bold text-white">{info.label}</span>
+                    </div>
+                    <p className="text-xl font-bold mb-3" style={{ color: info.color }}>
+                      ${info.price}
+                      <span className="text-xs text-slate-500 font-normal">/mo</span>
+                    </p>
+                    <ul className="space-y-1.5 text-xs text-slate-500 mb-4 flex-1">
+                      {[`${info.jobs} / month`, `${info.sms} SMS`, `${info.techs} techs`].map(f => (
+                        <li key={f} className="flex items-center gap-1.5">
+                          <Check className="w-3 h-3 shrink-0" style={{ color: info.color }} />
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={() => handleUpgrade(p)}
+                      disabled={!!billingLoading}
+                      className="w-full py-2 rounded-lg text-xs font-semibold transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
+                      style={{ background: `${info.color}20`, color: info.color, border: `1px solid ${info.color}30` }}
+                    >
+                      {isLoading
+                        ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Redirecting…</>
+                        : `Subscribe to ${info.label}`
+                      }
+                    </button>
+                  </div>
+                )
+              })}
+          </div>
+
+          <p className="text-[11px] text-slate-600 mt-3 text-center">
+            Secure checkout powered by Stripe · No hidden fees
+          </p>
+        </SectionCard>
+      )}
+
+      {/* ── Gifted plan info ── */}
+      {isGifted && (
+        <SectionCard>
+          <div className="flex items-start gap-3">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#10b98120', border: '1px solid #10b98140' }}>
+              <Gift className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-white">Complimentary access</p>
+              <p className="text-xs text-slate-500 mt-1">
+                Your organization has been granted complimentary full-feature access by the Hephaestus team.
+                No payment is required.
+              </p>
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
+    </div>
+  )
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────
 
 type Tab = 'general' | 'services' | 'plan'
@@ -245,6 +571,16 @@ export default function SettingsPage() {
   const [addingService, setAddingService] = useState(false)
   const [serviceSaving, setServiceSaving] = useState(false)
 
+  // Check for checkout redirect in URL params and switch to plan tab
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('tab') === 'plan') {
+      setActiveTab('plan')
+      // Clean up the URL
+      window.history.replaceState({}, '', '/settings?tab=plan')
+    }
+  }, [])
+
   // Load org on mount
   useEffect(() => {
     fetch('/api/org')
@@ -259,6 +595,10 @@ export default function SettingsPage() {
             reviewUrl: o.review_url,
             twilioPhoneNumber: o.twilio_phone_number,
             createdAt: o.created_at,
+            stripeCustomerId: o.stripe_customer_id ?? null,
+            subscriptionStatus: o.subscription_status ?? null,
+            subscriptionPeriodEnd: o.subscription_period_end ?? null,
+            trialEndsAt: o.trial_ends_at ?? null,
           })
           setBusinessName(o.business_name ?? '')
           setReviewUrl(o.review_url ?? '')
@@ -347,12 +687,10 @@ export default function SettingsPage() {
   // ── Tabs ────────────────────────────────────────────────────────────────
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: 'general',  label: 'General',  icon: Settings2 },
-    { id: 'services', label: 'Services', icon: Layers    },
+    { id: 'general',  label: 'General',  icon: Settings2  },
+    { id: 'services', label: 'Services', icon: Layers     },
     { id: 'plan',     label: 'Plan',     icon: CreditCard },
   ]
-
-  const planInfo = PLAN_FEATURES[org?.plan ?? 'trial']
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -519,7 +857,6 @@ export default function SettingsPage() {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {/* Add form */}
                         {addingService && (
                           <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-900/10">
                             <p className="text-xs font-semibold text-blue-300 mb-4">New service</p>
@@ -531,7 +868,6 @@ export default function SettingsPage() {
                           </div>
                         )}
 
-                        {/* Service cards */}
                         {services.map(svc => {
                           const colorHex = COLOR_OPTIONS.find(c => c.value === svc.color)?.hex ?? '#64748b'
                           return (
@@ -594,91 +930,8 @@ export default function SettingsPage() {
               )}
 
               {/* ── Plan ── */}
-              {activeTab === 'plan' && (
-                <div className="space-y-5">
-                  <SectionCard>
-                    <div className="flex items-center gap-2 mb-5">
-                      <CreditCard className="w-4 h-4 text-slate-500" />
-                      <h2 className="text-sm font-semibold text-white">Current plan</h2>
-                    </div>
-
-                    <div className="flex items-center gap-4 p-4 rounded-xl border" style={{ borderColor: 'rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.03)' }}>
-                      <div
-                        className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
-                        style={{ background: `${planInfo.color}20`, border: `1px solid ${planInfo.color}40` }}
-                      >
-                        <Zap className="w-5 h-5" style={{ color: planInfo.color }} />
-                      </div>
-                      <div>
-                        <p className="text-lg font-bold text-white">{planInfo.label}</p>
-                        <p className="text-xs text-slate-500">
-                          Member since {org ? new Date(org.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '—'}
-                        </p>
-                      </div>
-                      {org?.plan === 'trial' && (
-                        <span className="ml-auto px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/20">
-                          Trial
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3 mt-4">
-                      {[
-                        { label: 'Jobs / month',  value: planInfo.jobs  },
-                        { label: 'SMS credits',   value: planInfo.sms   },
-                        { label: 'Technicians',   value: planInfo.techs },
-                      ].map(item => (
-                        <div key={item.label} className="p-3 rounded-xl border text-center" style={{ borderColor: 'rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.02)' }}>
-                          <p className="text-base font-bold text-white">{item.value}</p>
-                          <p className="text-[11px] text-slate-600 mt-0.5">{item.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </SectionCard>
-
-                  {/* Upgrade cards — only show for trial/starter */}
-                  {(org?.plan === 'trial' || org?.plan === 'starter') && (
-                    <SectionCard>
-                      <h2 className="text-sm font-semibold text-white mb-4">Upgrade your plan</h2>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {(['starter', 'pro'] as const)
-                          .filter(p => p !== org?.plan)
-                          .map(p => {
-                            const info = PLAN_FEATURES[p]
-                            return (
-                              <div
-                                key={p}
-                                className="p-4 rounded-xl border transition-all"
-                                style={{ borderColor: `${info.color}30`, background: `${info.color}08` }}
-                              >
-                                <div className="flex items-center gap-2 mb-3">
-                                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${info.color}20` }}>
-                                    <Zap className="w-4 h-4" style={{ color: info.color }} />
-                                  </div>
-                                  <span className="text-sm font-bold text-white">{info.label}</span>
-                                </div>
-                                <ul className="space-y-1.5 text-xs text-slate-500 mb-4">
-                                  {[info.jobs + ' / month', info.sms + ' SMS', info.techs].map(f => (
-                                    <li key={f} className="flex items-center gap-1.5">
-                                      <Check className="w-3 h-3 shrink-0" style={{ color: info.color }} />
-                                      {f}
-                                    </li>
-                                  ))}
-                                </ul>
-                                <button
-                                  className="w-full py-2 rounded-lg text-xs font-semibold transition-all"
-                                  style={{ background: `${info.color}20`, color: info.color, border: `1px solid ${info.color}30` }}
-                                  onClick={() => alert('Billing portal coming soon!')}
-                                >
-                                  Upgrade to {info.label}
-                                </button>
-                              </div>
-                            )
-                          })}
-                      </div>
-                    </SectionCard>
-                  )}
-                </div>
+              {activeTab === 'plan' && org && (
+                <PlanTab org={org} role={role} />
               )}
 
             </main>
