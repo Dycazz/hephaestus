@@ -58,11 +58,11 @@ const COLOR_OPTIONS: { name: string; value: string; hex: string }[] = [
 
 // Plan display data — pricing matches Stripe products
 const PLAN_FEATURES = {
-  trial:      { label: 'Free Trial',   color: '#94a3b8', price: null,  jobs: '25 jobs',    sms: '50 SMS',      techs: '2 techs'   },
-  starter:    { label: 'Starter',      color: '#3b82f6', price: 24.99, jobs: '200 jobs',   sms: '500 SMS',     techs: '5 techs'   },
-  pro:        { label: 'Pro',          color: '#a855f7', price: 49.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
-  enterprise: { label: 'Enterprise',   color: '#f59e0b', price: 99.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
-  gifted:     { label: 'Gifted',       color: '#10b981', price: null,  jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited' },
+  trial:      { label: 'Free Trial',   color: '#94a3b8', price: null,  jobs: '25 jobs',    sms: '50 SMS',      techs: '2 techs'       },
+  starter:    { label: 'Starter',      color: '#3b82f6', price: 24.99, jobs: '200 jobs',   sms: '500 SMS',     techs: '3 techs'       },
+  pro:        { label: 'Pro',          color: '#a855f7', price: 49.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: '5 techs'       },
+  enterprise: { label: 'Enterprise',   color: '#f59e0b', price: 99.99, jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'     },
+  gifted:     { label: 'Gifted',       color: '#10b981', price: null,  jobs: 'Unlimited',  sms: 'Unlimited',   techs: 'Unlimited'     },
 } as const
 
 // Tiers shown as upgrade options

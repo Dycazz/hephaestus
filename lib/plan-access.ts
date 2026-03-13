@@ -29,8 +29,8 @@ export interface LimitCheck {
 /** Limits for each plan. Infinity = no limit. */
 export const PLAN_LIMITS: Record<AllPlanKey, { jobs: number; techs: number; sms: number }> = {
   trial:      { jobs: 25,       techs: 2,        sms: 50       },
-  starter:    { jobs: 200,      techs: 5,        sms: 500      },
-  pro:        { jobs: Infinity, techs: Infinity,  sms: Infinity },
+  starter:    { jobs: 200,      techs: 3,        sms: 500      },
+  pro:        { jobs: Infinity, techs: 5,        sms: Infinity },
   enterprise: { jobs: Infinity, techs: Infinity,  sms: Infinity },
   gifted:     { jobs: Infinity, techs: Infinity,  sms: Infinity },
 }
