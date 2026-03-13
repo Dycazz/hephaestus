@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Eye, EyeOff, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 
@@ -26,8 +26,6 @@ export default function LoginPage() {
         setError(error.message)
         setLoading(false)
       } else {
-        // Hard navigation avoids Next.js router deadlock in Cloudflare Workers
-        // and ensures fresh auth cookies are sent with the new request.
         window.location.href = '/dashboard'
       }
     } catch (err) {
@@ -38,90 +36,184 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: '#111318' }}
+    <div
+      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
+      style={{ background: '#090909' }}
     >
-      <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden flex items-center justify-center" style={{ width: 96, height: 96 }}>
-            <Image src="/logo.png" alt="Hephaestus" width={88} height={88} className="object-contain" priority />
+      {/* Ambient forge glow — bottom left */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          left: '-200px',
+          bottom: '-150px',
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }}
+      />
+      {/* Subtle top-right accent */}
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          right: '-100px',
+          top: '-100px',
+          width: '400px',
+          height: '400px',
+          background: 'radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div className="w-full max-w-sm relative slide-up-in">
+        {/* Brand mark */}
+        <div className="flex items-center gap-3 mb-10">
+          <div
+            className="rounded-xl overflow-hidden flex items-center justify-center bg-white shrink-0"
+            style={{
+              width: 42,
+              height: 42,
+              boxShadow: '0 0 28px rgba(249,115,22,0.18)',
+            }}
+          >
+            <Image src="/logo.png" alt="Hephaestus" width={36} height={36} className="object-contain" priority />
           </div>
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
-            <p className="text-xs text-slate-600">Field service management</p>
-          </div>
-        </div>
-
-        {/* Card */}
-        <div
-          className="rounded-2xl p-8"
-          style={{
-            background: '#1a1d26',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.4)',
-          }}
-        >
-          <h2 className="text-xl font-bold text-white mb-1">Welcome back</h2>
-          <p className="text-sm text-slate-400 mb-6">Sign in to your dashboard</p>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1">Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@yourcompany.com"
-                required
-                className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={e => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  required
-                  className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="bg-red-900/40 border border-red-700/60 rounded-lg px-3 py-2 text-sm text-red-400">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-70 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2"
+          <div>
+            <h1
+              className="font-display font-bold leading-none"
+              style={{ fontSize: '1.1rem', color: '#f0ece3', letterSpacing: '-0.02em' }}
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button>
-          </form>
-
-          <p className="text-center text-sm text-slate-500 mt-6">
-            Don&apos;t have an account?{' '}
-            <Link href="/signup" className="text-blue-400 font-semibold hover:underline">
-              Create one free
-            </Link>
-          </p>
+              Hephaestus
+            </h1>
+            <p className="text-xs mt-0.5" style={{ color: '#3a3a48' }}>Field service management</p>
+          </div>
         </div>
+
+        {/* Heading */}
+        <div className="mb-8">
+          <h2
+            className="font-display font-bold mb-1"
+            style={{ fontSize: '1.7rem', color: '#f0ece3', letterSpacing: '-0.03em' }}
+          >
+            Welcome back
+          </h2>
+          <p className="text-sm" style={{ color: '#9494a0' }}>Sign in to your dashboard</p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label
+              className="block text-xs font-semibold mb-1.5"
+              style={{ color: '#9494a0', letterSpacing: '0.02em' }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@yourcompany.com"
+              required
+              className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-all"
+              style={{
+                background: '#111114',
+                border: '1px solid rgba(255,255,255,0.07)',
+                color: '#f0ece3',
+              }}
+              onFocus={e => {
+                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.45)'
+                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.08)'
+              }}
+              onBlur={e => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+                e.currentTarget.style.boxShadow = 'none'
+              }}
+            />
+          </div>
+
+          <div>
+            <label
+              className="block text-xs font-semibold mb-1.5"
+              style={{ color: '#9494a0', letterSpacing: '0.02em' }}
+            >
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+                className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-all pr-10"
+                style={{
+                  background: '#111114',
+                  border: '1px solid rgba(255,255,255,0.07)',
+                  color: '#f0ece3',
+                }}
+                onFocus={e => {
+                  e.currentTarget.style.borderColor = 'rgba(249,115,22,0.45)'
+                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.08)'
+                }}
+                onBlur={e => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+                  e.currentTarget.style.boxShadow = 'none'
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(v => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
+                style={{ color: '#3a3a48' }}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <div
+              className="rounded-lg px-3 py-2.5 text-sm"
+              style={{
+                background: 'rgba(239,68,68,0.08)',
+                border: '1px solid rgba(239,68,68,0.2)',
+                color: '#f87171',
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 text-sm text-white"
+            style={{
+              background: loading ? 'rgba(249,115,22,0.5)' : 'linear-gradient(135deg, #ea580c, #f97316)',
+              boxShadow: loading ? 'none' : '0 4px 16px rgba(249,115,22,0.25)',
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading
+              ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
+              : <><span>Sign in</span><ArrowRight className="w-4 h-4" /></>
+            }
+          </button>
+        </form>
+
+        <p className="text-sm mt-6" style={{ color: '#9494a0' }}>
+          Don&apos;t have an account?{' '}
+          <Link
+            href="/signup"
+            className="font-semibold transition-colors"
+            style={{ color: '#f97316' }}
+          >
+            Create one free
+          </Link>
+        </p>
       </div>
     </div>
   )

@@ -17,28 +17,37 @@ export function StatsBar({ appointments }: StatsBarProps) {
   const completed = appointments.filter(a => a.status === 'completed').length
 
   const stats = [
-    { label: "Today's jobs",   value: total,     icon: Calendar,      color: '#60a5fa', dim: 'rgba(96,165,250,0.1)'  },
-    { label: 'Confirmed',      value: confirmed,  icon: CheckCircle,   color: '#34d399', dim: 'rgba(52,211,153,0.1)'  },
-    { label: 'Awaiting reply', value: pending,    icon: Clock,         color: '#fbbf24', dim: 'rgba(251,191,36,0.1)'  },
-    { label: 'At risk',        value: atRisk,     icon: AlertTriangle, color: '#f87171', dim: 'rgba(248,113,113,0.1)' },
-    { label: 'Completed',      value: completed,  icon: Star,          color: '#818cf8', dim: 'rgba(129,140,248,0.1)' },
+    { label: "Today's jobs",   value: total,     icon: Calendar,      color: '#f97316' },
+    { label: 'Confirmed',      value: confirmed,  icon: CheckCircle,   color: '#34d399' },
+    { label: 'Awaiting reply', value: pending,    icon: Clock,         color: '#fbbf24' },
+    { label: 'At risk',        value: atRisk,     icon: AlertTriangle, color: '#f87171' },
+    { label: 'Completed',      value: completed,  icon: Star,          color: '#a78bfa' },
   ]
 
   return (
-    <div style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+    <div style={{ background: '#09090b', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
       <div className="max-w-7xl mx-auto px-4 py-2.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          {stats.map((stat) => {
+        <div className="flex items-center gap-1 flex-wrap">
+          {stats.map((stat, i) => {
             const Icon = stat.icon
             return (
-              <div
-                key={stat.label}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
-                style={{ background: stat.dim, border: `1px solid ${stat.color}18` }}
-              >
-                <Icon className="w-3.5 h-3.5" style={{ color: stat.color }} />
-                <span className="text-base font-semibold tabular-nums" style={{ color: stat.color }}>{stat.value}</span>
-                <span className="text-xs text-slate-500 font-normal">{stat.label}</span>
+              <div key={stat.label} className="flex items-center">
+                {i > 0 && (
+                  <div
+                    className="w-px h-3 mx-3"
+                    style={{ background: 'rgba(255,255,255,0.07)' }}
+                  />
+                )}
+                <div className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg transition-colors">
+                  <Icon className="w-3 h-3" style={{ color: stat.color }} />
+                  <span
+                    className="text-base font-bold tabular-nums font-display"
+                    style={{ color: stat.color, letterSpacing: '-0.02em' }}
+                  >
+                    {stat.value}
+                  </span>
+                  <span className="text-xs font-medium" style={{ color: '#3a3a48' }}>{stat.label}</span>
+                </div>
               </div>
             )
           })}

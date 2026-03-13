@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutGrid, CalendarDays, Loader2, Eye } from 'lucide-react'
+import { LayoutGrid, CalendarDays, CalendarRange, Loader2, Eye } from 'lucide-react'
 import { Appointment, Toast, SMSMessage } from '@/types'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
@@ -13,9 +13,11 @@ import { ToastContainer } from '@/components/ToastContainer'
 import { AddClientModal } from '@/components/AddClientModal'
 import { RescheduleModal } from '@/components/RescheduleModal'
 import { CalendarView } from '@/components/CalendarView'
+import { WeekView } from '@/components/WeekView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
 import { useAppointments } from '@/hooks/useAppointments'
 import { useTechnicians } from '@/hooks/useTechnicians'
+import { formatDisplayDate, buildScheduledAt } from '@/lib/dateUtils'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -40,7 +42,7 @@ export default function Dashboard() {
       .catch(() => setViewAsOrgName(viewAs))
   }, [viewAs])
 
-  const { appointments, setAppointments, loading, updateAppointment, logMessages } = useAppointments(viewAs)
+  const { appointments, setAppointments, loading, updateAppointment, logMessages, refetch: refetchAppointments } = useAppointments(viewAs)
   const { technicians, refetch: refetchTechnicians } = useTechnicians()
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -49,7 +51,7 @@ export default function Dashboard() {
   const [cancelledSlot, setCancelledSlot] = useState<Appointment | null>(null)
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
-  const [view, setView] = useState<'board' | 'calendar'>('board')
+  const [view, setView] = useState<'board' | 'week' | 'calendar'>('board')
   const [calendarDate, setCalendarDate] = useState<string>(() => {
     // Use local date, not UTC, so it always matches wall-clock "today"
     const now = new Date()
@@ -59,7 +61,7 @@ export default function Dashboard() {
     return `${y}-${m}-${d}`
   })
   const [addClientDefaults, setAddClientDefaults] = useState<{
-    time?: string; technicianId?: string; date?: string  // ISO date YYYY-MM-DD
+    time?: string; technicianId?: string; date?: string
   }>({})
   const [teamPanelOpen, setTeamPanelOpen] = useState(false)
 
@@ -290,28 +292,49 @@ export default function Dashboard() {
           technicianName: appt.technician,
           scheduledAt: scheduledAtISO,
           prepChecklist: appt.prepChecklist,
+          durationMinutes: appt.durationMinutes,
+          recurrenceRule: appt.recurrenceRule,
+          recurrenceEndDate: appt.recurrenceEndDate,
         }),
       })
 
       if (res.ok) {
         const json = await res.json()
-        // Use the real DB id but keep the frontend-shaped appt for instant display
-        setAppointments(prev => [...prev, { ...appt, id: json.appointment.id }])
+        const recurringCount: number = json.recurringCount ?? 0
+        if (recurringCount > 1) {
+          // Recurring: refetch all appointments so we get every occurrence
+          await refetchAppointments()
+          addToast({ type: 'success', message: `${recurringCount} appointments added for ${appt.customerName}.` })
+        } else {
+          // Single appointment: optimistic add with real DB id
+          setAppointments(prev => [...prev, { ...appt, id: json.appointment.id }])
+          addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
+        }
       } else {
         // Fallback: show with temp id, will sync on next fetch
         setAppointments(prev => [...prev, appt])
+        addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
       }
 
       setAddClientOpen(false)
       setAddClientDefaults({})
-      addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
     },
-    [addToast, setAppointments]
+    [addToast, setAppointments, refetchAppointments]
   )
 
+  // Called from CalendarView (4-arg) — technician pre-fill
   const handleAddAtSlot = useCallback(
     (technicianId: string, _technicianName: string, time: string, date: string) => {
       setAddClientDefaults({ technicianId, time, date })
+      setAddClientOpen(true)
+    },
+    []
+  )
+
+  // Called from WeekView (2-arg) — no technician pre-fill
+  const handleAddAtSlotFromWeek = useCallback(
+    (isoDate: string, time: string) => {
+      setAddClientDefaults({ time, date: isoDate })
       setAddClientOpen(true)
     },
     []
@@ -325,27 +348,33 @@ export default function Dashboard() {
     [appointments]
   )
 
+  // Updated: accepts ISO date string instead of 'Today'|'Tomorrow'
   const handleReschedule = useCallback(
-    (id: string, newDate: 'Today' | 'Tomorrow', newTime: string) => {
+    (id: string, newDateISO: string, newTime: string) => {
       const appt = appointments.find(a => a.id === id)
       if (!appt) return
+      const newScheduledDate = formatDisplayDate(newDateISO)
+      const newScheduledAt   = buildScheduledAt(newDateISO, newTime)
       const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       const confirmMsg: SMSMessage = {
         id: Date.now().toString(),
         from: 'system',
-        text: `Hi ${appt.customerName.split(' ')[0]}! Your appointment has been rescheduled to ${newDate === 'Today' ? 'today' : 'tomorrow'} at ${newTime} with ${appt.technician}. Reply '1' to confirm the new time.`,
+        text: `Hi ${appt.customerName.split(' ')[0]}! Your appointment has been rescheduled to ${
+          newScheduledDate === 'Today' ? 'today' : newScheduledDate === 'Tomorrow' ? 'tomorrow' : newScheduledDate
+        } at ${newTime} with ${appt.technician}. Reply '1' to confirm.`,
         timestamp: now,
         type: 'reminder',
       }
       handleUpdateAppointment(id, {
-        scheduledDate: newDate,
+        scheduledDate: newScheduledDate,
         scheduledTime: newTime,
+        scheduledAt: newScheduledAt,
         status: 'reminder_sent',
         smsThread: [...appt.smsThread, confirmMsg],
       })
       logMessages(id, [{ direction: 'outbound', body: confirmMsg.text, messageType: 'reminder' }])
       setRescheduleTarget(null)
-      addToast({ type: 'success', message: `${appt.customerName} rescheduled to ${newDate} at ${newTime}.` })
+      addToast({ type: 'success', message: `${appt.customerName} rescheduled to ${newScheduledDate} at ${newTime}.` })
     },
     [appointments, handleUpdateAppointment, addToast, logMessages]
   )
@@ -362,17 +391,25 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ background: '#111318' }}
+      <div
+        className="min-h-screen flex flex-col items-center justify-center gap-4"
+        style={{ background: '#090909' }}
       >
-        <Loader2 className="w-8 h-8 text-blue-500/60 animate-spin" />
-        <p className="text-blue-300/40 text-sm font-medium tracking-wide">Loading your schedule…</p>
+        <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'rgba(249,115,22,0.6)' }} />
+        <p className="text-sm font-medium tracking-wide fade-in" style={{ color: '#3a3a48' }}>Loading your schedule…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: '#111318' }}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: '#090909',
+        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }}
+    >
       {/* Admin impersonation banner */}
       {viewAs && (
         <div
@@ -400,31 +437,33 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* View toggle */}
         <div className="flex items-center gap-2 mb-5">
-          <div className="flex items-center gap-0.5 rounded-xl p-1" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <button
-              onClick={() => setView('board')}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
-                view === 'board'
-                  ? 'text-white shadow-md'
-                  : 'text-slate-500 hover:text-slate-300'
-              }`}
-              style={view === 'board' ? { background: 'linear-gradient(135deg, #1e3a6e, #1e40af)', boxShadow: '0 2px 8px rgba(30,58,110,0.5)' } : undefined}
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              Board
-            </button>
-            <button
-              onClick={() => setView('calendar')}
-              className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
-                view === 'calendar'
-                  ? 'text-white shadow-md'
-                  : 'text-slate-500 hover:text-slate-300'
-              }`}
-              style={view === 'calendar' ? { background: 'linear-gradient(135deg, #1e3a6e, #1e40af)', boxShadow: '0 2px 8px rgba(30,58,110,0.5)' } : undefined}
-            >
-              <CalendarDays className="w-3.5 h-3.5" />
-              Calendar
-            </button>
+          <div
+            className="flex items-center gap-0.5 rounded-xl p-1"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            {([
+              { id: 'board',    label: 'Board',    Icon: LayoutGrid },
+              { id: 'week',     label: 'Week',     Icon: CalendarRange },
+              { id: 'calendar', label: 'Calendar', Icon: CalendarDays },
+            ] as const).map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                onClick={() => setView(id)}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150"
+                style={
+                  view === id
+                    ? {
+                        background: 'linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,88,12,0.15))',
+                        color: '#f97316',
+                        boxShadow: '0 2px 8px rgba(249,115,22,0.15)',
+                      }
+                    : { color: '#3a3a48' }
+                }
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -436,6 +475,12 @@ export default function Dashboard() {
             onMarkComplete={handleMarkComplete}
             onCancel={handleCancel}
             onReschedule={handleOpenReschedule}
+          />
+        ) : view === 'week' ? (
+          <WeekView
+            appointments={appointments}
+            onSelectAppointment={setSelectedId}
+            onAddAtSlot={handleAddAtSlotFromWeek}
           />
         ) : (
           <CalendarView
