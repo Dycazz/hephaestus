@@ -15,7 +15,7 @@ export async function GET(_request: NextRequest) {
 
   const { data: org, error } = await supabase
     .from('organizations')
-    .select('id, name, business_name, slug, plan, review_url, twilio_phone_number, created_at, stripe_customer_id, subscription_status, subscription_period_end, trial_ends_at')
+    .select('id, name, business_name, slug, plan, review_url, twilio_phone_number, reminder_hours_before, created_at, stripe_customer_id, subscription_status, subscription_period_end, trial_ends_at')
     .eq('id', profile.org_id)
     .single()
 
@@ -41,10 +41,11 @@ export async function PATCH(request: NextRequest) {
   const body = await request.json().catch(() => null)
   if (!body) return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
 
-  const updates: Record<string, string | null> = {}
-  if ('businessName' in body) updates.business_name = body.businessName || null
-  if ('reviewUrl' in body) updates.review_url = body.reviewUrl || null
-  if ('twilioPhoneNumber' in body) updates.twilio_phone_number = body.twilioPhoneNumber || null
+  const updates: Record<string, string | number | null> = {}
+  if ('businessName'        in body) updates.business_name         = body.businessName        || null
+  if ('reviewUrl'           in body) updates.review_url            = body.reviewUrl           || null
+  if ('twilioPhoneNumber'   in body) updates.twilio_phone_number   = body.twilioPhoneNumber   || null
+  if ('reminderHoursBefore' in body) updates.reminder_hours_before = Number(body.reminderHoursBefore) || 24
 
   const { data: org, error } = await supabase
     .from('organizations')

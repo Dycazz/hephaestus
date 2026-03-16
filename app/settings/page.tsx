@@ -7,6 +7,7 @@ import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
   Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw,
+  Globe, Clock, DollarSign, Copy, Calendar,
 } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -18,6 +19,7 @@ interface OrgData {
   plan: 'trial' | 'starter' | 'pro' | 'enterprise' | 'gifted'
   reviewUrl: string | null
   twilioPhoneNumber?: string | null
+  reminderHoursBefore: number
   createdAt: string
   // Subscription fields
   stripeCustomerId: string | null
@@ -34,6 +36,60 @@ interface Service {
   prep_templates: string[]
   is_active: boolean
 }
+
+interface BPortalService {
+  id: string
+  name: string
+  description: string | null
+  duration_minutes: number
+  price_cents: number
+  display_order: number
+}
+
+interface DayAvailability {
+  enabled: boolean
+  start_time: string
+  end_time: string
+}
+
+interface BookingPortalLink {
+  id: string
+  slug: string
+  business_name: string
+  business_phone: string | null
+  accent_color: string
+  show_pricing: boolean
+  require_customer_email: boolean
+  require_customer_phone: boolean
+  booking_window_days: number
+  slot_duration_minutes: number
+  is_active: boolean
+  total_views: number
+  total_bookings: number
+}
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+const DEFAULT_AVAILABILITY: DayAvailability[] = [
+  { enabled: false, start_time: '09:00', end_time: '17:00' }, // Sun
+  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Mon
+  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Tue
+  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Wed
+  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Thu
+  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Fri
+  { enabled: false, start_time: '09:00', end_time: '17:00' }, // Sat
+]
+
+const ACCENT_COLORS = [
+  { label: 'Orange',  hex: '#f97316' },
+  { label: 'Blue',    hex: '#3b82f6' },
+  { label: 'Emerald', hex: '#10b981' },
+  { label: 'Purple',  hex: '#a855f7' },
+  { label: 'Red',     hex: '#ef4444' },
+  { label: 'Cyan',    hex: '#06b6d4' },
+  { label: 'Yellow',  hex: '#eab308' },
+  { label: 'Pink',    hex: '#ec4899' },
+]
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -560,6 +616,7 @@ export default function SettingsPage() {
   // General form
   const [businessName, setBusinessName] = useState('')
   const [reviewUrl, setReviewUrl] = useState('')
+  const [reminderHoursBefore, setReminderHoursBefore] = useState(24)
   const [generalSaving, setGeneralSaving] = useState(false)
   const [generalSaved, setGeneralSaved] = useState(false)
   const [generalError, setGeneralError] = useState<string | null>(null)
@@ -594,6 +651,7 @@ export default function SettingsPage() {
             plan: o.plan,
             reviewUrl: o.review_url,
             twilioPhoneNumber: o.twilio_phone_number,
+            reminderHoursBefore: o.reminder_hours_before ?? 24,
             createdAt: o.created_at,
             stripeCustomerId: o.stripe_customer_id ?? null,
             subscriptionStatus: o.subscription_status ?? null,
@@ -602,6 +660,7 @@ export default function SettingsPage() {
           })
           setBusinessName(o.business_name ?? '')
           setReviewUrl(o.review_url ?? '')
+          setReminderHoursBefore(o.reminder_hours_before ?? 24)
         }
         setRole(r ?? 'viewer')
       })
@@ -628,7 +687,7 @@ export default function SettingsPage() {
       const res = await fetch('/api/org', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName, reviewUrl }),
+        body: JSON.stringify({ businessName, reviewUrl, reminderHoursBefore }),
       })
       const json = await res.json()
       if (!res.ok) { setGeneralError(json.error ?? 'Failed to save'); return }
@@ -636,13 +695,14 @@ export default function SettingsPage() {
         ...prev,
         businessName: json.org.business_name,
         reviewUrl: json.org.review_url,
+        reminderHoursBefore: json.org.reminder_hours_before ?? 24,
       } : prev)
       setGeneralSaved(true)
       setTimeout(() => setGeneralSaved(false), 2500)
     } finally {
       setGeneralSaving(false)
     }
-  }, [businessName, reviewUrl])
+  }, [businessName, reviewUrl, reminderHoursBefore])
 
   const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
     setServiceSaving(true)
@@ -816,6 +876,35 @@ export default function SettingsPage() {
                         <ExternalLink className="w-3 h-3" /> Test link
                       </a>
                     )}
+                  </SectionCard>
+
+                  <SectionCard>
+                    <div className="flex items-center gap-2 mb-5">
+                      <Clock className="w-4 h-4 text-slate-500" />
+                      <h2 className="text-sm font-semibold text-white">SMS reminders</h2>
+                    </div>
+                    <div>
+                      <FieldLabel>Reminder window</FieldLabel>
+                      <div className="flex gap-2 mt-1.5">
+                        {[24, 48, 72].map(h => (
+                          <button
+                            key={h}
+                            type="button"
+                            onClick={() => setReminderHoursBefore(h)}
+                            className="flex-1 py-2.5 rounded-lg text-sm font-semibold border transition-all duration-150"
+                            style={reminderHoursBefore === h
+                              ? { background: 'rgba(59,130,246,0.12)', borderColor: '#3b82f6', color: '#3b82f6' }
+                              : { background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.1)', color: '#475569' }
+                            }
+                          >
+                            {h}h
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-slate-600 mt-1.5">
+                        Customers receive an automated SMS this many hours before their appointment.
+                      </p>
+                    </div>
                   </SectionCard>
 
                   {generalError && (
