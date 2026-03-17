@@ -4,14 +4,20 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(
+    searchParams.get('reason') === 'subscription'
+      ? 'Your trial has ended or subscription is inactive. Please subscribe at hephaestus.work to continue.'
+      : null
+  )
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
