@@ -36,31 +36,44 @@ export async function GET() {
   const admin = await createClient(true)
   const access = await getOrgPlanAccess(profile.org_id, admin)
 
+  const clearAuthCookies = (res: NextResponse) => {
+    res.cookies.set('heph_auth', '', { path: '/', maxAge: 0 })
+    // Clear any Supabase auth cookies this client might have set during sign-in
+    const cookieStore = supabase.cache?.cookies ?? []
+    const cookiesArray = Array.isArray(cookieStore) ? cookieStore : []
+    cookiesArray.forEach(({ name }) => {
+      if (name.startsWith('sb-')) {
+        res.cookies.set(name, '', { path: '/', maxAge: 0 })
+      }
+    })
+    return res
+  }
+
   if (access.suspended) {
-    return NextResponse.json({
+    return clearAuthCookies(NextResponse.json({
       allowed: false,
       reason: 'Your account has been suspended. Please contact support.',
-    })
+    }))
   }
 
   if (access.plan === 'trial') {
-    return NextResponse.json({
+    return clearAuthCookies(NextResponse.json({
       allowed: false,
       reason: 'A subscription is required. Please subscribe at hephaestus.work to continue.',
-    })
+    }))
   }
 
   if (!access.active) {
     if (access.plan === 'trial') {
-      return NextResponse.json({
+      return clearAuthCookies(NextResponse.json({
         allowed: false,
         reason: 'Your free trial has ended. Please subscribe at hephaestus.work to continue.',
-      })
+      }))
     }
-    return NextResponse.json({
+    return clearAuthCookies(NextResponse.json({
       allowed: false,
       reason: 'Your subscription is inactive. Please update your billing at hephaestus.work.',
-    })
+    }))
   }
 
   // Set a session-only marker cookie so middleware can confirm this session

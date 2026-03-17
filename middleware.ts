@@ -44,9 +44,19 @@ export async function middleware(request: NextRequest) {
   const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/settings') || pathname.startsWith('/analytics')
   const isAdminRoute = pathname.startsWith('/admin')
 
+  const clearAuthCookies = (response: NextResponse) => {
+    request.cookies.getAll().forEach(({ name }) => {
+      if (name.startsWith('sb-') || name === 'heph_auth') {
+        response.cookies.set(name, '', { path: '/', maxAge: 0 })
+      }
+    })
+    return response
+  }
+
   // Redirect unauthenticated users away from protected routes
   if (!user && (isProtected || isAdminRoute)) {
-    return NextResponse.redirect(new URL('/login', request.url))
+    const loginUrl = new URL('/login', request.url)
+    return clearAuthCookies(NextResponse.redirect(loginUrl))
   }
 
   // For authenticated users on non-admin protected routes, enforce active plan
@@ -57,7 +67,7 @@ export async function middleware(request: NextRequest) {
     if (!request.cookies.get('heph_auth')) {
       const loginUrl = new URL('/login', request.url)
       loginUrl.searchParams.set('reason', 'subscription')
-      return NextResponse.redirect(loginUrl)
+      return clearAuthCookies(NextResponse.redirect(loginUrl))
     }
 
     try {
@@ -91,7 +101,7 @@ export async function middleware(request: NextRequest) {
         if (!active) {
           const loginUrl = new URL('/login', request.url)
           loginUrl.searchParams.set('reason', 'subscription')
-          return NextResponse.redirect(loginUrl)
+          return clearAuthCookies(NextResponse.redirect(loginUrl))
         }
       }
     } catch {
