@@ -12,22 +12,6 @@ interface TechnicianAvailabilityModalProps {
 
 const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-function buildTimeOptions(): { label: string; value: string }[] {
-  const opts: { label: string; value: string }[] = []
-  for (let h = 6; h <= 21; h++) {
-    for (const m of [0, 30]) {
-      if (h === 21 && m === 30) break
-      const val = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
-      const period = h < 12 ? 'AM' : 'PM'
-      const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h
-      opts.push({ label: `${h12}:${String(m).padStart(2, '0')} ${period}`, value: val })
-    }
-  }
-  return opts
-}
-
-const TIME_OPTIONS = buildTimeOptions()
-
 const DEFAULT_AVAIL = (technicianId: string): TechnicianAvailability[] =>
   Array.from({ length: 7 }, (_, i) => ({
     id: '',
@@ -144,25 +128,21 @@ export function TechnicianAvailabilityModal({
                   {/* Time range */}
                   {day.isWorking ? (
                     <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <select
+                      <input
+                        type="time"
+                        step={900}
                         value={day.startTime}
                         onChange={e => updateDay(day.dayOfWeek, 'startTime', e.target.value)}
                         className="flex-1 min-w-0 border border-slate-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {TIME_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
+                      />
                       <span className="text-slate-400 text-xs shrink-0">to</span>
-                      <select
+                      <input
+                        type="time"
+                        step={900}
                         value={day.endTime}
                         onChange={e => updateDay(day.dayOfWeek, 'endTime', e.target.value)}
                         className="flex-1 min-w-0 border border-slate-300 rounded-lg px-2 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        {TIME_OPTIONS.map(opt => (
-                          <option key={opt.value} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
+                      />
                     </div>
                   ) : (
                     <span className="text-sm text-slate-400 italic">Day off</span>
