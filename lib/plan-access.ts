@@ -71,10 +71,11 @@ export async function getOrgPlanAccess(
 
   // 3. Paid subscription plans
   if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
-    const isActive =
-      org.subscription_status === 'active' &&
-      !!org.subscription_period_end &&
-      new Date(org.subscription_period_end) > new Date()
+    const status = org.subscription_status as string | null
+    const periodEnd = org.subscription_period_end ? new Date(org.subscription_period_end) : null
+    const isStatusActive = status === 'active' || status === 'trialing'
+    const isPeriodValid = !periodEnd || periodEnd > new Date()
+    const isActive = isStatusActive && isPeriodValid
 
     return { suspended: false, plan, active: isActive }
   }

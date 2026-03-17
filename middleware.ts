@@ -107,12 +107,13 @@ export async function middleware(request: NextRequest) {
         active = false
       } else if (plan === 'gifted') {
         active = true
-      } else if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
-        active =
-          org.subscription_status === 'active' &&
-          !!org.subscription_period_end &&
-          new Date(org.subscription_period_end as string) > new Date()
-      } else {
+        } else if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
+          const status = org.subscription_status as string | null
+          const periodEnd = org.subscription_period_end ? new Date(org.subscription_period_end as string) : null
+          const isStatusActive = status === 'active' || status === 'trialing'
+          const isPeriodValid = !periodEnd || periodEnd > new Date()
+          active = isStatusActive && isPeriodValid
+        } else {
         // trial plan — subscription required, dashboard access not permitted on trial
         active = false
       }
