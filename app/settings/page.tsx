@@ -6,8 +6,7 @@ import Image from 'next/image'
 import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
-  Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw,
-  Globe, Clock, DollarSign, Copy, Calendar,
+  Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw, Clock,
 } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -36,60 +35,6 @@ interface Service {
   prep_templates: string[]
   is_active: boolean
 }
-
-interface BPortalService {
-  id: string
-  name: string
-  description: string | null
-  duration_minutes: number
-  price_cents: number
-  display_order: number
-}
-
-interface DayAvailability {
-  enabled: boolean
-  start_time: string
-  end_time: string
-}
-
-interface BookingPortalLink {
-  id: string
-  slug: string
-  business_name: string
-  business_phone: string | null
-  accent_color: string
-  show_pricing: boolean
-  require_customer_email: boolean
-  require_customer_phone: boolean
-  booking_window_days: number
-  slot_duration_minutes: number
-  is_active: boolean
-  total_views: number
-  total_bookings: number
-}
-
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-
-const DEFAULT_AVAILABILITY: DayAvailability[] = [
-  { enabled: false, start_time: '09:00', end_time: '17:00' }, // Sun
-  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Mon
-  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Tue
-  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Wed
-  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Thu
-  { enabled: true,  start_time: '09:00', end_time: '17:00' }, // Fri
-  { enabled: false, start_time: '09:00', end_time: '17:00' }, // Sat
-]
-
-const ACCENT_COLORS = [
-  { label: 'Orange',  hex: '#f97316' },
-  { label: 'Blue',    hex: '#3b82f6' },
-  { label: 'Emerald', hex: '#10b981' },
-  { label: 'Purple',  hex: '#a855f7' },
-  { label: 'Red',     hex: '#ef4444' },
-  { label: 'Cyan',    hex: '#06b6d4' },
-  { label: 'Yellow',  hex: '#eab308' },
-  { label: 'Pink',    hex: '#ec4899' },
-]
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
