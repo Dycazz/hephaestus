@@ -3,7 +3,9 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
-  const adminEmail = 'gavindycus@gmail.com'
+  const adminEmails = ['gavindycus@gmail.com']
+  const isAdminEmail = (email?: string | null) =>
+    !!email && adminEmails.includes(email.toLowerCase())
 
   // If Supabase is not yet configured, skip auth checks and let all routes through
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -61,14 +63,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Only allow the admin email into /admin
-  if (user && isAdminRoute && user.email !== adminEmail) {
+  if (user && isAdminRoute && !isAdminEmail(user.email)) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   // For authenticated users on non-admin protected routes, enforce active plan
   if (user && isProtected) {
     // Admin override: allow access regardless of subscription status
-    if (user.email === adminEmail) {
+    if (isAdminEmail(user.email)) {
       return supabaseResponse
     }
 
