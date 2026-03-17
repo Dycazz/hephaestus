@@ -16,12 +16,10 @@ function SignupForm() {
   const searchParams = useSearchParams()
   const token = searchParams.get('token')
 
-  // Invite state
   const [invite, setInvite] = useState<InviteDetails | null>(null)
   const [inviteLoading, setInviteLoading] = useState(!!token)
   const [inviteError, setInviteError] = useState<string | null>(null)
 
-  // Form state
   const [businessName, setBusinessName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,7 +29,6 @@ function SignupForm() {
   const [submitted, setSubmitted] = useState(false)
   const [submittedEmail, setSubmittedEmail] = useState('')
 
-  // Fetch invite details if token present
   useEffect(() => {
     if (!token) return
     fetch(`/api/invitations/accept?token=${encodeURIComponent(token)}`)
@@ -80,54 +77,47 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4"
-      style={{ background: '#111318' }}
-    >
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-6 py-12 text-white">
+      <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-orange-500/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-orange-500/15 blur-[140px]" />
+
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex flex-col items-center mb-8 gap-3">
-          <div className="bg-white rounded-2xl shadow-2xl shadow-black/30 overflow-hidden flex items-center justify-center" style={{ width: 96, height: 96 }}>
-            <Image src="/logo.png" alt="Hephaestus" width={88} height={88} className="object-contain" priority />
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white">
+            <Image src="/logo.png" alt="Hephaestus" width={64} height={64} className="object-contain" priority />
           </div>
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-white tracking-tight">Hephaestus</h1>
-            <p className="text-xs text-slate-600">Field service management</p>
+            <h1 className="font-display text-2xl font-semibold text-white">Hephaestus</h1>
+            <p className="text-xs uppercase tracking-[0.28em] text-white/40">Dispatch</p>
           </div>
         </div>
 
-        {/* Card */}
-        <div className="rounded-2xl p-8"
-          style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
-        >
-          {/* Email confirmation sent state */}
+        <div className="rounded-2xl border border-white/10 bg-black/70 p-8 shadow-[0_30px_60px_-40px_rgba(249,115,22,0.6)]">
           {submitted && (
             <div className="text-center py-4">
               <div className="text-4xl mb-4">📬</div>
-              <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
-              <p className="text-sm text-slate-400 mb-1">
-                We sent a verification link to
-              </p>
+              <h2 className="text-xl font-semibold text-white mb-2">Check your inbox</h2>
+              <p className="text-sm text-white/60 mb-1">We sent a verification link to</p>
               <p className="text-sm font-semibold text-white mb-4 break-all">{submittedEmail}</p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-white/40">
                 Click the link in the email to verify your account, then sign in.
               </p>
             </div>
           )}
 
-          {/* Invitation loading / error states + signup form */}
           {!submitted && (
             <>
               {token && inviteLoading && (
-                <div className="flex items-center justify-center gap-2 py-8 text-slate-400">
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                <div className="flex items-center justify-center gap-2 py-8 text-white/50">
+                  <Loader2 className="h-5 w-5 animate-spin" />
                   <span className="text-sm">Loading invitation…</span>
                 </div>
               )}
 
               {token && !inviteLoading && inviteError && (
                 <div className="text-center py-4">
-                  <p className="text-sm text-red-400 mb-4">{inviteError}</p>
-                  <Link href="/signup" className="text-blue-400 text-sm hover:underline">
+                  <p className="text-sm text-red-200 mb-4">{inviteError}</p>
+                  <Link href="/signup" className="text-orange-300 text-sm hover:text-orange-200">
                     Sign up without an invitation
                   </Link>
                 </div>
@@ -135,84 +125,80 @@ function SignupForm() {
 
               {(!token || (!inviteLoading && !inviteError)) && (
                 <>
-                  {/* Header */}
                   {invite ? (
                     <div className="mb-6">
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-                        style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
-                      >
+                      <div className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/30 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-200 mb-3">
                         🎉 You&apos;ve been invited
                       </div>
-                      <h2 className="text-xl font-bold text-white mb-1">Join {invite.orgName}</h2>
-                      <p className="text-sm text-slate-400">
+                      <h2 className="text-xl font-semibold text-white mb-1">Join {invite.orgName}</h2>
+                      <p className="text-sm text-white/60">
                         Create your account to accept the invitation as a{' '}
-                        <span className="text-blue-400 font-semibold capitalize">{invite.role}</span>.
+                        <span className="text-orange-300 font-semibold capitalize">{invite.role}</span>.
                       </p>
                     </div>
                   ) : (
                     <div className="mb-6">
-                      <h2 className="text-xl font-bold text-white mb-1">Create your account</h2>
-                      <p className="text-sm text-slate-400">Free trial — no credit card required</p>
+                      <h2 className="text-xl font-semibold text-white mb-1">Create your account</h2>
+                      <p className="text-sm text-white/60">Free trial — no credit card required</p>
                     </div>
                   )}
 
                   <form onSubmit={handleSignup} className="space-y-4">
-                    {/* Business name — only shown for new-org signups */}
                     {!invite && (
                       <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1">Business Name</label>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                          Business name
+                        </label>
                         <input
                           type="text"
                           value={businessName}
                           onChange={e => setBusinessName(e.target.value)}
-                          placeholder="Mike's Plumbing & HVAC"
+                          placeholder="Apex Plumbing Co."
                           required
-                          minLength={2}
-                          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20"
                         />
                       </div>
                     )}
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1">Work Email</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                        Email
+                      </label>
                       <input
                         type="email"
                         value={email}
                         onChange={e => setEmail(e.target.value)}
                         placeholder="you@yourcompany.com"
                         required
-                        readOnly={!!invite}
-                        className={`w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${invite ? 'opacity-70 cursor-not-allowed' : ''}`}
+                        className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20"
                       />
-                      {invite && (
-                        <p className="text-xs text-slate-500 mt-1">Email is set by the invitation and cannot be changed.</p>
-                      )}
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
+                        Password
+                      </label>
                       <div className="relative">
                         <input
                           type={showPassword ? 'text' : 'password'}
                           value={password}
                           onChange={e => setPassword(e.target.value)}
-                          placeholder="Min 8 characters"
+                          placeholder="••••••••"
                           required
-                          minLength={8}
-                          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                          className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2.5 pr-10 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20"
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(v => !v)}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
                         >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
                       </div>
                     </div>
 
                     {error && (
-                      <div className="bg-red-900/40 border border-red-700/60 rounded-lg px-3 py-2 text-sm text-red-400">
+                      <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
                         {error}
                       </div>
                     )}
@@ -220,15 +206,15 @@ function SignupForm() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
+                      className="w-full rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
                     >
-                      {loading ? 'Creating account…' : invite ? `Join ${invite.orgName}` : 'Create free account'}
+                      {loading ? 'Creating account…' : invite ? 'Accept invitation' : 'Start free trial'}
                     </button>
                   </form>
 
-                  <p className="text-center text-sm text-slate-500 mt-6">
+                  <p className="mt-6 text-sm text-white/60">
                     Already have an account?{' '}
-                    <Link href="/login" className="text-blue-400 font-semibold hover:underline">
+                    <Link href="/login" className="font-semibold text-orange-300 hover:text-orange-200">
                       Sign in
                     </Link>
                   </p>
@@ -244,11 +230,7 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#111318' }}>
-        <Loader2 className="w-6 h-6 animate-spin text-slate-400" />
-      </div>
-    }>
+    <Suspense fallback={null}>
       <SignupForm />
     </Suspense>
   )

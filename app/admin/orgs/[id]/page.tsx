@@ -41,12 +41,12 @@ interface Appointment {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  trial: '#94a3b8', starter: '#60a5fa', pro: '#c084fc', enterprise: '#f59e0b', gifted: '#10b981',
+  trial: '#cbd5f5', starter: '#f97316', pro: '#fb923c', enterprise: '#f59e0b', gifted: '#facc15',
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: '#10b981', scheduled: '#3b82f6', completed: '#64748b',
-  at_risk: '#ef4444', rescheduling: '#eab308', reminder_sent: '#f97316', cancelled: '#6b7280',
+  confirmed: '#f97316', scheduled: '#94a3b8', completed: '#cbd5f5',
+  at_risk: '#ef4444', rescheduling: '#fb923c', reminder_sent: '#f59e0b', cancelled: '#6b7280',
 }
 
 function formatDate(iso: string) {
@@ -198,7 +198,7 @@ export default function OrgDetailPage() {
                 { label: 'Plan', value: <span style={{ color: planColor }} className="font-bold capitalize">{org.plan}</span> },
                 { label: 'Trial ends', value: org.trial_ends_at ? formatDate(org.trial_ends_at) : '—' },
                 { label: 'Twilio', value: org.twilio_phone_number ?? 'Not configured' },
-                { label: 'Review URL', value: org.review_url ? <a href={org.review_url} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline truncate flex items-center gap-1"><ExternalLink className="w-3 h-3" />Configured</a> : '—' },
+                { label: 'Review URL', value: org.review_url ? <a href={org.review_url} target="_blank" rel="noreferrer" className="text-orange-300 hover:underline truncate flex items-center gap-1"><ExternalLink className="w-3 h-3" />Configured</a> : '—' },
                 { label: 'Org ID', value: <span className="font-mono text-[11px] text-slate-500">{org.id}</span> },
                 { label: 'Created', value: formatDate(org.created_at) },
               ].map(({ label, value }) => (
@@ -242,7 +242,7 @@ export default function OrgDetailPage() {
                     </td>
                     <td className="px-4 py-3">
                       {m.expo_push_token
-                        ? <Bell className="w-3.5 h-3.5 text-blue-400" />
+                        ? <Bell className="w-3.5 h-3.5 text-orange-300" />
                         : <BellOff className="w-3.5 h-3.5 text-slate-600" />
                       }
                     </td>
@@ -349,7 +349,7 @@ export default function OrgDetailPage() {
                   key={d}
                   onClick={() => extendTrial(d)}
                   disabled={saving}
-                  className="flex-1 py-1.5 text-xs font-semibold rounded-lg text-blue-400 hover:text-white transition-colors disabled:opacity-50"
+                  className="flex-1 py-1.5 text-xs font-semibold rounded-lg text-orange-300 hover:text-white transition-colors disabled:opacity-50"
                   style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)' }}
                 >
                   +{d}d
@@ -361,13 +361,13 @@ export default function OrgDetailPage() {
                 type="date"
                 value={trialDate}
                 onChange={e => setTrialDate(e.target.value)}
-                className="flex-1 px-2 py-1.5 rounded-lg text-xs text-white outline-none focus:ring-1 focus:ring-blue-500"
+                className="flex-1 px-2 py-1.5 rounded-lg text-xs text-white outline-none focus:ring-1 focus:ring-orange-400"
                 style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
               />
               <button
                 onClick={setTrialManual}
                 disabled={saving || !trialDate}
-                className="px-3 py-1.5 text-xs font-semibold text-white rounded-lg transition-colors disabled:opacity-50 bg-blue-600 hover:bg-blue-500"
+                className="px-3 py-1.5 text-xs font-semibold text-black rounded-lg transition-colors disabled:opacity-50 bg-orange-500 hover:bg-orange-400"
               >
                 Set
               </button>

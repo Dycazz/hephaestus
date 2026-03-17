@@ -21,9 +21,9 @@ interface OrgRow {
 }
 
 const PLAN_STYLES: Record<string, { label: string; bg: string; text: string; border: string }> = {
-  trial:      { label: 'Trial',      bg: 'rgba(100,116,139,0.15)', text: '#94a3b8', border: 'rgba(100,116,139,0.3)' },
-  starter:    { label: 'Starter',    bg: 'rgba(59,130,246,0.15)',  text: '#60a5fa', border: 'rgba(59,130,246,0.3)' },
-  pro:        { label: 'Pro',        bg: 'rgba(168,85,247,0.15)',  text: '#c084fc', border: 'rgba(168,85,247,0.3)' },
+  trial:      { label: 'Trial',      bg: 'rgba(255,255,255,0.08)', text: '#cbd5f5', border: 'rgba(255,255,255,0.18)' },
+  starter:    { label: 'Starter',    bg: 'rgba(249,115,22,0.15)',  text: '#fdba74', border: 'rgba(249,115,22,0.3)' },
+  pro:        { label: 'Pro',        bg: 'rgba(251,146,60,0.15)',  text: '#fb923c', border: 'rgba(251,146,60,0.3)' },
   enterprise: { label: 'Enterprise', bg: 'rgba(245,158,11,0.15)',  text: '#f59e0b', border: 'rgba(245,158,11,0.3)' },
 }
 
@@ -159,7 +159,7 @@ export default function AdminOrgsPage() {
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Search by name or slug…"
-            className="w-full pl-8 pr-3 py-2 text-sm text-white rounded-lg outline-none focus:ring-1 focus:ring-blue-500"
+            className="w-full pl-8 pr-3 py-2 text-sm text-white rounded-lg outline-none focus:ring-1 focus:ring-orange-400"
             style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
           />
         </div>
@@ -170,7 +170,7 @@ export default function AdminOrgsPage() {
               onClick={() => setFilter(f)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors capitalize ${
                 filter === f
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-orange-500 text-black'
                   : 'text-slate-500 hover:text-slate-300'
               }`}
               style={filter !== f ? { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' } : undefined}

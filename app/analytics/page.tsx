@@ -38,10 +38,10 @@ function StatCard({
   color?: 'blue' | 'green' | 'amber' | 'purple'
 }) {
   const colors = {
-    blue:   { bg: 'rgba(59,130,246,0.12)',  text: '#60a5fa', border: 'rgba(59,130,246,0.2)'  },
-    green:  { bg: 'rgba(34,197,94,0.12)',   text: '#4ade80', border: 'rgba(34,197,94,0.2)'   },
-    amber:  { bg: 'rgba(245,158,11,0.12)',  text: '#fbbf24', border: 'rgba(245,158,11,0.2)'  },
-    purple: { bg: 'rgba(168,85,247,0.12)',  text: '#c084fc', border: 'rgba(168,85,247,0.2)'  },
+    blue:   { bg: 'rgba(249,115,22,0.12)',  text: '#fdba74', border: 'rgba(249,115,22,0.28)'  },
+    green:  { bg: 'rgba(253,186,116,0.12)', text: '#fdba74', border: 'rgba(253,186,116,0.28)' },
+    amber:  { bg: 'rgba(245,158,11,0.12)',  text: '#fbbf24', border: 'rgba(245,158,11,0.28)'  },
+    purple: { bg: 'rgba(251,146,60,0.12)',  text: '#fb923c', border: 'rgba(251,146,60,0.28)'  },
   }
   const c = colors[color]
   return (
@@ -146,8 +146,8 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: '#111318' }}>
-        <Loader2 className="w-8 h-8 text-blue-500/60 animate-spin" />
-        <p className="text-blue-300/40 text-sm font-medium tracking-wide">Crunching numbers…</p>
+        <Loader2 className="w-8 h-8 text-orange-400/70 animate-spin" />
+        <p className="text-orange-200/50 text-sm font-medium tracking-wide">Crunching numbers…</p>
       </div>
     )
   }
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: '#111318' }}>
         <p className="text-red-400 text-sm">{error ?? 'Something went wrong'}</p>
-        <button onClick={() => router.push('/dashboard')} className="text-blue-400 text-sm hover:underline">
+        <button onClick={() => router.push('/dashboard')} className="text-orange-300 text-sm hover:underline">
           ← Back to dashboard
         </button>
       </div>
@@ -180,7 +180,7 @@ export default function AnalyticsPage() {
           Dashboard
         </button>
         <div className="flex items-center gap-2 ml-2">
-          <BarChart2 className="w-5 h-5 text-blue-400" />
+          <BarChart2 className="w-5 h-5 text-orange-300" />
           <h1 className="text-white font-semibold text-lg">Analytics</h1>
         </div>
       </header>
@@ -207,7 +207,7 @@ export default function AnalyticsPage() {
             style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
           >
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp className="w-4 h-4 text-blue-400/70" />
+              <TrendingUp className="w-4 h-4 text-orange-300/80" />
               <h3 className="text-sm font-semibold text-white/90">Jobs — Last 14 Days</h3>
             </div>
             {data.dailyTrend.every(d => d.count === 0) ? (
@@ -335,7 +335,7 @@ export default function AnalyticsPage() {
                       <tr key={name}>
                         <td className="py-3 pr-4">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-6 h-6 rounded-full bg-blue-600/30 flex items-center justify-center text-[10px] font-bold text-blue-300">
+                            <div className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center text-[10px] font-bold text-orange-200">
                               {name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                             </div>
                             <span className="text-white/80 font-medium text-xs">{name}</span>
