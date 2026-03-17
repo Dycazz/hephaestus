@@ -197,6 +197,19 @@ body::after {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28);
 }
 
+@keyframes pageIn {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+main,
+header,
+section,
+article,
+aside {
+  animation: pageIn 0.35s ease-out both;
+}
+
 /* Buttons */
 .btn {
   display: inline-flex;
@@ -287,6 +300,13 @@ a[role="button"]:focus-visible {
   }
   .card {
     transition: none;
+  }
+  main,
+  header,
+  section,
+  article,
+  aside {
+    animation: none;
   }
 }
 
