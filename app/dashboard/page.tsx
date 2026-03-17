@@ -80,113 +80,38 @@ export default function Dashboard() {
 
   const handleUpdateAppointment = useCallback(
     (id: string, updates: Partial<Appointment>) => {
-      setAppointments((prev) =>
-        prev.map((a) => (a.id === id ? { ...a, ...updates } : a))
-      )
-      // Persist to DB (non-blocking, optimistic)
+      // updateAppointment handles the optimistic state update internally
       updateAppointment(id, updates as Record<string, unknown>)
     },
-    [setAppointments, updateAppointment]
+    [updateAppointment]
   )
 
   const handleSendReminder = useCallback(
-    (id: string) => {
+    async (id: string) => {
       const appt = appointments.find((a) => a.id === id)
       if (!appt) return
 
-      const dateWord = appt.scheduledDate === 'Today' ? 'today' : appt.scheduledDate === 'Tomorrow' ? 'tomorrow' : `on ${appt.scheduledDate}`
-      const prep = appt.prepChecklist[0] ? ` Please: ${appt.prepChecklist[0]}.` : ''
-      const reminderText = `Hi ${appt.customerName.split(' ')[0]}! This is ${appt.technician.split(' ')[0]} confirming your ${appt.service} appointment ${dateWord} at ${appt.scheduledTime}.${prep} Reply '1' to confirm or '2' to reschedule.`
+      // Optimistic update for instant feedback
+      setAppointments(prev => prev.map(a => a.id !== id ? a : { ...a, status: 'reminder_sent' }))
 
-      const newMsg: SMSMessage = {
-        id: Date.now().toString(),
-        from: 'system',
-        text: reminderText,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: 'reminder',
-      }
-
-      handleUpdateAppointment(id, {
-        status: 'reminder_sent',
-        smsThread: [...appt.smsThread, newMsg],
+      const res = await fetch('/api/sms/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: id, type: 'reminder' }),
       })
-      logMessages(id, [{ direction: 'outbound', body: reminderText, messageType: 'reminder' }])
 
-      addToast({ type: 'info', message: `Reminder sent to ${appt.customerName}` })
-    },
-    [appointments, handleUpdateAppointment, addToast, logMessages]
-  )
-
-  const handleSimulateReply = useCallback(
-    (id: string, reply: '1' | '2') => {
-      const appt = appointments.find((a) => a.id === id)
-      if (!appt) return
-
-      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-
-      if (reply === '1') {
-        const newMsgs: SMSMessage[] = [
-          {
-            id: Date.now().toString(),
-            from: 'customer',
-            text: '1',
-            timestamp: now,
-            type: 'customer_reply',
-          },
-          {
-            id: (Date.now() + 1).toString(),
-            from: 'system',
-            text: `Perfect, you're all confirmed for ${appt.scheduledDate === 'Today' ? 'today' : appt.scheduledDate === 'Tomorrow' ? 'tomorrow' : appt.scheduledDate} at ${appt.scheduledTime}! ${appt.technician} will see you then. 🔧`,
-            timestamp: now,
-            type: 'confirmation',
-          },
-        ]
-        handleUpdateAppointment(id, {
-          status: 'confirmed',
-          smsThread: [...appt.smsThread, ...newMsgs],
-        })
-        logMessages(id, [
-          { direction: 'inbound', body: '1', messageType: 'customer_reply' },
-          { direction: 'outbound', body: newMsgs[1].text, messageType: 'confirmation' },
-        ])
-        addToast({
-          type: 'success',
-          message: `${appt.customerName} confirmed the appointment.`,
-        })
-        setSelectedId(null)
+      if (res.ok) {
+        addToast({ type: 'info', message: `Reminder sent to ${appt.customerName}` })
+        // Refetch to get the real SMS thread from the DB
+        refetchAppointments()
       } else {
-        const newMsgs: SMSMessage[] = [
-          {
-            id: Date.now().toString(),
-            from: 'customer',
-            text: '2',
-            timestamp: now,
-            type: 'customer_reply',
-          },
-          {
-            id: (Date.now() + 1).toString(),
-            from: 'system',
-            text: `No problem! Here's your rescheduling link — pick any open slot: mikesplumbing.com/reschedule`,
-            timestamp: now,
-            type: 'reschedule_link',
-          },
-        ]
-        handleUpdateAppointment(id, {
-          status: 'rescheduling',
-          smsThread: [...appt.smsThread, ...newMsgs],
-        })
-        logMessages(id, [
-          { direction: 'inbound', body: '2', messageType: 'customer_reply' },
-          { direction: 'outbound', body: newMsgs[1].text, messageType: 'reschedule_link' },
-        ])
-        addToast({
-          type: 'warning',
-          message: `${appt.customerName} requested a reschedule. Link sent.`,
-        })
-        setSelectedId(null)
+        const errData = await res.json().catch(() => ({}))
+        addToast({ type: 'error', message: (errData as { error?: string }).error ?? 'Failed to send reminder' })
+        // Revert optimistic update
+        setAppointments(prev => prev.map(a => a.id !== id ? a : { ...a, status: appt.status }))
       }
     },
-    [appointments, handleUpdateAppointment, addToast, logMessages]
+    [appointments, setAppointments, addToast, refetchAppointments]
   )
 
   const handleMarkComplete = useCallback(
@@ -348,6 +273,14 @@ export default function Dashboard() {
     [appointments]
   )
 
+  const handleAssignTechnician = useCallback(
+    (id: string, technicianId: string, technicianName: string) => {
+      handleUpdateAppointment(id, { technicianId, technician: technicianName })
+      addToast({ type: 'success', message: `${technicianName} assigned to job.` })
+    },
+    [handleUpdateAppointment, addToast]
+  )
+
   // Updated: accepts ISO date string instead of 'Today'|'Tomorrow'
   const handleReschedule = useCallback(
     (id: string, newDateISO: string, newTime: string) => {
@@ -470,11 +403,13 @@ export default function Dashboard() {
         {view === 'board' ? (
           <KanbanBoard
             appointments={appointments}
+            technicians={technicians}
             onSelectAppointment={setSelectedId}
             onSendReminder={handleSendReminder}
             onMarkComplete={handleMarkComplete}
             onCancel={handleCancel}
             onReschedule={handleOpenReschedule}
+            onAssignTechnician={handleAssignTechnician}
           />
         ) : view === 'week' ? (
           <WeekView
@@ -498,7 +433,6 @@ export default function Dashboard() {
         <SMSDrawer
           appointment={selectedAppointment}
           onClose={() => setSelectedId(null)}
-          onSimulateReply={handleSimulateReply}
           onMarkComplete={handleMarkComplete}
         />
       )}

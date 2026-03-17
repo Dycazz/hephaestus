@@ -25,6 +25,8 @@ export const mockAppointments: Appointment[] = [
       'Turn off water supply valve under sink',
     ],
     reviewRequestSent: false,
+    durationMinutes: 60,
+    recurrenceRule: 'none',
     smsThread: [
       {
         id: 'msg-1a',
@@ -66,6 +68,8 @@ export const mockAppointments: Appointment[] = [
       'Clear 3-ft clearance around your outdoor AC unit',
     ],
     reviewRequestSent: false,
+    durationMinutes: 60,
+    recurrenceRule: 'none',
     smsThread: [
       {
         id: 'msg-2a',
@@ -107,6 +111,8 @@ export const mockAppointments: Appointment[] = [
       'Have a list of outlets or switches needing work',
     ],
     reviewRequestSent: false,
+    durationMinutes: 60,
+    recurrenceRule: 'none',
     smsThread: [
       {
         id: 'msg-3a',
@@ -134,6 +140,8 @@ export const mockAppointments: Appointment[] = [
       'Have towels nearby — minor water spillage may occur',
     ],
     reviewRequestSent: false,
+    durationMinutes: 60,
+    recurrenceRule: 'none',
     smsThread: [
       {
         id: 'msg-4a',
@@ -161,6 +169,8 @@ export const mockAppointments: Appointment[] = [
       'Clear access to attic entry if applicable',
     ],
     reviewRequestSent: false,
+    durationMinutes: 60,
+    recurrenceRule: 'none',
     notes: '⚠ No response to 2 reminders. 12 hrs out.',
     smsThread: [
       {

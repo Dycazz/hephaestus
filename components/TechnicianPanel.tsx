@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { X, Plus, Pencil, Trash2, User, Check, Loader2, Mail, Copy, CheckCheck, UserPlus, Users } from 'lucide-react'
+import { X, Plus, Pencil, Trash2, User, Check, Loader2, Mail, Copy, CheckCheck, UserPlus, Users, Clock } from 'lucide-react'
+import { TechnicianAvailabilityModal } from '@/components/TechnicianAvailabilityModal'
 
 interface Technician {
   id: string
@@ -56,6 +57,9 @@ type PanelTab = 'technicians' | 'invitations'
 
 export function TechnicianPanel({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<PanelTab>('technicians')
+
+  // ── Availability modal ────────────────────────────────────────────────────
+  const [availModalTech, setAvailModalTech] = useState<{ id: string; name: string } | null>(null)
 
   // ── Technician state ──────────────────────────────────────────────────────
   const [technicians, setTechnicians] = useState<Technician[]>([])
@@ -200,6 +204,14 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <>
+      {availModalTech && (
+        <TechnicianAvailabilityModal
+          technicianId={availModalTech.id}
+          technicianName={availModalTech.name}
+          onClose={() => setAvailModalTech(null)}
+        />
+      )}
+
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
 
       <div
@@ -280,6 +292,13 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                             {tech.phone && <p className="text-xs text-slate-400">{tech.phone}</p>}
                           </div>
                           <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setAvailModalTech({ id: tech.id, name: tech.name })}
+                              title="Set working hours"
+                              className="p-1.5 text-slate-500 hover:text-teal-400 hover:bg-teal-900/30 rounded-lg transition-colors"
+                            >
+                              <Clock className="w-3.5 h-3.5" />
+                            </button>
                             <button
                               onClick={() => startEdit(tech)}
                               className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors"

@@ -1,43 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { X, Clock, User, MapPin } from 'lucide-react'
 import { Appointment } from '@/types'
+import { DateTimePicker } from '@/components/DateTimePicker'
+import { toISODate, formatDisplayDate } from '@/lib/dateUtils'
 
 interface RescheduleModalProps {
   appointment: Appointment
   existingTimes: string[]
-  onReschedule: (id: string, newDate: 'Today' | 'Tomorrow', newTime: string) => void
+  // newDateISO is an ISO date string "YYYY-MM-DD" (not 'Today'|'Tomorrow')
+  onReschedule: (id: string, newDateISO: string, newTime: string) => void
   onClose: () => void
 }
 
-const timeSlots = [
-  '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
-  '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM',  '5:00 PM', '6:00 PM',
-]
+export function RescheduleModal({
+  appointment,
+  existingTimes,
+  onReschedule,
+  onClose,
+}: RescheduleModalProps) {
+  const todayISO = toISODate(new Date())
 
-export function RescheduleModal({ appointment, existingTimes, onReschedule, onClose }: RescheduleModalProps) {
-  const [selectedDate, setSelectedDate] = useState<'Today' | 'Tomorrow'>(
-    appointment.scheduledDate === 'Today' ? 'Today' : 'Tomorrow'
-  )
-  const [selectedTime, setSelectedTime] = useState<string | null>(null)
+  const [selectedDateISO, setSelectedDateISO] = useState<string | null>(null)
+  const [selectedTime, setSelectedTime]       = useState<string | null>(null)
 
-  // A slot is a conflict if it's booked by another appointment (not this one)
-  const isConflict = (d: string, t: string) => {
-    const key = `${d}-${t}`
-    const currentKey = `${appointment.scheduledDate}-${appointment.scheduledTime}`
-    return existingTimes.includes(key) && key !== currentKey
-  }
+  // Times already booked on the selected date (excluding this appointment's current slot)
+  const bookedTimesForDate = useMemo(() => {
+    if (!selectedDateISO) return []
+    const displayDate = formatDisplayDate(selectedDateISO)
+    const prefix      = `${displayDate}-`
+    const currentKey  = `${appointment.scheduledDate}-${appointment.scheduledTime}`
+    return existingTimes
+      .filter(s => s.startsWith(prefix) && s !== currentKey)
+      .map(s => s.slice(prefix.length))
+  }, [existingTimes, selectedDateISO, appointment.scheduledDate, appointment.scheduledTime])
 
   const handleConfirm = () => {
-    if (!selectedTime) return
-    onReschedule(appointment.id, selectedDate, selectedTime)
+    if (!selectedDateISO || !selectedTime) return
+    onReschedule(appointment.id, selectedDateISO, selectedTime)
     onClose()
   }
 
+  const confirmLabel = selectedDateISO && selectedTime
+    ? `Confirm ${formatDisplayDate(selectedDateISO)} at ${selectedTime}`
+    : 'Select a date & time'
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
 
         {/* Header */}
         <div className="bg-gradient-to-r from-purple-600 to-purple-500 text-white p-5">
@@ -71,55 +82,19 @@ export function RescheduleModal({ appointment, existingTimes, onReschedule, onCl
             </div>
           </div>
 
-          {/* Date toggle */}
+          {/* Date & Time picker */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">New Date</label>
-            <div className="flex gap-2">
-              {(['Today', 'Tomorrow'] as const).map(d => (
-                <button
-                  key={d}
-                  onClick={() => { setSelectedDate(d); setSelectedTime(null) }}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                    selectedDate === d
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-purple-400'
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Time slot grid */}
-          <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">New Time</label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {timeSlots.map(t => {
-                const conflict  = isConflict(selectedDate, t)
-                const isCurrent = t === appointment.scheduledTime && selectedDate === appointment.scheduledDate
-                const selected  = selectedTime === t
-                return (
-                  <button
-                    key={t}
-                    onClick={() => !conflict && setSelectedTime(t)}
-                    disabled={conflict}
-                    className={`py-2 rounded-lg text-xs font-medium border transition-colors ${
-                      conflict
-                        ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                        : selected
-                        ? 'bg-purple-600 text-white border-purple-600'
-                        : isCurrent
-                        ? 'bg-amber-50 text-amber-700 border-amber-300'
-                        : 'bg-white text-slate-600 border-slate-300 hover:border-purple-400'
-                    }`}
-                  >
-                    {t}
-                    {isCurrent && !selected && <span className="block text-[9px] text-amber-500">Current</span>}
-                    {conflict && <span className="block text-[9px] text-slate-400">Booked</span>}
-                  </button>
-                )
-              })}
+            <label className="text-xs font-semibold text-slate-600 mb-2 block">New Date & Time</label>
+            <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+              <DateTimePicker
+                date={selectedDateISO}
+                time={selectedTime}
+                onDateChange={d => { setSelectedDateISO(d); setSelectedTime(null) }}
+                onTimeChange={setSelectedTime}
+                bookedTimes={bookedTimesForDate}
+                minDate={todayISO}
+                accentColor="purple"
+              />
             </div>
           </div>
 
@@ -133,10 +108,10 @@ export function RescheduleModal({ appointment, existingTimes, onReschedule, onCl
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!selectedTime}
+              disabled={!selectedDateISO || !selectedTime}
               className="flex-grow py-2.5 bg-purple-600 hover:bg-purple-700 disabled:bg-slate-200 disabled:text-slate-400 text-white text-sm font-semibold rounded-xl transition-colors"
             >
-              {selectedTime ? `Confirm ${selectedDate} at ${selectedTime}` : 'Select a time slot'}
+              {confirmLabel}
             </button>
           </div>
         </div>

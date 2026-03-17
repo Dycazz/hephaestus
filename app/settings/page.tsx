@@ -7,6 +7,7 @@ import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
   Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw, Clock,
+  Globe, DollarSign, Copy, Calendar,
 } from 'lucide-react'
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -546,9 +547,452 @@ function PlanTab({ org, role }: { org: OrgData; role: string }) {
   )
 }
 
+// ── Booking Portal Tab ─────────────────────────────────────────────────────
+
+interface BPortalService {
+  id: string
+  name: string
+  description: string
+  duration_minutes: number
+  price_cents: number
+  display_order: number
+  is_active: boolean
+}
+
+interface DayAvailability {
+  enabled: boolean
+  start: string
+  end: string
+}
+
+interface BookingPortalLink {
+  id: string
+  slug: string
+  business_name: string
+  business_phone: string
+  accent_color: string
+  show_pricing: boolean
+  require_customer_email: boolean
+  require_customer_phone: boolean
+  booking_window_days: number
+  slot_duration_minutes: number
+  is_active: boolean
+}
+
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+const DEFAULT_AVAILABILITY: Record<number, DayAvailability> = {
+  0: { enabled: false, start: '09:00', end: '17:00' },
+  1: { enabled: true,  start: '09:00', end: '17:00' },
+  2: { enabled: true,  start: '09:00', end: '17:00' },
+  3: { enabled: true,  start: '09:00', end: '17:00' },
+  4: { enabled: true,  start: '09:00', end: '17:00' },
+  5: { enabled: true,  start: '09:00', end: '17:00' },
+  6: { enabled: false, start: '09:00', end: '17:00' },
+}
+
+const ACCENT_COLORS = [
+  { label: 'Orange', value: '#f97316' },
+  { label: 'Blue',   value: '#3b82f6' },
+  { label: 'Green',  value: '#22c55e' },
+  { label: 'Purple', value: '#a855f7' },
+  { label: 'Red',    value: '#ef4444' },
+  { label: 'Pink',   value: '#ec4899' },
+]
+
+function BookingServiceForm({
+  onSave,
+  onCancel,
+  initial,
+}: {
+  onSave: (data: { name: string; description: string; duration_minutes: number; price_cents: number }) => void
+  onCancel: () => void
+  initial?: Partial<BPortalService>
+}) {
+  const [name, setName]               = useState(initial?.name ?? '')
+  const [description, setDescription] = useState(initial?.description ?? '')
+  const [duration, setDuration]       = useState(initial?.duration_minutes ?? 60)
+  const [price, setPrice]             = useState(initial?.price_cents ? (initial.price_cents / 100).toFixed(2) : '0.00')
+
+  return (
+    <div className="space-y-3 p-4 rounded-xl border border-white/10 bg-white/5">
+      <div>
+        <FieldLabel>Service Name</FieldLabel>
+        <TextInput value={name} onChange={setName} placeholder="e.g. Haircut, Oil Change…" />
+      </div>
+      <div>
+        <FieldLabel>Description (optional)</FieldLabel>
+        <TextInput value={description} onChange={setDescription} placeholder="Brief description" />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <FieldLabel>Duration</FieldLabel>
+          <select
+            value={duration}
+            onChange={e => setDuration(Number(e.target.value))}
+            className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-white/30"
+          >
+            {[15,30,45,60,90,120,180,240].map(m => (
+              <option key={m} value={m}>{m < 60 ? `${m}min` : `${m/60}hr${m > 60 ? 's' : ''}`}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <FieldLabel>Price ($)</FieldLabel>
+          <TextInput
+            type="number"
+            value={price}
+            onChange={setPrice}
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+      <div className="flex gap-2 pt-1">
+        <button
+          type="button"
+          onClick={() => onSave({ name, description, duration_minutes: duration, price_cents: Math.round(parseFloat(price || '0') * 100) })}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150"
+          style={{ background: '#2563eb', color: 'white' }}
+        >
+          <Save className="w-4 h-4" /> Save Service
+        </button>
+        <button type="button" onClick={onCancel} className="px-4 py-2 text-sm text-slate-400 hover:text-white transition-colors">Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+function BookingPortalTab({ orgName, orgSlug }: { orgName: string; orgSlug: string }) {
+  const [portal, setPortal]           = useState<BookingPortalLink | null>(null)
+  const [loading, setLoading]         = useState(true)
+  const [saving, setSaving]           = useState(false)
+  const [saved, setSaved]             = useState(false)
+  const [copied, setCopied]           = useState(false)
+
+  // Portal form fields
+  const [businessName, setBusinessName]   = useState(orgName)
+  const [businessPhone, setBusinessPhone] = useState('')
+  const [accentColor, setAccentColor]     = useState('#f97316')
+  const [showPricing, setShowPricing]     = useState(true)
+  const [requireEmail, setRequireEmail]   = useState(true)
+  const [requirePhone, setRequirePhone]   = useState(true)
+  const [windowDays, setWindowDays]       = useState(30)
+  const [slotDuration, setSlotDuration]   = useState(60)
+
+  // Services
+  const [services, setServices]           = useState<BPortalService[]>([])
+  const [showServiceForm, setShowServiceForm] = useState(false)
+  const [editingService, setEditingService]   = useState<BPortalService | null>(null)
+
+  // Availability
+  const [availability, setAvailability]   = useState<Record<number, DayAvailability>>(DEFAULT_AVAILABILITY)
+  const [savingAvail, setSavingAvail]     = useState(false)
+  const [savedAvail, setSavedAvail]       = useState(false)
+
+  // Load portal on mount
+  useEffect(() => {
+    fetch('/api/booking-portal')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data?.portal) {
+          const p: BookingPortalLink = data.portal
+          setPortal(p)
+          setBusinessName(p.business_name)
+          setBusinessPhone(p.business_phone ?? '')
+          setAccentColor(p.accent_color)
+          setShowPricing(p.show_pricing)
+          setRequireEmail(p.require_customer_email)
+          setRequirePhone(p.require_customer_phone)
+          setWindowDays(p.booking_window_days)
+          setSlotDuration(p.slot_duration_minutes)
+        }
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  // Load services & availability once portal exists
+  useEffect(() => {
+    if (!portal) return
+    fetch('/api/booking-portal/services').then(r => r.ok ? r.json() : null).then(d => d?.services && setServices(d.services))
+    fetch('/api/booking-portal/availability').then(r => r.ok ? r.json() : null).then(d => {
+      if (!d?.availability?.length) return
+      const map: Record<number, DayAvailability> = { ...DEFAULT_AVAILABILITY }
+      d.availability.forEach((a: { day_of_week: number; start_time: string; end_time: string; is_active: boolean }) => {
+        map[a.day_of_week] = { enabled: a.is_active, start: a.start_time.slice(0,5), end: a.end_time.slice(0,5) }
+      })
+      setAvailability(map)
+    })
+  }, [portal])
+
+  const slug = portal?.slug || orgSlug
+  const portalUrl = `https://hephaestus.work/book/${slug}`
+
+  async function handleSavePortal() {
+    setSaving(true)
+    const body = { business_name: businessName, business_phone: businessPhone, accent_color: accentColor, show_pricing: showPricing, require_customer_email: requireEmail, require_customer_phone: requirePhone, booking_window_days: windowDays, slot_duration_minutes: slotDuration }
+    const res = portal
+      ? await fetch('/api/booking-portal', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      : await fetch('/api/booking-portal', { method: 'POST',  headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    if (res.ok) {
+      const d = await res.json()
+      setPortal(d.portal)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    }
+    setSaving(false)
+  }
+
+  async function handleAddService(data: { name: string; description: string; duration_minutes: number; price_cents: number }) {
+    const res = await fetch('/api/booking-portal/services', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    if (res.ok) {
+      const d = await res.json()
+      setServices(prev => [...prev, d.service])
+      setShowServiceForm(false)
+    }
+  }
+
+  async function handleEditService(id: string, data: { name: string; description: string; duration_minutes: number; price_cents: number }) {
+    const res = await fetch(`/api/booking-portal/services/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+    if (res.ok) {
+      const d = await res.json()
+      setServices(prev => prev.map(s => s.id === id ? d.service : s))
+      setEditingService(null)
+    }
+  }
+
+  async function handleDeleteService(id: string) {
+    const res = await fetch(`/api/booking-portal/services/${id}`, { method: 'DELETE' })
+    if (res.ok) setServices(prev => prev.filter(s => s.id !== id))
+  }
+
+  async function handleSaveAvailability() {
+    setSavingAvail(true)
+    const slots = Object.entries(availability)
+      .filter(([, v]) => v.enabled)
+      .map(([day, v]) => ({ day_of_week: Number(day), start_time: v.start, end_time: v.end }))
+    const res = await fetch('/api/booking-portal/availability', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slots }) })
+    if (res.ok) { setSavedAvail(true); setTimeout(() => setSavedAvail(false), 2000) }
+    setSavingAvail(false)
+  }
+
+  function copyUrl() {
+    navigator.clipboard.writeText(portalUrl)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading) return <div className="text-slate-500 text-sm py-8 text-center">Loading…</div>
+
+  return (
+    <div className="space-y-5">
+
+      {/* Portal URL — always visible */}
+      <SectionCard>
+        <div className="flex items-center gap-2 mb-3">
+          <Globe className="w-4 h-4 text-slate-500" />
+          <h2 className="text-sm font-semibold text-white">Your Booking Link</h2>
+          {portal ? (
+            <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">Live</span>
+          ) : (
+            <span className="ml-auto text-[10px] font-semibold px-2 py-0.5 rounded-full bg-slate-500/15 text-slate-400 border border-slate-500/20">Not active</span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10">
+          <span className="text-sm text-slate-300 truncate flex-1 font-mono">{portalUrl}</span>
+          <button
+            onClick={copyUrl}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all shrink-0 border"
+            style={{
+              background: copied ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.06)',
+              borderColor: copied ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)',
+              color: copied ? '#34d399' : '#cbd5e1',
+            }}
+          >
+            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+          {portal && (
+            <a
+              href={portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 transition-all shrink-0"
+            >
+              <ExternalLink className="w-3.5 h-3.5" />
+              Open
+            </a>
+          )}
+        </div>
+        {!portal && (
+          <p className="text-xs text-slate-500 mt-2">Create your portal below to activate this link.</p>
+        )}
+      </SectionCard>
+
+      {/* Portal Settings */}
+      <SectionCard>
+        <div className="flex items-center gap-2 mb-4">
+          <Globe className="w-4 h-4 text-slate-500" />
+          <h2 className="text-sm font-semibold text-white">Portal Settings</h2>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <FieldLabel>Business Name</FieldLabel>
+            <TextInput value={businessName} onChange={setBusinessName} placeholder="Your business name" />
+          </div>
+          <div>
+            <FieldLabel>Business Phone (optional)</FieldLabel>
+            <TextInput value={businessPhone} onChange={setBusinessPhone} placeholder="+1 555 000 0000" />
+          </div>
+          <div>
+            <FieldLabel>Accent Color</FieldLabel>
+            <div className="flex gap-2 flex-wrap">
+              {ACCENT_COLORS.map(c => (
+                <button
+                  key={c.value}
+                  onClick={() => setAccentColor(c.value)}
+                  className="w-8 h-8 rounded-full border-2 transition-all"
+                  style={{ background: c.value, borderColor: accentColor === c.value ? 'white' : 'transparent' }}
+                  title={c.label}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <FieldLabel>Booking Window (days)</FieldLabel>
+              <select value={windowDays} onChange={e => setWindowDays(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-white/30">
+                {[7,14,21,30,45,60,90].map(d => <option key={d} value={d}>{d} days</option>)}
+              </select>
+            </div>
+            <div>
+              <FieldLabel>Slot Duration</FieldLabel>
+              <select value={slotDuration} onChange={e => setSlotDuration(Number(e.target.value))} className="w-full px-3 py-2 rounded-lg text-sm text-white bg-white/5 border border-white/10 focus:outline-none focus:border-white/30">
+                {[15,30,45,60,90,120].map(m => <option key={m} value={m}>{m < 60 ? `${m} min` : `${m/60} hr`}</option>)}
+              </select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={showPricing} onChange={e => setShowPricing(e.target.checked)} className="w-4 h-4 rounded accent-orange-500" />
+              <span className="text-sm text-slate-300">Show pricing on portal</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={requireEmail} onChange={e => setRequireEmail(e.target.checked)} className="w-4 h-4 rounded accent-orange-500" />
+              <span className="text-sm text-slate-300">Require customer email</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" checked={requirePhone} onChange={e => setRequirePhone(e.target.checked)} className="w-4 h-4 rounded accent-orange-500" />
+              <span className="text-sm text-slate-300">Require customer phone</span>
+            </label>
+          </div>
+          <button
+            type="button"
+            disabled={saving}
+            onClick={handleSavePortal}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 disabled:opacity-60"
+            style={{ background: saved ? '#059669' : '#2563eb', color: 'white' }}
+          >
+            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+            {saving ? 'Saving…' : saved ? 'Saved!' : (portal ? 'Save Changes' : 'Create Portal')}
+          </button>
+        </div>
+      </SectionCard>
+
+      {/* Services — only show after portal is created */}
+      {portal && (
+        <SectionCard>
+          <div className="flex items-center gap-2 mb-4">
+            <Layers className="w-4 h-4 text-slate-500" />
+            <h2 className="text-sm font-semibold text-white">Services</h2>
+          </div>
+          <div className="space-y-3">
+            {services.map(svc => (
+              editingService?.id === svc.id ? (
+                <BookingServiceForm
+                  key={svc.id}
+                  initial={svc}
+                  onSave={data => handleEditService(svc.id, data)}
+                  onCancel={() => setEditingService(null)}
+                />
+              ) : (
+                <div key={svc.id} className="flex items-center justify-between gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{svc.name}</p>
+                    <p className="text-xs text-slate-400">{svc.duration_minutes}min{svc.price_cents > 0 ? ` · $${(svc.price_cents/100).toFixed(2)}` : ' · Free'}</p>
+                  </div>
+                  <div className="flex gap-1 shrink-0">
+                    <button onClick={() => setEditingService(svc)} className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-all"><Edit2 className="w-3.5 h-3.5" /></button>
+                    <button onClick={() => handleDeleteService(svc.id)} className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+              )
+            ))}
+            {showServiceForm ? (
+              <BookingServiceForm onSave={handleAddService} onCancel={() => setShowServiceForm(false)} />
+            ) : (
+              <button onClick={() => setShowServiceForm(true)} className="flex items-center gap-2 w-full px-4 py-3 rounded-xl border border-dashed border-white/20 text-sm text-slate-400 hover:text-white hover:border-white/40 transition-all">
+                <Plus className="w-4 h-4" /> Add Service
+              </button>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Weekly Availability — only show after portal is created */}
+      {portal && (
+        <SectionCard>
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-slate-500" />
+            <h2 className="text-sm font-semibold text-white">Weekly Availability</h2>
+          </div>
+          <div className="space-y-2">
+            {Object.entries(availability).map(([dayStr, val]) => {
+              const day = Number(dayStr)
+              return (
+                <div key={day} className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 w-28 cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={val.enabled}
+                      onChange={e => setAvailability(prev => ({ ...prev, [day]: { ...prev[day], enabled: e.target.checked } }))}
+                      className="w-4 h-4 rounded accent-orange-500"
+                    />
+                    <span className={`text-sm ${val.enabled ? 'text-white' : 'text-slate-500'}`}>{DAY_NAMES[day]}</span>
+                  </label>
+                  {val.enabled && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <input type="time" value={val.start} onChange={e => setAvailability(prev => ({ ...prev, [day]: { ...prev[day], start: e.target.value } }))} className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-white/30" />
+                      <span className="text-slate-500">to</span>
+                      <input type="time" value={val.end} onChange={e => setAvailability(prev => ({ ...prev, [day]: { ...prev[day], end: e.target.value } }))} className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white text-xs focus:outline-none focus:border-white/30" />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          <div className="mt-4">
+            <button
+              type="button"
+              disabled={savingAvail}
+              onClick={handleSaveAvailability}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 disabled:opacity-60"
+              style={{ background: savedAvail ? '#059669' : '#2563eb', color: 'white' }}
+            >
+              {savingAvail ? <Loader2 className="w-4 h-4 animate-spin" /> : savedAvail ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
+              {savingAvail ? 'Saving…' : savedAvail ? 'Saved!' : 'Save Schedule'}
+            </button>
+          </div>
+        </SectionCard>
+      )}
+
+    </div>
+  )
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────
 
-type Tab = 'general' | 'services' | 'plan'
+type Tab = 'general' | 'services' | 'plan' | 'booking'
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<Tab>('general')
@@ -695,6 +1139,7 @@ export default function SettingsPage() {
     { id: 'general',  label: 'General',  icon: Settings2  },
     { id: 'services', label: 'Services', icon: Layers     },
     { id: 'plan',     label: 'Plan',     icon: CreditCard },
+    { id: 'booking',  label: 'Booking Portal', icon: Globe },
   ]
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -966,6 +1411,11 @@ export default function SettingsPage() {
               {/* ── Plan ── */}
               {activeTab === 'plan' && org && (
                 <PlanTab org={org} role={role} />
+              )}
+
+              {/* ── Booking Portal ── */}
+              {activeTab === 'booking' && (
+                <BookingPortalTab orgName={org?.businessName ?? ''} orgSlug={org?.slug ?? ''} />
               )}
 
             </main>

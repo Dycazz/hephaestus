@@ -104,7 +104,12 @@ export async function POST(request: NextRequest) {
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
   // ── Plan access check ────────────────────────────────────────────────────
-  const planAccess = await getOrgPlanAccess(profile.org_id, supabase)
+  let planAccess: Awaited<ReturnType<typeof getOrgPlanAccess>>
+  try {
+    planAccess = await getOrgPlanAccess(profile.org_id, supabase)
+  } catch {
+    return NextResponse.json({ error: 'Unable to verify account status. Please try again.' }, { status: 503 })
+  }
   if (planAccess.suspended) {
     return NextResponse.json({ error: 'Your account has been suspended. Please contact support.' }, { status: 403 })
   }

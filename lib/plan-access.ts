@@ -53,8 +53,8 @@ export async function getOrgPlanAccess(
     .single()
 
   if (error || !org) {
-    // Treat unresolvable org as suspended for safety
-    return { suspended: true, plan: 'trial', active: false }
+    console.error('[getOrgPlanAccess] Failed to fetch org status:', orgId, error?.message)
+    throw new Error(`Could not load organization plan: ${error?.message ?? 'org not found'}`)
   }
 
   const plan = (org.plan ?? 'trial') as AllPlanKey

@@ -2,15 +2,18 @@
 
 import { CheckCircle, Clock, AlertTriangle, Star } from 'lucide-react'
 import { Appointment } from '@/types'
+import { Technician } from '@/hooks/useTechnicians'
 import { AppointmentCard } from './AppointmentCard'
 
 interface KanbanBoardProps {
   appointments: Appointment[]
+  technicians: Technician[]
   onSelectAppointment: (id: string) => void
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 
 interface ColumnProps {
@@ -22,11 +25,13 @@ interface ColumnProps {
   headerBg: string
   accentBorder: string
   appointments: Appointment[]
+  technicians: Technician[]
   onSelectAppointment: (id: string) => void
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 
 function Column({
@@ -38,11 +43,13 @@ function Column({
   headerBg,
   accentBorder,
   appointments,
+  technicians,
   onSelectAppointment,
   onSendReminder,
   onMarkComplete,
   onCancel,
   onReschedule,
+  onAssignTechnician,
 }: ColumnProps) {
   return (
     <div className="flex flex-col gap-3">
@@ -70,11 +77,13 @@ function Column({
           <AppointmentCard
             key={appt.id}
             appointment={appt}
+            technicians={technicians}
             onSelect={onSelectAppointment}
             onSendReminder={onSendReminder}
             onMarkComplete={onMarkComplete}
             onCancel={onCancel}
             onReschedule={onReschedule}
+            onAssignTechnician={onAssignTechnician}
           />
         ))
       )}
@@ -84,11 +93,13 @@ function Column({
 
 export function KanbanBoard({
   appointments,
+  technicians,
   onSelectAppointment,
   onSendReminder,
   onMarkComplete,
   onCancel,
   onReschedule,
+  onAssignTechnician,
 }: KanbanBoardProps) {
   const confirmed = appointments.filter(a => a.status === 'confirmed')
   const pending = appointments.filter(
@@ -110,11 +121,13 @@ export function KanbanBoard({
           headerBg="bg-green-900/15 border-green-900/40"
           accentBorder="border-l-green-600"
           appointments={confirmed}
+          technicians={technicians}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onAssignTechnician={onAssignTechnician}
         />
 
         <Column
@@ -126,11 +139,13 @@ export function KanbanBoard({
           headerBg="bg-amber-900/15 border-amber-900/40"
           accentBorder="border-l-amber-500"
           appointments={pending}
+          technicians={technicians}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onAssignTechnician={onAssignTechnician}
         />
 
         <Column
@@ -142,11 +157,13 @@ export function KanbanBoard({
           headerBg="bg-red-900/15 border-red-900/40"
           accentBorder="border-l-red-600"
           appointments={atRisk}
+          technicians={technicians}
           onSelectAppointment={onSelectAppointment}
           onSendReminder={onSendReminder}
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onAssignTechnician={onAssignTechnician}
         />
       </div>
 
@@ -165,11 +182,13 @@ export function KanbanBoard({
               <AppointmentCard
                 key={appt.id}
                 appointment={appt}
+                technicians={technicians}
                 onSelect={onSelectAppointment}
                 onSendReminder={onSendReminder}
                 onMarkComplete={onMarkComplete}
                 onCancel={onCancel}
                 onReschedule={onReschedule}
+                onAssignTechnician={onAssignTechnician}
               />
             ))}
           </div>

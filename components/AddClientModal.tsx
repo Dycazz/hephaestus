@@ -1,56 +1,48 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { X, Plus, Trash2 } from 'lucide-react'
-import { Appointment } from '@/types'
-import { timeSlots as allTimeSlots } from '@/lib/mockData'
+import { useState, useEffect, useMemo } from 'react'
+import { X, Plus, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
+import { Appointment, RecurrenceRule, TechnicianAvailability } from '@/types'
+import { DateTimePicker } from '@/components/DateTimePicker'
+import { formatDisplayDate, buildScheduledAt, toISODate, addDays } from '@/lib/dateUtils'
 import type { Technician } from '@/hooks/useTechnicians'
 
 interface AddClientModalProps {
   onAdd: (appointment: Appointment) => void
   onClose: () => void
   technicians: Technician[]
-  existingTimes: string[]
+  existingTimes: string[]      // "DisplayDate-Time" strings, e.g. "Today-9:00 AM"
   defaultTime?: string
   defaultTechnicianId?: string
-  defaultDate?: string  // ISO date string YYYY-MM-DD (defaults to today)
+  defaultDate?: string         // ISO date "YYYY-MM-DD" (defaults to today)
 }
 
-// ─── Date helpers ──────────────────────────────────────────────────────────────
+// ─── Duration options ─────────────────────────────────────────────────────────
+const DURATIONS = [
+  { label: '15m',  value: 15 },
+  { label: '30m',  value: 30 },
+  { label: '1 hr', value: 60 },
+  { label: '1.5h', value: 90 },
+  { label: '2 hr', value: 120 },
+  { label: '3 hr', value: 180 },
+  { label: '4 hr', value: 240 },
+]
 
-function toISODate(date: Date): string {
-  // Use local time (not UTC) so "Today" always matches the user's wall-clock date
-  const y = date.getFullYear()
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+const RECURRENCE_OPTIONS: { label: string; value: RecurrenceRule }[] = [
+  { label: 'None',      value: 'none' },
+  { label: 'Daily',     value: 'daily' },
+  { label: 'Weekly',    value: 'weekly' },
+  { label: 'Bi-weekly', value: 'biweekly' },
+  { label: 'Monthly',   value: 'monthly' },
+]
+
+// ─── Service fallback ─────────────────────────────────────────────────────────
+interface ServiceOption {
+  name: string
+  icon: string
+  color: string
+  prepTemplates: string[]
 }
-
-function formatDisplayDate(iso: string): string {
-  const todayDate = new Date()
-  const todayISO = toISODate(todayDate)
-  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
-  const tomorrowISO = toISODate(tomorrowDate)
-  if (iso === todayISO) return 'Today'
-  if (iso === tomorrowISO) return 'Tomorrow'
-  const [year, month, day] = iso.split('-').map(Number)
-  return new Date(year, month - 1, day).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  })
-}
-
-function buildScheduledAt(dateISO: string, timeStr: string): string {
-  const [year, month, day] = dateISO.split('-').map(Number)
-  const [timePart, meridiem] = timeStr.split(' ')
-  const [hourStr, minuteStr] = timePart.split(':')
-  let hour = parseInt(hourStr)
-  if (meridiem === 'PM' && hour !== 12) hour += 12
-  if (meridiem === 'AM' && hour === 12) hour = 0
-  return new Date(year, month - 1, day, hour, parseInt(minuteStr ?? '0'), 0).toISOString()
-}
-
-// ─── Fallback if API not yet available ────────────────────────────────────────
 
 const fallbackServices: ServiceOption[] = [
   { name: 'Plumbing',   icon: '🔧', color: 'blue',   prepTemplates: ['Clear all items from under the sink', 'Turn off water supply valve under sink', 'Have towels nearby'] },
@@ -58,13 +50,6 @@ const fallbackServices: ServiceOption[] = [
   { name: 'Electrical', icon: '⚡', color: 'yellow', prepTemplates: ['Ensure breaker panel is fully accessible', 'Have a list of outlets or switches needing work'] },
   { name: 'Heating',    icon: '🔥', color: 'orange', prepTemplates: ['Locate your furnace or boiler', 'Clear 2-ft access around the heating unit', 'Note any error codes on your thermostat'] },
 ]
-
-interface ServiceOption {
-  name: string
-  icon: string
-  color: string
-  prepTemplates: string[]
-}
 
 export function AddClientModal({
   onAdd,
@@ -75,31 +60,39 @@ export function AddClientModal({
   defaultTechnicianId,
   defaultDate,
 }: AddClientModalProps) {
-  const todayDate = new Date()
-  const todayISO = toISODate(todayDate)
-  const tomorrowDate = new Date(); tomorrowDate.setDate(tomorrowDate.getDate() + 1)
-  const tomorrowISO = toISODate(tomorrowDate)
+  const todayISO = toISODate(new Date())
 
-  const [name, setName]         = useState('')
-  const [phone, setPhone]       = useState('')
-  const [dateISO, setDateISO]   = useState<string>(defaultDate ?? todayISO)
-  const [time, setTime]         = useState(defaultTime ?? '9:00 AM')
-  const [address, setAddress]   = useState('')
-  const [checklist, setChecklist] = useState<string[]>(fallbackServices[0].prepTemplates)
-  const [newItem, setNewItem]   = useState('')
-  const [errors, setErrors]     = useState<Record<string, string>>({})
+  // ── Core fields ─────────────────────────────────────────────────────────────
+  const [name, setName]       = useState('')
+  const [phone, setPhone]     = useState('')
+  const [dateISO, setDateISO] = useState<string>(defaultDate ?? todayISO)
+  const [time, setTime]       = useState<string | null>(defaultTime ?? null)
+  const [address, setAddress] = useState('')
+  const [errors, setErrors]   = useState<Record<string, string>>({})
 
-  const [services, setServices] = useState<ServiceOption[]>(fallbackServices)
-  const [service, setService]   = useState<ServiceOption>(fallbackServices[0])
+  // ── Service ─────────────────────────────────────────────────────────────────
+  const [services, setServices]           = useState<ServiceOption[]>(fallbackServices)
+  const [service, setService]             = useState<ServiceOption>(fallbackServices[0])
   const [servicesLoading, setServicesLoading] = useState(true)
 
-  // Resolve the initially selected technician from props; fall back to first in list
+  // ── Prep checklist ──────────────────────────────────────────────────────────
+  const [checklist, setChecklist] = useState<string[]>(fallbackServices[0].prepTemplates)
+  const [newItem, setNewItem]     = useState('')
+
+  // ── Scheduling v2 ───────────────────────────────────────────────────────────
+  const [durationMinutes, setDurationMinutes]     = useState(60)
+  const [recurrenceRule, setRecurrenceRule]       = useState<RecurrenceRule>('none')
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState<string | null>(null)
+  const [showRecurrence, setShowRecurrence]       = useState(false)
+  const [techAvailability, setTechAvailability]   = useState<TechnicianAvailability[] | null>(null)
+
+  // ── Technician ──────────────────────────────────────────────────────────────
   const initialTech = defaultTechnicianId
     ? (technicians.find(t => t.id === defaultTechnicianId) ?? technicians[0] ?? null)
     : (technicians[0] ?? null)
   const [technician, setTechnicianState] = useState<Technician | null>(initialTech)
 
-  // Load services from the DB
+  // Load services from DB
   useEffect(() => {
     fetch('/api/services')
       .then(r => r.ok ? r.json() : null)
@@ -117,23 +110,57 @@ export function AddClientModal({
         setService(loaded[0])
         setChecklist(loaded[0].prepTemplates)
       })
-      .catch(() => { /* keep fallback */ })
+      .catch(() => {})
       .finally(() => setServicesLoading(false))
   }, [])
 
-  const handleServiceChange = (name: string) => {
-    const svc = services.find(s => s.name === name) ?? services[0]
+  // Fetch technician availability when technician changes
+  useEffect(() => {
+    if (!technician?.id) { setTechAvailability(null); return }
+    fetch(`/api/technicians/${technician.id}/availability`)
+      .then(r => r.ok ? r.json() : null)
+      .then(json => { if (json?.availability) setTechAvailability(json.availability) })
+      .catch(() => setTechAvailability(null))
+  }, [technician?.id])
+
+  // Booked times for the currently selected date (to pass to DateTimePicker)
+  const bookedTimesForDate = useMemo(() => {
+    const displayDate = formatDisplayDate(dateISO)
+    const prefix = `${displayDate}-`
+    return existingTimes
+      .filter(s => s.startsWith(prefix))
+      .map(s => s.slice(prefix.length))
+  }, [existingTimes, dateISO])
+
+  // Preview count for recurring appointments
+  const recurringCount = useMemo(() => {
+    if (recurrenceRule === 'none') return 0
+    const endISO = recurrenceEndDate
+      ?? toISODate(addDays(new Date(dateISO + 'T12:00:00'), 365))
+    const intervalDays: Record<Exclude<RecurrenceRule, 'none'>, number> = {
+      daily: 1, weekly: 7, biweekly: 14, monthly: 30,
+    }
+    const interval = intervalDays[recurrenceRule as Exclude<RecurrenceRule, 'none'>] ?? 7
+    let count = 1
+    let cur = new Date(dateISO + 'T12:00:00')
+    while (count < 60) {
+      cur = addDays(cur, interval)
+      if (toISODate(cur) > endISO) break
+      count++
+    }
+    return count
+  }, [recurrenceRule, dateISO, recurrenceEndDate])
+
+  // ── Handlers ─────────────────────────────────────────────────────────────────
+  const handleServiceChange = (svcName: string) => {
+    const svc = services.find(s => s.name === svcName) ?? services[0]
     setService(svc)
     setChecklist(svc.prepTemplates)
   }
 
   const addChecklistItem = () => {
-    if (newItem.trim()) {
-      setChecklist(prev => [...prev, newItem.trim()])
-      setNewItem('')
-    }
+    if (newItem.trim()) { setChecklist(prev => [...prev, newItem.trim()]); setNewItem('') }
   }
-
   const removeChecklistItem = (i: number) =>
     setChecklist(prev => prev.filter((_, idx) => idx !== i))
 
@@ -142,13 +169,13 @@ export function AddClientModal({
     if (!name.trim())    errs.name    = 'Required'
     if (!phone.trim())   errs.phone   = 'Required'
     if (!address.trim()) errs.address = 'Required'
+    if (!time)           errs.time    = 'Select a time slot'
     setErrors(errs)
     return Object.keys(errs).length === 0
   }
 
   const handleSubmit = () => {
-    if (!validate()) return
-    const displayDate = formatDisplayDate(dateISO)
+    if (!validate() || !time) return
     const scheduledAt = buildScheduledAt(dateISO, time)
     const newAppt: Appointment = {
       id: `appt-${Date.now()}`,
@@ -158,7 +185,7 @@ export function AddClientModal({
       serviceIcon: service.icon,
       serviceColor: service.color,
       scheduledTime: time,
-      scheduledDate: displayDate,
+      scheduledDate: formatDisplayDate(dateISO),
       scheduledAt,
       technician: technician?.name ?? 'Unassigned',
       technicianId: technician?.id,
@@ -167,17 +194,16 @@ export function AddClientModal({
       prepChecklist: checklist,
       smsThread: [],
       reviewRequestSent: false,
+      durationMinutes,
+      recurrenceRule,
+      recurrenceEndDate: recurrenceRule !== 'none' ? (recurrenceEndDate ?? undefined) : undefined,
     }
     onAdd(newAppt)
   }
 
-  // existingTimes are "DisplayDate-Time" e.g. "Today-9:00 AM" or "Mar 15-9:00 AM"
-  const displayDate = formatDisplayDate(dateISO)
-  const isBooked = (t: string) => existingTimes.includes(`${displayDate}-${t}`)
-
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col">
 
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-t-2xl shrink-0">
@@ -241,10 +267,7 @@ export function AddClientModal({
               ) : (
                 <select
                   value={technician?.id ?? ''}
-                  onChange={e => {
-                    const found = technicians.find(t => t.id === e.target.value) ?? null
-                    setTechnicianState(found)
-                  }}
+                  onChange={e => setTechnicianState(technicians.find(t => t.id === e.target.value) ?? null)}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {technicians.map(t => (
@@ -255,72 +278,95 @@ export function AddClientModal({
             </div>
           </div>
 
-          {/* Date picker */}
+          {/* Date & Time */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">Date</label>
-            <div className="flex items-center gap-2 flex-wrap">
-              {/* Quick-select buttons */}
-              <button
-                onClick={() => setDateISO(todayISO)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                  dateISO === todayISO
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => setDateISO(tomorrowISO)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium border transition-colors ${
-                  dateISO === tomorrowISO
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
-                }`}
-              >
-                Tomorrow
-              </button>
-              {/* Custom date input */}
-              <input
-                type="date"
-                value={dateISO}
-                min={todayISO}
-                onChange={e => e.target.value && setDateISO(e.target.value)}
-                className={`border rounded-lg px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  dateISO !== todayISO && dateISO !== tomorrowISO
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 font-medium'
-                    : 'border-slate-300 text-slate-600'
-                }`}
+            <label className="text-xs font-semibold text-slate-600 mb-2 block">Date & Time</label>
+            {errors.time && <p className="text-xs text-red-500 mb-1.5">{errors.time}</p>}
+            <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+              <DateTimePicker
+                date={dateISO}
+                time={time}
+                onDateChange={d => { setDateISO(d); setTime(null) }}
+                onTimeChange={t => { setTime(t); setErrors(e => ({ ...e, time: '' })) }}
+                bookedTimes={bookedTimesForDate}
+                technicianAvailability={techAvailability ?? undefined}
               />
             </div>
           </div>
 
-          {/* Time slots */}
+          {/* Duration */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">Time</label>
-            <div className="grid grid-cols-4 gap-1.5">
-              {allTimeSlots.map(t => {
-                const booked   = isBooked(t)
-                const selected = time === t
-                return (
-                  <button
-                    key={t}
-                    onClick={() => !booked && setTime(t)}
-                    disabled={booked}
-                    className={`py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                      booked
-                        ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-                        : selected
-                        ? 'bg-blue-600 text-white border-blue-600'
-                        : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
-                    }`}
-                  >
-                    {t}
-                    {booked && <span className="block text-[9px] text-slate-400">Booked</span>}
-                  </button>
-                )
-              })}
+            <label className="text-xs font-semibold text-slate-600 mb-2 block">Duration</label>
+            <div className="flex gap-1.5 flex-wrap">
+              {DURATIONS.map(d => (
+                <button
+                  key={d.value}
+                  onClick={() => setDurationMinutes(d.value)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                    durationMinutes === d.value
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                  }`}
+                >
+                  {d.label}
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Recurrence */}
+          <div>
+            <button
+              onClick={() => setShowRecurrence(v => !v)}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Repeat?
+              {showRecurrence ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+            </button>
+
+            {showRecurrence && (
+              <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                <div className="flex gap-1.5 flex-wrap">
+                  {RECURRENCE_OPTIONS.map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => setRecurrenceRule(opt.value)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                        recurrenceRule === opt.value
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+
+                {recurrenceRule !== 'none' && (
+                  <div>
+                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">
+                      Repeat until <span className="font-normal text-slate-400">(leave blank for 1 year)</span>
+                    </label>
+                    <div className="border border-slate-200 rounded-xl p-3 bg-white">
+                      <DateTimePicker
+                        date={recurrenceEndDate}
+                        time={null}
+                        onDateChange={setRecurrenceEndDate}
+                        onTimeChange={() => {}}
+                        minDate={dateISO}
+                        dateOnly
+                      />
+                    </div>
+                    {recurringCount > 1 && (
+                      <p className="mt-2 text-xs text-blue-600 font-semibold">
+                        Creates {recurringCount} appointments total
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Address */}
@@ -353,7 +399,7 @@ export function AddClientModal({
                 value={newItem}
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addChecklistItem()}
-                placeholder="Add a custom prep item..."
+                placeholder="Add a custom prep item…"
                 className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
@@ -377,7 +423,9 @@ export function AddClientModal({
               onClick={handleSubmit}
               className="flex-grow py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
             >
-              Add to Schedule
+              {recurrenceRule !== 'none' && recurringCount > 1
+                ? `Add ${recurringCount} Appointments`
+                : 'Add to Schedule'}
             </button>
           </div>
         </div>

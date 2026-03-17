@@ -6,12 +6,10 @@ import { Appointment } from '@/types'
 interface SMSDrawerProps {
   appointment: Appointment
   onClose: () => void
-  onSimulateReply: (id: string, reply: '1' | '2') => void
   onMarkComplete: (id: string) => void
 }
 
-export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplete }: SMSDrawerProps) {
-  const canSimulate = appointment.status === 'reminder_sent' || appointment.status === 'at_risk'
+export function SMSDrawer({ appointment, onClose, onMarkComplete }: SMSDrawerProps) {
   const canComplete = appointment.status === 'confirmed'
   const canSendReview = appointment.status === 'completed' && !appointment.reviewRequestSent
 
@@ -108,30 +106,7 @@ export function SMSDrawer({ appointment, onClose, onSimulateReply, onMarkComplet
           className="shrink-0 p-4 space-y-2.5"
           style={{ borderTop: '1px solid rgba(255,255,255,0.07)', background: '#0d0f17' }}
         >
-          {canSimulate && (
-            <div
-              className="rounded-xl p-3"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
-            >
-              <p className="text-xs font-medium text-slate-500 mb-2">Simulate customer reply</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => onSimulateReply(appointment.id, '1')}
-                  className="flex-1 py-2 bg-emerald-700 hover:bg-emerald-600 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  Reply &ldquo;1&rdquo; — Confirm
-                </button>
-                <button
-                  onClick={() => onSimulateReply(appointment.id, '2')}
-                  className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-colors"
-                >
-                  Reply &ldquo;2&rdquo; — Reschedule
-                </button>
-              </div>
-            </div>
-          )}
-
-          {canComplete && (
+{canComplete && (
             <div
               className="rounded-xl p-3"
               style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}

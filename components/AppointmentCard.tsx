@@ -1,15 +1,19 @@
 'use client'
 
-import { Clock, MapPin, User, CheckSquare, Square, MessageSquare, Check, RefreshCw, XCircle, Star } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Clock, MapPin, User, CheckSquare, Square, MessageSquare, Check, RefreshCw, XCircle, Star, UserPlus } from 'lucide-react'
 import { Appointment } from '@/types'
+import { Technician } from '@/hooks/useTechnicians'
 
 interface AppointmentCardProps {
   appointment: Appointment
+  technicians: Technician[]
   onSelect: (id: string) => void
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 
 const statusConfig = {
@@ -52,16 +56,35 @@ const statusConfig = {
 
 export function AppointmentCard({
   appointment,
+  technicians,
   onSelect,
   onSendReminder,
   onMarkComplete,
   onCancel,
   onReschedule,
+  onAssignTechnician,
 }: AppointmentCardProps) {
   const { badge, label, dot } = statusConfig[appointment.status]
   const canSendReminder = appointment.status === 'scheduled' || appointment.status === 'at_risk'
   const canComplete = appointment.status === 'confirmed'
   const canCancel = !['completed', 'cancelled'].includes(appointment.status)
+  const canAssign = !['completed', 'cancelled'].includes(appointment.status)
+  const isUnassigned = appointment.technician === 'Unassigned'
+
+  const [showTechPicker, setShowTechPicker] = useState(false)
+  const pickerRef = useRef<HTMLDivElement>(null)
+
+  // Close picker when clicking outside
+  useEffect(() => {
+    if (!showTechPicker) return
+    function handleClickOutside(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setShowTechPicker(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showTechPicker])
 
   return (
     <div
@@ -109,10 +132,85 @@ export function AppointmentCard({
               {appointment.scheduledDate} at {appointment.scheduledTime}
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-            <span>{appointment.technician}</span>
+
+          {/* Technician row with inline picker */}
+          <div className="relative" ref={pickerRef}>
+            <div className="flex items-center gap-2 text-xs text-slate-300">
+              <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+              <span className={isUnassigned ? 'text-slate-500 italic' : ''}>
+                {appointment.technician}
+              </span>
+              {canAssign && (
+                <button
+                  onClick={() => setShowTechPicker(v => !v)}
+                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border transition-all duration-150"
+                  style={
+                    isUnassigned
+                      ? { background: 'rgba(249,115,22,0.15)', borderColor: 'rgba(249,115,22,0.35)', color: '#f97316' }
+                      : { background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#64748b' }
+                  }
+                  onMouseEnter={e => {
+                    const btn = e.currentTarget as HTMLButtonElement
+                    btn.style.opacity = '0.75'
+                  }}
+                  onMouseLeave={e => {
+                    const btn = e.currentTarget as HTMLButtonElement
+                    btn.style.opacity = '1'
+                  }}
+                >
+                  {isUnassigned ? (
+                    <>
+                      <UserPlus className="w-2.5 h-2.5" />
+                      Assign
+                    </>
+                  ) : (
+                    '✎'
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* Technician picker dropdown */}
+            {showTechPicker && (
+              <div
+                className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border shadow-2xl py-1"
+                style={{ background: '#1e2130', borderColor: 'rgba(255,255,255,0.14)' }}
+              >
+                <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                  Assign technician
+                </p>
+                {technicians.length === 0 ? (
+                  <p className="px-3 py-2 text-xs text-slate-500">No technicians added yet</p>
+                ) : (
+                  technicians.map(tech => (
+                    <button
+                      key={tech.id}
+                      onClick={() => {
+                        onAssignTechnician(appointment.id, tech.id, tech.name)
+                        setShowTechPicker(false)
+                      }}
+                      className="w-full text-left px-3 py-1.5 text-xs text-slate-300 transition-colors flex items-center gap-2"
+                      style={{ background: 'transparent' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
+                    >
+                      <span
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
+                        style={{ background: 'rgba(249,115,22,0.2)', color: '#f97316' }}
+                      >
+                        {tech.initials || tech.name.charAt(0)}
+                      </span>
+                      {tech.name}
+                      {appointment.technicianId === tech.id && (
+                        <Check className="w-3 h-3 text-emerald-400 ml-auto" />
+                      )}
+                    </button>
+                  ))
+                )}
+              </div>
+            )}
           </div>
+
           <div className="flex items-center gap-2 text-xs text-slate-300">
             <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             <span className="truncate">{appointment.address}</span>
@@ -193,15 +291,6 @@ export function AppointmentCard({
             >
               <Check className="w-3.5 h-3.5" />
               Complete
-            </button>
-          )}
-
-          {appointment.status === 'reminder_sent' && (
-            <button
-              onClick={() => onSelect(appointment.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg transition-all duration-150"
-            >
-              Simulate Reply
             </button>
           )}
 

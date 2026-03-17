@@ -7,6 +7,7 @@ const bookingSchema = z.object({
   serviceId: z.string().uuid().optional(),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   time: z.string().regex(/^\d{2}:\d{2}$/),
+  scheduledAt: z.string().datetime().optional(), // UTC ISO computed in browser
   customerName: z.string().min(1).max(255),
   customerEmail: z.string().email().optional().or(z.literal("")),
   customerPhone: z.string().max(50).optional().or(z.literal("")),
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create the portal booking
+    // Create the portal booking record (for analytics / portal tracking)
     const { data: booking, error: bookingError } = await supabase
       .from("portal_bookings")
       .insert({
@@ -80,6 +81,81 @@ export async function POST(request: NextRequest) {
       console.error("Booking error:", bookingError);
       return NextResponse.json({ error: "Failed to create booking" }, { status: 500 });
     }
+
+    // ── Mirror to appointments table so it shows on the dashboard ──────────
+
+    // Find or create a client record
+    let clientId: string | null = null;
+    const phone = validatedData.customerPhone || null;
+
+    if (phone) {
+      // Try to match an existing client by phone within this org
+      const { data: existingClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("org_id", link.org_id)
+        .eq("phone", phone)
+        .maybeSingle();
+
+      if (existingClient) {
+        clientId = existingClient.id;
+      } else {
+        const { data: newClient } = await supabase
+          .from("clients")
+          .insert({
+            org_id: link.org_id,
+            name: validatedData.customerName,
+            phone,
+            email: validatedData.customerEmail || null,
+            address: validatedData.customerAddress || null,
+          })
+          .select("id")
+          .single();
+        clientId = newClient?.id ?? null;
+      }
+    } else {
+      // No phone — create a fresh client using booking ID as a unique phone placeholder
+      const { data: newClient } = await supabase
+        .from("clients")
+        .insert({
+          org_id: link.org_id,
+          name: validatedData.customerName,
+          phone: `portal:${booking.id.slice(0, 8)}`,
+          email: validatedData.customerEmail || null,
+          address: validatedData.customerAddress || null,
+        })
+        .select("id")
+        .single();
+      clientId = newClient?.id ?? null;
+    }
+
+    // Insert the appointment so it appears on the dashboard.
+    // Prefer the browser-computed UTC timestamp (scheduledAt) which correctly
+    // reflects the customer's local timezone. Fall back to treating date+time as UTC.
+    const scheduledAt = validatedData.scheduledAt ?? `${validatedData.date}T${validatedData.time}:00Z`;
+    const { error: apptError } = await supabase
+      .from("appointments")
+      .insert({
+        org_id: link.org_id,
+        client_id: clientId,
+        technician_id: null,
+        service: serviceName,
+        service_icon: "📅",
+        service_color: link.accent_color || "#f97316",
+        scheduled_at: scheduledAt,
+        status: "scheduled",
+        address: validatedData.customerAddress || null,
+        prep_checklist: [],
+        duration_minutes: durationMinutes,
+        notes: validatedData.customerNotes || null,
+      });
+
+    if (apptError) {
+      // Non-fatal: portal booking was already saved; just log the error
+      console.error("Failed to mirror portal booking to appointments:", apptError);
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
 
     // Increment booking count on the link (fire-and-forget)
     void supabase
