@@ -66,79 +66,85 @@ const STATS = [
   { label: 'Reviews/month', value: '+54' },
 ]
 
-const COMPARISON = [
-  {
-    label: 'Two-way SMS with confirmations',
-    hephaestus: true,
-    others: false,
-  },
-  {
-    label: 'Live dispatch board + calendar',
-    hephaestus: true,
-    others: false,
-  },
-  {
-    label: 'Auto review requests',
-    hephaestus: true,
-    others: false,
-  },
-  {
-    label: 'Waitlist recovery',
-    hephaestus: true,
-    others: false,
-  },
-  {
-    label: 'Booking portal + payments',
-    hephaestus: true,
-    others: true,
-  },
-  {
-    label: 'Custom technician schedules',
-    hephaestus: true,
-    others: true,
-  },
+type PlanValue = boolean | string | null
+
+const PLAN_COMPARE: Array<{
+  section?: string
+  label: string
+  starter: PlanValue
+  pro: PlanValue
+  enterprise: PlanValue
+}> = [
+  { section: 'Capacity', label: 'Jobs per month', starter: '200', pro: 'Unlimited', enterprise: 'Unlimited' },
+  { label: 'Technicians', starter: '3', pro: '5', enterprise: 'Unlimited' },
+  { label: 'SMS per month', starter: '500', pro: 'Unlimited', enterprise: 'Unlimited' },
+  { label: 'Team members', starter: 'Unlimited', pro: 'Unlimited', enterprise: 'Unlimited' },
+  { section: 'Scheduling', label: 'Dispatch board', starter: true, pro: true, enterprise: true },
+  { label: 'Calendar view', starter: true, pro: true, enterprise: true },
+  { label: 'Recurring appointments', starter: true, pro: true, enterprise: true },
+  { label: 'Technician availability', starter: true, pro: true, enterprise: true },
+  { label: 'Prep checklists', starter: true, pro: true, enterprise: true },
+  { label: 'Waitlist recovery', starter: true, pro: true, enterprise: true },
+  { section: 'Communication', label: 'Automated SMS reminders', starter: true, pro: true, enterprise: true },
+  { label: 'Two-way replies', starter: true, pro: true, enterprise: true },
+  { label: 'Reschedule via SMS', starter: true, pro: true, enterprise: true },
+  { label: 'Review requests', starter: true, pro: true, enterprise: true },
+  { label: 'Custom Twilio number', starter: null, pro: null, enterprise: true },
+  { section: 'Mobile & Alerts', label: 'Mobile app (iOS + Android)', starter: true, pro: true, enterprise: true },
+  { label: 'Push notifications', starter: true, pro: true, enterprise: true },
+  { section: 'Team & Access', label: 'Role-based access', starter: true, pro: true, enterprise: true },
+  { label: 'Team invitations', starter: true, pro: true, enterprise: true },
+  { label: 'Client profiles', starter: true, pro: true, enterprise: true },
+  { section: 'Support', label: 'Email support', starter: true, pro: true, enterprise: true },
+  { label: 'Priority support', starter: null, pro: true, enterprise: true },
+  { label: 'Dedicated account manager', starter: null, pro: null, enterprise: true },
+  { label: 'SLA guarantee', starter: null, pro: null, enterprise: true },
 ]
 
 const TIERS = [
   {
     name: 'Starter',
-    price: '$199',
+    price: '$24.99',
     cadence: '/mo',
-    description: 'Perfect for solo operators and small teams.',
-    cta: 'Start free trial',
+    description: 'For solo operators and small crews getting started.',
+    cta: 'Start with Starter',
     features: [
-      'SMS confirmations + reminders',
-      'Live dispatch board',
-      'Customer portal',
-      '1 review request flow',
+      '200 jobs per month',
+      '3 technicians',
+      '500 SMS per month',
+      'Dispatch board + calendar view',
+      'Automated SMS reminders',
+      'Review request flow',
     ],
   },
   {
     name: 'Pro',
-    price: '$399',
+    price: '$49.99',
     cadence: '/mo',
-    description: 'For growing teams that want automation.',
-    cta: 'Upgrade to Pro',
+    description: 'For growing teams that need more automation.',
+    cta: 'Start with Pro',
     highlight: true,
     features: [
+      'Unlimited jobs',
+      '5 technicians',
+      'Unlimited SMS',
       'Everything in Starter',
       'Waitlist recovery',
-      'Automated review requests',
-      'Advanced reporting',
-      'Technician availability rules',
+      'Priority support',
     ],
   },
   {
     name: 'Enterprise',
-    price: 'Custom',
-    cadence: '',
-    description: 'Multi-location operations and custom integrations.',
-    cta: 'Talk to sales',
+    price: '$99.99',
+    cadence: '/mo',
+    description: 'For larger operations that need white-glove support.',
+    cta: 'Start with Enterprise',
     features: [
+      'Unlimited technicians',
       'Dedicated account manager',
-      'Custom onboarding',
-      'SLA + priority support',
-      'Data exports + API access',
+      'SLA guarantee',
+      'Custom Twilio number',
+      'Advanced reporting',
     ],
   },
 ]
@@ -171,24 +177,16 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-orange-400 to-orange-600" />
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-orange-400">
-                Hephaestus
-              </p>
-              <p className="text-xs text-white/50">Dispatch intelligence</p>
+              <p className="text-sm font-semibold text-orange-400">Hephaestus</p>
+              <p className="text-xs text-white/50">Dispatch</p>
             </div>
           </div>
-          <nav className="hidden items-center gap-6 text-sm text-white/70 md:flex">
+          <nav className="hidden items-center gap-6 text-sm text-white/60 md:flex">
             <a className="transition hover:text-white" href="#features">
               Features
             </a>
             <a className="transition hover:text-white" href="#pricing">
               Pricing
-            </a>
-            <a className="transition hover:text-white" href="#comparison">
-              Why us
-            </a>
-            <a className="transition hover:text-white" href="#faq">
-              FAQ
             </a>
           </nav>
           <div className="flex items-center gap-3">
@@ -508,41 +506,33 @@ export default function Home() {
             </div>
           ))}
         </div>
-      </section>
-
-      <section id="comparison" className="mx-auto max-w-6xl px-6 pb-20">
-        <div className="mb-10 flex items-center justify-between">
-          <div>
-            <p className="text-sm uppercase tracking-[0.3em] text-orange-400">Comparison</p>
-            <h2 className="mt-2 text-3xl font-semibold text-white">Why teams pick Hephaestus</h2>
+        <div className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-black/70">
+          <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] border-b border-white/10 px-6 py-4 text-xs uppercase tracking-[0.3em] text-white/50">
+            <span>Feature</span>
+            <span>Starter</span>
+            <span>Pro</span>
+            <span>Enterprise</span>
           </div>
-        </div>
-        <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/70">
-          <div className="grid grid-cols-[1.4fr_1fr_1fr] border-b border-white/10 px-6 py-4 text-xs uppercase tracking-[0.3em] text-white/50">
-            <span>Capability</span>
-            <span>Hephaestus</span>
-            <span>Others</span>
-          </div>
-          {COMPARISON.map((row) => (
+          {PLAN_COMPARE.map((row) => (
             <div
-              key={row.label}
-              className="grid grid-cols-[1.4fr_1fr_1fr] items-center border-b border-white/10 px-6 py-4 text-sm text-white/70 last:border-b-0"
+              key={`${row.section ?? 'row'}-${row.label}`}
+              className="border-b border-white/10 px-6 py-4 text-sm text-white/70 last:border-b-0"
             >
-              <span>{row.label}</span>
-              <span>
-                {row.hephaestus ? (
-                  <Check className="h-4 w-4 text-orange-400" />
-                ) : (
-                  <X className="h-4 w-4 text-white/30" />
-                )}
-              </span>
-              <span>
-                {row.others ? (
-                  <Check className="h-4 w-4 text-white/40" />
-                ) : (
-                  <X className="h-4 w-4 text-white/30" />
-                )}
-              </span>
+              {row.section && (
+                <div className="mb-2 text-xs uppercase tracking-[0.28em] text-orange-300">
+                  {row.section}
+                </div>
+              )}
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] items-center">
+                <span>{row.label}</span>
+                {[row.starter, row.pro, row.enterprise].map((value, idx) => (
+                  <span key={`${row.label}-${idx}`}>
+                    {value === true && <Check className="h-4 w-4 text-orange-400" />}
+                    {value === null && <X className="h-4 w-4 text-white/30" />}
+                    {typeof value === 'string' && <span>{value}</span>}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
