@@ -11,6 +11,7 @@ const UpdateAppointmentSchema = z.object({
   prepChecklist: z.array(z.string()).optional(),
   reviewRequestSent: z.boolean().optional(),
   completedAt: z.string().datetime().optional().nullable(),
+  autoReminder: z.boolean().optional(),
 })
 
 export async function GET(
@@ -64,6 +65,7 @@ export async function PATCH(
   if (d.prepChecklist !== undefined) updates.prep_checklist = d.prepChecklist
   if (d.reviewRequestSent !== undefined) updates.review_request_sent = d.reviewRequestSent
   if (d.completedAt !== undefined) updates.completed_at = d.completedAt
+  if (d.autoReminder !== undefined) updates.auto_reminder = d.autoReminder
 
   if (d.status === 'completed' && !d.completedAt) {
     updates.completed_at = new Date().toISOString()

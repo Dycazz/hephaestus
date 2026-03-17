@@ -20,6 +20,7 @@ const CreateAppointmentSchema = z.object({
   durationMinutes: z.number().int().min(15).max(480).default(60),
   recurrenceRule: z.enum(['none', 'daily', 'weekly', 'biweekly', 'monthly']).default('none'),
   recurrenceEndDate: z.string().optional(),
+  autoReminder: z.boolean().default(true),
 })
 
 export async function GET(request: NextRequest) {
@@ -174,6 +175,7 @@ export async function POST(request: NextRequest) {
       duration_minutes: d.durationMinutes,
       recurrence_rule: d.recurrenceRule,
       recurrence_end_date: d.recurrenceEndDate ?? null,
+      auto_reminder: d.autoReminder,
     })
     .select()
     .single()
@@ -203,6 +205,7 @@ export async function POST(request: NextRequest) {
         scheduled_at: current.toISOString(), status: 'scheduled', address: d.address,
         prep_checklist: d.prepChecklist, duration_minutes: d.durationMinutes,
         recurrence_rule: d.recurrenceRule, recurrence_end_date: d.recurrenceEndDate ?? null,
+        auto_reminder: d.autoReminder,
         parent_appointment_id: appt.id,
       })
     }

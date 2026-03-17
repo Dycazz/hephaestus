@@ -60,6 +60,7 @@ function mapDbAppointment(row: Record<string, unknown>): Appointment {
     recurrenceRule: ((row.recurrence_rule as string) ?? 'none') as Appointment['recurrenceRule'],
     recurrenceEndDate: (row.recurrence_end_date as string) ?? undefined,
     parentAppointmentId: (row.parent_appointment_id as string) ?? undefined,
+    autoReminder: (row.auto_reminder as boolean) ?? true,
   }
 }
 
@@ -109,6 +110,7 @@ export function useAppointments(viewAs?: string | null) {
     if ('reviewRequestSent' in updates) apiUpdates.reviewRequestSent = updates.reviewRequestSent
     if ('technicianId' in updates) apiUpdates.technicianId = updates.technicianId
     if ('durationMinutes' in updates) apiUpdates.durationMinutes = updates.durationMinutes
+    if ('autoReminder' in updates) apiUpdates.autoReminder = updates.autoReminder
 
     const res = await fetch(`/api/appointments/${id}`, {
       method: 'PATCH',

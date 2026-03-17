@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { X, Plus, Trash2, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react'
+import { X, Plus, Trash2, ChevronDown, ChevronUp, RefreshCw, Bell, BellOff } from 'lucide-react'
 import { Appointment, RecurrenceRule, TechnicianAvailability } from '@/types'
 import { DateTimePicker } from '@/components/DateTimePicker'
 import { formatDisplayDate, buildScheduledAt, toISODate, addDays } from '@/lib/dateUtils'
@@ -78,6 +78,9 @@ export function AddClientModal({
   // ── Prep checklist ──────────────────────────────────────────────────────────
   const [checklist, setChecklist] = useState<string[]>(fallbackServices[0].prepTemplates)
   const [newItem, setNewItem]     = useState('')
+
+  // ── Reminders ───────────────────────────────────────────────────────────────
+  const [autoReminder, setAutoReminder] = useState(true)
 
   // ── Scheduling v2 ───────────────────────────────────────────────────────────
   const [durationMinutes, setDurationMinutes]     = useState(60)
@@ -197,6 +200,7 @@ export function AddClientModal({
       durationMinutes,
       recurrenceRule,
       recurrenceEndDate: recurrenceRule !== 'none' ? (recurrenceEndDate ?? undefined) : undefined,
+      autoReminder,
     }
     onAdd(newAppt)
   }
@@ -409,6 +413,37 @@ export function AddClientModal({
                 <Plus className="w-4 h-4" />
               </button>
             </div>
+          </div>
+
+          {/* Auto-reminder toggle */}
+          <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50">
+            <div className="flex items-center gap-2.5">
+              {autoReminder
+                ? <Bell className="w-4 h-4 text-blue-500" />
+                : <BellOff className="w-4 h-4 text-slate-400" />
+              }
+              <div>
+                <p className="text-xs font-semibold text-slate-700">Auto-reminders</p>
+                <p className="text-[11px] text-slate-400">
+                  {autoReminder ? 'SMS reminders enabled for this appointment' : 'No automatic reminders will be sent'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setAutoReminder(v => !v)}
+              className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                autoReminder ? 'bg-blue-600' : 'bg-slate-300'
+              }`}
+              role="switch"
+              aria-checked={autoReminder}
+            >
+              <span
+                className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200 ${
+                  autoReminder ? 'translate-x-4' : 'translate-x-0'
+                }`}
+              />
+            </button>
           </div>
 
           {/* Actions */}

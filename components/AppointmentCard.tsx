@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Clock, MapPin, User, CheckSquare, Square, MessageSquare, Check, RefreshCw, XCircle, Star, UserPlus } from 'lucide-react'
+import { Clock, MapPin, User, CheckSquare, Square, MessageSquare, Check, RefreshCw, XCircle, Star, UserPlus, BellOff } from 'lucide-react'
 import { Appointment } from '@/types'
 import { Technician } from '@/hooks/useTechnicians'
 
@@ -244,6 +244,16 @@ export function AppointmentCard({
             style={{ background: 'rgba(220,38,38,0.12)', borderColor: 'rgba(185,28,28,0.4)' }}
           >
             {appointment.notes}
+          </div>
+        )}
+
+        {/* No-reminder badge */}
+        {!appointment.autoReminder && (
+          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-slate-400 font-medium flex items-center gap-1.5"
+            style={{ background: 'rgba(100,116,139,0.1)', borderColor: 'rgba(100,116,139,0.25)' }}
+          >
+            <BellOff className="w-3.5 h-3.5" />
+            No auto-reminder
           </div>
         )}
 

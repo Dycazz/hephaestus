@@ -48,6 +48,7 @@ export interface Appointment {
   recurrenceRule: RecurrenceRule // 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly'
   recurrenceEndDate?: string     // ISO date "YYYY-MM-DD" (null = 1 year from start)
   parentAppointmentId?: string   // set on child occurrences of a recurring series
+  autoReminder: boolean          // false = excluded from automated reminder workflows
 }
 
 export interface TechnicianAvailability {

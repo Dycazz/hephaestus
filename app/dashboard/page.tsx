@@ -216,6 +216,7 @@ export default function Dashboard() {
           durationMinutes: appt.durationMinutes,
           recurrenceRule: appt.recurrenceRule,
           recurrenceEndDate: appt.recurrenceEndDate,
+          autoReminder: appt.autoReminder,
         }),
       })
 
