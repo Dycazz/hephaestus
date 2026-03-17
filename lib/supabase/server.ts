@@ -18,6 +18,25 @@ import { cookies } from 'next/headers'
  * importing getCloudflareContext() from @opennextjs/cloudflare (which is a
  * devDependency and would not be bundled into the production Worker).
  */
+function getCfEnv(): Record<string, string | undefined> {
+  try {
+    const cfCtx = (globalThis as Record<symbol, unknown>)[
+      Symbol.for('__cloudflare-context__')
+    ] as { env?: Record<string, string | undefined> } | undefined
+    return cfCtx?.env ?? {}
+  } catch {
+    return {}
+  }
+}
+
+function getEnvVar(name: string): string {
+  const cfVal = getCfEnv()[name]
+  if (cfVal) return cfVal
+  const nodeVal = process.env[name]
+  if (nodeVal) return nodeVal
+  throw new Error(`Missing required environment variable: ${name}`)
+}
+
 export async function createClient(serviceRole = false) {
   const cookieStore = await cookies()
 
@@ -27,22 +46,9 @@ export async function createClient(serviceRole = false) {
     // from cookies, which makes Supabase apply RLS instead of bypassing it.
     // Service role key is read from the Cloudflare request env (always current) with
     // process.env as fallback for local dev.
-    let serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-    try {
-      // OpenNext sets globalThis[Symbol.for('__cloudflare-context__')] to a getter
-      // backed by AsyncLocalStorage, so this is always the current request's env bindings.
-      const cfCtx = (globalThis as Record<symbol, unknown>)[Symbol.for('__cloudflare-context__')] as
-        | { env?: Record<string, string | undefined> }
-        | undefined
-      const cfKey = cfCtx?.env?.SUPABASE_SERVICE_ROLE_KEY
-      if (cfKey) serviceRoleKey = cfKey
-    } catch {
-      // Not running in Cloudflare Workers — process.env fallback is fine
-    }
-
     return createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey!,
+      getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
+      getEnvVar('SUPABASE_SERVICE_ROLE_KEY'),
       {
         // Empty cookie helpers: prevents session JWT from overriding
         // the service role key in the Authorization header.
@@ -53,8 +59,8 @@ export async function createClient(serviceRole = false) {
 
   // Regular (anon) client — uses the user's session from cookies, RLS applied.
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    getEnvVar('NEXT_PUBLIC_SUPABASE_URL'),
+    getEnvVar('NEXT_PUBLIC_SUPABASE_ANON_KEY'),
     {
       cookies: {
         getAll() {
