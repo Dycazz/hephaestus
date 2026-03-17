@@ -249,9 +249,13 @@ function PlanTab({ org, role }: { org: OrgData; role: string }) {
 
   const isActivePaidPlan =
     (org.plan === 'starter' || org.plan === 'pro' || org.plan === 'enterprise') &&
-    org.subscriptionStatus === 'active' &&
-    !!org.subscriptionPeriodEnd &&
-    new Date(org.subscriptionPeriodEnd) > new Date()
+    (() => {
+      const status = org.subscriptionStatus
+      const periodEnd = org.subscriptionPeriodEnd ? new Date(org.subscriptionPeriodEnd) : null
+      const isStatusActive = status === 'active' || status === 'trialing'
+      const isPeriodValid = !periodEnd || periodEnd > new Date()
+      return (status ? isStatusActive : true) && isPeriodValid
+    })()
 
   const isPastDue =
     (org.plan === 'starter' || org.plan === 'pro' || org.plan === 'enterprise') &&
