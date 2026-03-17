@@ -21,16 +21,41 @@ export const metadata: Metadata = {
   description: "Appointment scheduling, automated SMS reminders, and job management for field service businesses.",
 };
 
+function getCfEnv(): Record<string, string | undefined> {
+  try {
+    const cfCtx = (globalThis as Record<symbol, unknown>)[
+      Symbol.for("__cloudflare-context__")
+    ] as { env?: Record<string, string | undefined> } | undefined;
+    return cfCtx?.env ?? {};
+  } catch {
+    return {};
+  }
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const publicEnv = {
+    NEXT_PUBLIC_SUPABASE_URL:
+      getCfEnv().NEXT_PUBLIC_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_ANON_KEY:
+      getCfEnv().NEXT_PUBLIC_SUPABASE_ANON_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    NEXT_PUBLIC_APP_URL:
+      getCfEnv().NEXT_PUBLIC_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL,
+  };
+  const envScript = `window.__HEPH_ENV=${JSON.stringify(publicEnv).replace(
+    /</g,
+    "\\u003c"
+  )};`;
+
   return (
     <html lang="en">
       <body
         className={`${syne.variable} ${instrumentSans.variable} antialiased`}
       >
+        <script dangerouslySetInnerHTML={{ __html: envScript }} />
         {children}
       </body>
     </html>
