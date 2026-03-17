@@ -25,9 +25,21 @@ export default function LoginPage() {
       if (error) {
         setError(error.message)
         setLoading(false)
-      } else {
-        window.location.href = '/dashboard'
+        return
       }
+
+      // Verify the org has an active plan before allowing dashboard access
+      const checkRes = await fetch('/api/auth/check-access')
+      const check = await checkRes.json()
+
+      if (!check.allowed) {
+        await supabase.auth.signOut()
+        setError(check.reason ?? 'Access denied.')
+        setLoading(false)
+        return
+      }
+
+      window.location.href = '/dashboard'
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       setError(msg || 'Connection error — please check your internet and try again.')

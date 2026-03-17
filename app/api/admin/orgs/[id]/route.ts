@@ -119,3 +119,37 @@ export async function PATCH(
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
   return NextResponse.json({ org })
 }
+
+/**
+ * DELETE /api/admin/orgs/[id]
+ * Permanently delete an org and all associated data, then remove auth users.
+ */
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params
+  const { admin, error, status } = await assertAdmin()
+  if (!admin) return NextResponse.json({ error }, { status })
+
+  // Collect member IDs before deletion (cascade will remove profiles)
+  const { data: profiles } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('org_id', id)
+
+  // Delete org — cascades to profiles, appointments, clients, technicians, services, sms_messages, etc.
+  const { error: deleteError } = await admin
+    .from('organizations')
+    .delete()
+    .eq('id', id)
+
+  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 })
+
+  // Remove auth users
+  for (const profile of profiles ?? []) {
+    await admin.auth.admin.deleteUser(profile.id).catch(() => {})
+  }
+
+  return NextResponse.json({ success: true })
+}

@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Shield, ShieldOff, Bell, BellOff, ExternalLink,
-  User, Calendar, Clock, Loader2, CheckCircle2, XCircle,
+  User, Calendar, Clock, Loader2, CheckCircle2, XCircle, Trash2,
 } from 'lucide-react'
 
 interface OrgDetail {
@@ -70,6 +70,10 @@ export default function OrgDetailPage() {
   // Trial extension state
   const [trialDate, setTrialDate] = useState('')
 
+  // Delete state
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
   const load = useCallback(async () => {
     setLoading(true)
     const res = await fetch(`/api/admin/orgs/${id}`)
@@ -124,6 +128,18 @@ export default function OrgDetailPage() {
       patch({ suspended_at: null }, 'Org unsuspended')
     } else {
       patch({ suspended_at: new Date().toISOString() }, 'Org suspended')
+    }
+  }
+
+  const deleteOrg = async () => {
+    if (!org) return
+    setDeleting(true)
+    const res = await fetch(`/api/admin/orgs/${id}`, { method: 'DELETE' })
+    if (res.ok) {
+      router.push('/admin')
+    } else {
+      setDeleting(false)
+      setDeleteConfirm(false)
     }
   }
 
@@ -392,6 +408,50 @@ export default function OrgDetailPage() {
                   style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}
                 >
                   Suspend Org
+                </button>
+              </div>
+            )}
+          </ActionCard>
+
+          {/* Delete org */}
+          <ActionCard title="Delete Org">
+            {deleteConfirm ? (
+              <div>
+                <p className="text-xs text-red-400 mb-3">
+                  Permanently delete <span className="font-semibold">{org.business_name ?? org.name}</span> and all associated data? This cannot be undone.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDeleteConfirm(false)}
+                    disabled={deleting}
+                    className="flex-1 py-2 text-xs font-semibold text-slate-400 rounded-lg transition-colors disabled:opacity-50"
+                    style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={deleteOrg}
+                    disabled={deleting}
+                    className="flex-1 py-2 text-xs font-semibold text-white rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-1"
+                    style={{ background: 'rgba(239,68,68,0.8)', border: '1px solid rgba(239,68,68,0.5)' }}
+                  >
+                    {deleting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                    Confirm Delete
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <p className="text-xs text-slate-500 mb-3">
+                  Permanently removes the org, all users, appointments, and data.
+                </p>
+                <button
+                  onClick={() => setDeleteConfirm(true)}
+                  className="w-full py-2 text-sm font-semibold text-red-400 rounded-lg transition-colors flex items-center justify-center gap-1.5"
+                  style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Delete Org
                 </button>
               </div>
             )}

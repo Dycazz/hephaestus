@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, RefreshCw, ChevronRight, Wifi, WifiOff } from 'lucide-react'
+import { Search, RefreshCw, ChevronRight, Wifi, WifiOff, Trash2, ShieldOff } from 'lucide-react'
 
 interface OrgRow {
   id: string
@@ -53,7 +53,7 @@ function shortDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
 }
 
-const FILTERS = ['all', 'trial', 'starter', 'pro', 'enterprise', 'suspended'] as const
+const FILTERS = ['all', 'trial', 'expired', 'starter', 'pro', 'enterprise', 'suspended'] as const
 type Filter = typeof FILTERS[number]
 
 export default function AdminOrgsPage() {
@@ -63,6 +63,8 @@ export default function AdminOrgsPage() {
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [saving, setSaving] = useState<Record<string, boolean>>({})
+  const [bulkLoading, setBulkLoading] = useState(false)
+  const [bulkConfirm, setBulkConfirm] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -79,6 +81,9 @@ export default function AdminOrgsPage() {
   const filtered = useMemo(() => {
     let list = orgs
     if (filter === 'suspended') list = list.filter(o => !!o.suspended_at)
+    else if (filter === 'expired') list = list.filter(o =>
+      o.plan === 'trial' && !!o.trial_ends_at && new Date(o.trial_ends_at) < new Date()
+    )
     else if (filter !== 'all') list = list.filter(o => o.plan === filter)
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -99,6 +104,32 @@ export default function AdminOrgsPage() {
     })
     setOrgs(prev => prev.map(o => o.id === orgId ? { ...o, plan } : o))
     setSaving(prev => ({ ...prev, [orgId]: false }))
+  }
+
+  const bulkSuspend = async () => {
+    setBulkLoading(true)
+    const now = new Date().toISOString()
+    for (const org of filtered) {
+      if (!org.suspended_at) {
+        await fetch(`/api/admin/orgs/${org.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ suspended_at: now }),
+        })
+      }
+    }
+    setBulkLoading(false)
+    load()
+  }
+
+  const bulkDelete = async () => {
+    setBulkLoading(true)
+    for (const org of filtered) {
+      await fetch(`/api/admin/orgs/${org.id}`, { method: 'DELETE' })
+    }
+    setBulkLoading(false)
+    setBulkConfirm(false)
+    load()
   }
 
   return (
@@ -149,6 +180,58 @@ export default function AdminOrgsPage() {
           ))}
         </div>
       </div>
+
+      {/* Bulk action bar — shown when expired filter is active */}
+      {filter === 'expired' && filtered.length > 0 && (
+        <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl"
+          style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)' }}
+        >
+          <span className="text-sm text-red-400 font-semibold flex-1">
+            {filtered.length} expired trial account{filtered.length !== 1 ? 's' : ''}
+          </span>
+          <button
+            onClick={bulkSuspend}
+            disabled={bulkLoading}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-amber-400 transition-colors disabled:opacity-50"
+            style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}
+          >
+            <ShieldOff className="w-3.5 h-3.5" />
+            Suspend All
+          </button>
+          {bulkConfirm ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-red-400">Delete {filtered.length} orgs?</span>
+              <button
+                onClick={() => setBulkConfirm(false)}
+                disabled={bulkLoading}
+                className="px-2 py-1 text-xs text-slate-400 rounded-lg transition-colors"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={bulkDelete}
+                disabled={bulkLoading}
+                className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold text-white transition-colors disabled:opacity-50"
+                style={{ background: 'rgba(239,68,68,0.8)', border: '1px solid rgba(239,68,68,0.5)' }}
+              >
+                <Trash2 className="w-3 h-3" />
+                {bulkLoading ? 'Deleting…' : 'Confirm Delete'}
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setBulkConfirm(true)}
+              disabled={bulkLoading}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-red-400 transition-colors disabled:opacity-50"
+              style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)' }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Delete All
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Table */}
       <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.07)' }}>

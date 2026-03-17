@@ -1,6 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { getCloudflareContext } from '@opennextjs/cloudflare'
 
 /**
  * Server-side Supabase client for use in:
@@ -14,29 +13,48 @@ import { getCloudflareContext } from '@opennextjs/cloudflare'
  * The service role key is read from the Cloudflare request context on every call
  * (via AsyncLocalStorage) rather than from process.env, which is only populated
  * once per worker instance and may miss secrets added after the first cold start.
+ *
+ * We read globalThis[Symbol.for('__cloudflare-context__')] directly rather than
+ * importing getCloudflareContext() from @opennextjs/cloudflare (which is a
+ * devDependency and would not be bundled into the production Worker).
  */
 export async function createClient(serviceRole = false) {
   const cookieStore = await cookies()
 
-  // Resolve the service role key from the live Cloudflare request context so
-  // it's always fresh — process.env is a one-time snapshot per worker instance.
-  let serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
   if (serviceRole) {
+    // For service role: we must NOT pass user cookie helpers.
+    // @supabase/ssr would replace the Authorization header with the user's session JWT
+    // from cookies, which makes Supabase apply RLS instead of bypassing it.
+    // Service role key is read from the Cloudflare request env (always current) with
+    // process.env as fallback for local dev.
+    let serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     try {
-      const cfEnv = getCloudflareContext().env as Record<string, string | undefined>
-      if (cfEnv.SUPABASE_SERVICE_ROLE_KEY) {
-        serviceRoleKey = cfEnv.SUPABASE_SERVICE_ROLE_KEY
-      }
+      // OpenNext sets globalThis[Symbol.for('__cloudflare-context__')] to a getter
+      // backed by AsyncLocalStorage, so this is always the current request's env bindings.
+      const cfCtx = (globalThis as Record<symbol, unknown>)[Symbol.for('__cloudflare-context__')] as
+        | { env?: Record<string, string | undefined> }
+        | undefined
+      const cfKey = cfCtx?.env?.SUPABASE_SERVICE_ROLE_KEY
+      if (cfKey) serviceRoleKey = cfKey
     } catch {
-      // Not running in Cloudflare Workers (e.g. local `next dev`) — process.env fallback is fine
+      // Not running in Cloudflare Workers — process.env fallback is fine
     }
+
+    return createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      serviceRoleKey!,
+      {
+        // Empty cookie helpers: prevents session JWT from overriding
+        // the service role key in the Authorization header.
+        cookies: { getAll: () => [], setAll: () => {} },
+      }
+    )
   }
 
+  // Regular (anon) client — uses the user's session from cookies, RLS applied.
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    serviceRole
-      ? serviceRoleKey!
-      : process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -44,9 +62,11 @@ export async function createClient(serviceRole = false) {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            cookiesToSet.forEach(({ name, value, options }) => {
+              // Strip maxAge and expires to keep auth cookies session-only
+              const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
+              cookieStore.set(name, value, sessionOptions)
+            })
           } catch {
             // setAll called from a Server Component — ignored, middleware handles refresh
           }
