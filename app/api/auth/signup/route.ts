@@ -73,9 +73,10 @@ export async function POST(request: NextRequest) {
       },
     })
     if (authError || !authData.user) {
+      const isRateLimit = authError?.message?.toLowerCase().includes('rate limit')
       return NextResponse.json(
-        { error: authError?.message ?? 'Failed to create account' },
-        { status: 400 }
+        { error: isRateLimit ? 'Too many sign-up attempts. Please try again in a few minutes.' : authError?.message ?? 'Failed to create account' },
+        { status: isRateLimit ? 429 : 400 }
       )
     }
 
@@ -124,9 +125,10 @@ export async function POST(request: NextRequest) {
   })
 
   if (authError || !authData.user) {
+    const isRateLimit = authError?.message?.toLowerCase().includes('rate limit')
     return NextResponse.json(
-      { error: authError?.message ?? 'Failed to create account' },
-      { status: 400 }
+      { error: isRateLimit ? 'Too many sign-up attempts. Please try again in a few minutes.' : authError?.message ?? 'Failed to create account' },
+      { status: isRateLimit ? 429 : 400 }
     )
   }
 
@@ -169,18 +171,6 @@ export async function POST(request: NextRequest) {
     await supabaseAdmin.from('organizations').delete().eq('id', org.id)
     return NextResponse.json({ error: 'Failed to set up account' }, { status: 500 })
   }
-
-  // 4. Seed default services for this org
-  const defaultServices = [
-    { name: 'Plumbing', icon: '🔧', color: 'blue', prep_templates: JSON.stringify(['Clear all items from under the sink', 'Turn off water supply valve under sink', 'Have towels nearby']) },
-    { name: 'HVAC', icon: '❄️', color: 'cyan', prep_templates: JSON.stringify(['Clear 3-ft clearance around your outdoor AC unit', 'Locate your air filter', 'Clear access to attic if applicable']) },
-    { name: 'Electrical', icon: '⚡', color: 'yellow', prep_templates: JSON.stringify(['Ensure breaker panel is fully accessible', 'Have a list of outlets or switches needing work']) },
-    { name: 'Heating', icon: '🔥', color: 'orange', prep_templates: JSON.stringify(['Locate your furnace or boiler', 'Clear 2-ft access around the heating unit', 'Note any error codes on your thermostat']) },
-  ]
-
-  await supabaseAdmin.from('services').insert(
-    defaultServices.map(s => ({ ...s, org_id: org.id }))
-  )
 
   return NextResponse.json({ success: true }, { status: 201 })
 }

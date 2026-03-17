@@ -36,20 +36,13 @@ const RECURRENCE_OPTIONS: { label: string; value: RecurrenceRule }[] = [
   { label: 'Monthly',   value: 'monthly' },
 ]
 
-// ─── Service fallback ─────────────────────────────────────────────────────────
+// ─── Service ──────────────────────────────────────────────────────────────────
 interface ServiceOption {
   name: string
   icon: string
   color: string
   prepTemplates: string[]
 }
-
-const fallbackServices: ServiceOption[] = [
-  { name: 'Plumbing',   icon: '🔧', color: 'blue',   prepTemplates: ['Clear all items from under the sink', 'Turn off water supply valve under sink', 'Have towels nearby'] },
-  { name: 'HVAC',       icon: '❄️', color: 'cyan',   prepTemplates: ['Clear 3-ft clearance around your outdoor AC unit', 'Locate your air filter', 'Clear access to attic if applicable'] },
-  { name: 'Electrical', icon: '⚡', color: 'yellow', prepTemplates: ['Ensure breaker panel is fully accessible', 'Have a list of outlets or switches needing work'] },
-  { name: 'Heating',    icon: '🔥', color: 'orange', prepTemplates: ['Locate your furnace or boiler', 'Clear 2-ft access around the heating unit', 'Note any error codes on your thermostat'] },
-]
 
 export function AddClientModal({
   onAdd,
@@ -71,12 +64,12 @@ export function AddClientModal({
   const [errors, setErrors]   = useState<Record<string, string>>({})
 
   // ── Service ─────────────────────────────────────────────────────────────────
-  const [services, setServices]           = useState<ServiceOption[]>(fallbackServices)
-  const [service, setService]             = useState<ServiceOption>(fallbackServices[0])
+  const [services, setServices]           = useState<ServiceOption[]>([])
+  const [service, setService]             = useState<ServiceOption | null>(null)
   const [servicesLoading, setServicesLoading] = useState(true)
 
   // ── Prep checklist ──────────────────────────────────────────────────────────
-  const [checklist, setChecklist] = useState<string[]>(fallbackServices[0].prepTemplates)
+  const [checklist, setChecklist] = useState<string[]>([])
   const [newItem, setNewItem]     = useState('')
 
   // ── Reminders ───────────────────────────────────────────────────────────────
@@ -156,9 +149,9 @@ export function AddClientModal({
 
   // ── Handlers ─────────────────────────────────────────────────────────────────
   const handleServiceChange = (svcName: string) => {
-    const svc = services.find(s => s.name === svcName) ?? services[0]
+    const svc = services.find(s => s.name === svcName) ?? services[0] ?? null
     setService(svc)
-    setChecklist(svc.prepTemplates)
+    setChecklist(svc?.prepTemplates ?? [])
   }
 
   const addChecklistItem = () => {
@@ -178,7 +171,7 @@ export function AddClientModal({
   }
 
   const handleSubmit = () => {
-    if (!validate() || !time) return
+    if (!validate() || !time || !service) return
     const scheduledAt = buildScheduledAt(dateISO, time)
     const newAppt: Appointment = {
       id: `appt-${Date.now()}`,
@@ -253,16 +246,20 @@ export function AddClientModal({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-xs font-semibold text-slate-600 mb-1 block">Service</label>
-              <select
-                value={service.name}
-                onChange={e => handleServiceChange(e.target.value)}
-                disabled={servicesLoading}
-                className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
-              >
-                {services.map(s => (
-                  <option key={s.name} value={s.name}>{s.icon} {s.name}</option>
-                ))}
-              </select>
+              {!servicesLoading && services.length === 0 ? (
+                <p className="text-xs text-slate-400 pt-2">No services — add via Settings</p>
+              ) : (
+                <select
+                  value={service?.name ?? ''}
+                  onChange={e => handleServiceChange(e.target.value)}
+                  disabled={servicesLoading}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                >
+                  {services.map(s => (
+                    <option key={s.name} value={s.name}>{s.icon} {s.name}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <label className="text-xs font-semibold text-slate-600 mb-1 block">Technician</label>
