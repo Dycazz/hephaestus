@@ -63,13 +63,13 @@ function addDays(iso: string, days: number): string {
 // ─── Styling maps ─────────────────────────────────────────────────────────────
 
 const statusBlock: Record<string, { bg: string; border: string; text: string; badge: string; badgeText: string }> = {
-  scheduled:     { bg: 'bg-slate-800/70',  border: 'border-slate-500',  text: 'text-slate-200',  badge: 'bg-slate-700/80 text-slate-300',   badgeText: 'Not sent'    },
-  reminder_sent: { bg: 'bg-amber-900/50',  border: 'border-amber-500',  text: 'text-amber-100',  badge: 'bg-amber-800/60 text-amber-300',   badgeText: 'Pending'     },
-  confirmed:     { bg: 'bg-green-900/50',  border: 'border-green-500',  text: 'text-green-100',  badge: 'bg-green-800/60 text-green-300',   badgeText: 'Confirmed'   },
-  rescheduling:  { bg: 'bg-purple-900/50', border: 'border-purple-500', text: 'text-purple-100', badge: 'bg-purple-800/60 text-purple-300', badgeText: 'Rescheduling'},
-  at_risk:       { bg: 'bg-red-900/50',    border: 'border-red-500',    text: 'text-red-100',    badge: 'bg-red-800/60 text-red-300',       badgeText: 'At risk'     },
-  completed:     { bg: 'bg-blue-900/50',   border: 'border-blue-500',   text: 'text-blue-100',   badge: 'bg-blue-800/60 text-blue-300',     badgeText: 'Done'        },
-  cancelled:     { bg: 'bg-slate-900/50',  border: 'border-slate-700',  text: 'text-slate-500',  badge: 'bg-slate-800/60 text-slate-500',   badgeText: 'Cancelled'   },
+  scheduled:     { bg: 'bg-white/5',       border: 'border-white/15',   text: 'text-white/70',   badge: 'bg-white/10 text-white/60',        badgeText: 'Not sent'    },
+  reminder_sent: { bg: 'bg-amber-500/15',  border: 'border-amber-500',  text: 'text-amber-100',  badge: 'bg-amber-500/20 text-amber-200',  badgeText: 'Pending'     },
+  confirmed:     { bg: 'bg-orange-500/20', border: 'border-orange-500', text: 'text-orange-100', badge: 'bg-orange-500/25 text-orange-200', badgeText: 'Confirmed'   },
+  rescheduling:  { bg: 'bg-orange-500/15', border: 'border-orange-400', text: 'text-orange-100', badge: 'bg-orange-500/20 text-orange-200', badgeText: 'Rescheduling'},
+  at_risk:       { bg: 'bg-red-500/15',    border: 'border-red-500',    text: 'text-red-100',    badge: 'bg-red-500/20 text-red-200',      badgeText: 'At risk'     },
+  completed:     { bg: 'bg-white/10',      border: 'border-white/20',   text: 'text-white/80',   badge: 'bg-white/10 text-white/70',        badgeText: 'Done'        },
+  cancelled:     { bg: 'bg-white/5',       border: 'border-white/10',   text: 'text-white/40',   badge: 'bg-white/5 text-white/40',         badgeText: 'Cancelled'   },
 }
 
 const colorBg: Record<string, string> = {
@@ -131,9 +131,9 @@ export function CalendarView({
         style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}
       >
         <div className="flex items-center gap-2.5">
-          <Clock className="w-4 h-4 text-blue-400/70" />
+          <Clock className="w-4 h-4 text-orange-300/80" />
           <h2 className="text-sm font-semibold text-white/90">Technician Schedule</h2>
-          <span className="text-xs bg-blue-500/20 text-blue-300 border border-blue-500/20 rounded-full px-2 py-0.5">
+          <span className="text-xs rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-orange-200">
             {dayAppts.length} job{dayAppts.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -154,7 +154,7 @@ export function CalendarView({
           {calendarDate !== todayISO && (
             <button
               onClick={() => onCalendarDateChange(todayISO)}
-              className="px-2 py-1 rounded-lg text-xs font-medium text-blue-300 hover:bg-blue-500/10 transition-all border border-blue-500/20"
+              className="rounded-lg border border-orange-500/30 px-2 py-1 text-xs font-medium text-orange-200 transition-all hover:bg-orange-500/10"
             >
               Today
             </button>

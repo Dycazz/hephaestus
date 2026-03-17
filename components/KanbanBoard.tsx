@@ -53,11 +53,11 @@ function Column({
 }: ColumnProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className={`rounded-xl border ${headerBg} p-3 flex items-center justify-between border-l-4 ${accentBorder}`}>
+      <div className={`flex items-center justify-between rounded-xl border p-3 ${headerBg} border-l-4 ${accentBorder}`}>
         <div className="flex items-center gap-2.5">
           {icon}
           <div>
-            <p className="font-semibold text-sm text-white">{title}</p>
+            <p className="text-sm font-semibold text-white">{title}</p>
             <p className="text-xs text-white/50">{subtitle}</p>
           </div>
         </div>
@@ -65,12 +65,12 @@ function Column({
       </div>
 
       {appointments.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-800 p-8 text-center flex flex-col items-center gap-2" style={{ background: 'rgba(255,255,255,0.02)' }}>
-          <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center mb-1">
+        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/5 p-8 text-center">
+          <div className="mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
             {icon}
           </div>
-          <p className="text-xs font-medium text-slate-600">No appointments here</p>
-          <p className="text-[11px] text-slate-700">{subtitle}</p>
+          <p className="text-xs font-medium text-white/50">No appointments here</p>
+          <p className="text-[11px] text-white/35">{subtitle}</p>
         </div>
       ) : (
         appointments.map((appt) => (
@@ -110,16 +110,15 @@ export function KanbanBoard({
 
   return (
     <div className="space-y-6">
-      {/* Main 3-column kanban */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Column
           title="Ready to Roll"
           subtitle="Confirmed & prepped"
-          icon={<CheckCircle className="w-4 h-4 text-green-500" />}
+          icon={<CheckCircle className="h-4 w-4 text-orange-300" />}
           count={confirmed.length}
-          accentColor="text-green-500"
-          headerBg="bg-green-900/15 border-green-900/40"
-          accentBorder="border-l-green-600"
+          accentColor="text-orange-300"
+          headerBg="bg-orange-500/10 border-orange-500/20"
+          accentBorder="border-l-orange-400"
           appointments={confirmed}
           technicians={technicians}
           onSelectAppointment={onSelectAppointment}
@@ -133,11 +132,11 @@ export function KanbanBoard({
         <Column
           title="Awaiting Response"
           subtitle="Reminder sent, no reply yet"
-          icon={<Clock className="w-4 h-4 text-amber-500" />}
+          icon={<Clock className="h-4 w-4 text-amber-300" />}
           count={pending.length}
-          accentColor="text-amber-500"
-          headerBg="bg-amber-900/15 border-amber-900/40"
-          accentBorder="border-l-amber-500"
+          accentColor="text-amber-300"
+          headerBg="bg-amber-500/10 border-amber-500/20"
+          accentBorder="border-l-amber-400"
           appointments={pending}
           technicians={technicians}
           onSelectAppointment={onSelectAppointment}
@@ -151,11 +150,11 @@ export function KanbanBoard({
         <Column
           title="Needs Attention"
           subtitle="No response — step in now"
-          icon={<AlertTriangle className="w-4 h-4 text-red-500" />}
+          icon={<AlertTriangle className="h-4 w-4 text-red-400" />}
           count={atRisk.length}
-          accentColor="text-red-500"
-          headerBg="bg-red-900/15 border-red-900/40"
-          accentBorder="border-l-red-600"
+          accentColor="text-red-400"
+          headerBg="bg-red-500/10 border-red-500/20"
+          accentBorder="border-l-red-400"
           appointments={atRisk}
           technicians={technicians}
           onSelectAppointment={onSelectAppointment}
@@ -167,17 +166,16 @@ export function KanbanBoard({
         />
       </div>
 
-      {/* Completed section */}
       {completed.length > 0 && (
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Star className="w-4 h-4 text-blue-500" />
-            <h3 className="text-sm font-semibold text-slate-400">Completed Today</h3>
-            <span className="text-xs bg-blue-900/30 text-blue-400 rounded-full px-2 py-0.5">
+          <div className="mb-3 flex items-center gap-2">
+            <Star className="h-4 w-4 text-orange-300" />
+            <h3 className="text-sm font-semibold text-white/70">Completed Today</h3>
+            <span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white/60">
               {completed.length}
             </span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {completed.map((appt) => (
               <AppointmentCard
                 key={appt.id}

@@ -35,7 +35,6 @@ function LoginPageInner() {
         return
       }
 
-      // Verify the org has an active plan before allowing dashboard access
       const checkRes = await fetch('/api/auth/check-access')
       const check = await checkRes.json()
 
@@ -55,92 +54,35 @@ function LoginPageInner() {
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden"
-      style={{ background: '#090909' }}
-    >
-      {/* Ambient forge glow — bottom left */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          left: '-200px',
-          bottom: '-150px',
-          width: '600px',
-          height: '600px',
-          background: 'radial-gradient(circle, rgba(249,115,22,0.06) 0%, transparent 65%)',
-          pointerEvents: 'none',
-        }}
-      />
-      {/* Subtle top-right accent */}
-      <div
-        aria-hidden
-        style={{
-          position: 'absolute',
-          right: '-100px',
-          top: '-100px',
-          width: '400px',
-          height: '400px',
-          background: 'radial-gradient(circle, rgba(249,115,22,0.04) 0%, transparent 65%)',
-          pointerEvents: 'none',
-        }}
-      />
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-black px-6 py-12 text-white">
+      <div className="pointer-events-none absolute -left-32 bottom-0 h-80 w-80 rounded-full bg-orange-500/15 blur-[140px]" />
+      <div className="pointer-events-none absolute -right-20 top-0 h-72 w-72 rounded-full bg-orange-400/10 blur-[120px]" />
 
-      <div className="w-full max-w-sm relative slide-up-in">
-        {/* Brand mark */}
-        <div className="flex items-center gap-3 mb-10">
-          <div
-            className="rounded-xl overflow-hidden flex items-center justify-center bg-white shrink-0"
-            style={{
-              width: 42,
-              height: 42,
-              boxShadow: '0 0 28px rgba(249,115,22,0.18)',
-            }}
-          >
-            <Image src="/logo.png" alt="Hephaestus" width={36} height={36} className="object-contain" priority />
+      <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-black/70 p-8 shadow-[0_30px_60px_-40px_rgba(249,115,22,0.7)]">
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white">
+            <Image src="/logo.png" alt="Hephaestus" width={28} height={28} className="object-contain" priority />
           </div>
           <div>
-            <h1
-              className="font-display font-bold leading-none"
-              style={{ fontSize: '1.1rem', color: '#f0ece3', letterSpacing: '-0.02em' }}
-            >
-              Hephaestus
-            </h1>
-            <p className="text-xs mt-0.5" style={{ color: '#3a3a48' }}>Field service management</p>
+            <h1 className="font-display text-lg font-semibold text-white">Hephaestus</h1>
+            <p className="text-xs uppercase tracking-[0.28em] text-white/40">Dispatch</p>
           </div>
         </div>
 
-        {/* Heading */}
-        <div className="mb-8">
-          <h2
-            className="font-display font-bold mb-1"
-            style={{ fontSize: '1.7rem', color: '#f0ece3', letterSpacing: '-0.03em' }}
-          >
-            Welcome back
-          </h2>
-          <p className="text-sm" style={{ color: '#9494a0' }}>Sign in to your dashboard</p>
+        <div className="mb-6">
+          <h2 className="font-display text-2xl font-semibold text-white">Welcome back</h2>
+          <p className="mt-1 text-sm text-white/60">Sign in to your dashboard</p>
         </div>
 
         {verified && (
-          <div
-            className="rounded-lg px-3 py-2.5 text-sm mb-6"
-            style={{
-              background: 'rgba(34,197,94,0.08)',
-              border: '1px solid rgba(34,197,94,0.2)',
-              color: '#4ade80',
-            }}
-          >
+          <div className="mb-5 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200">
             Email verified — you can now sign in.
           </div>
         )}
 
-        {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label
-              className="block text-xs font-semibold mb-1.5"
-              style={{ color: '#9494a0', letterSpacing: '0.02em' }}
-            >
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
               Email
             </label>
             <input
@@ -149,28 +91,12 @@ function LoginPageInner() {
               onChange={e => setEmail(e.target.value)}
               placeholder="you@yourcompany.com"
               required
-              className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-all"
-              style={{
-                background: '#111114',
-                border: '1px solid rgba(255,255,255,0.07)',
-                color: '#f0ece3',
-              }}
-              onFocus={e => {
-                e.currentTarget.style.borderColor = 'rgba(249,115,22,0.45)'
-                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.08)'
-              }}
-              onBlur={e => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-                e.currentTarget.style.boxShadow = 'none'
-              }}
+              className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2.5 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20"
             />
           </div>
 
           <div>
-            <label
-              className="block text-xs font-semibold mb-1.5"
-              style={{ color: '#9494a0', letterSpacing: '0.02em' }}
-            >
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-[0.2em] text-white/40">
               Password
             </label>
             <div className="relative">
@@ -180,41 +106,20 @@ function LoginPageInner() {
                 onChange={e => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full rounded-lg px-3 py-2.5 text-sm outline-none transition-all pr-10"
-                style={{
-                  background: '#111114',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  color: '#f0ece3',
-                }}
-                onFocus={e => {
-                  e.currentTarget.style.borderColor = 'rgba(249,115,22,0.45)'
-                  e.currentTarget.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.08)'
-                }}
-                onBlur={e => {
-                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-                  e.currentTarget.style.boxShadow = 'none'
-                }}
+                className="w-full rounded-lg border border-white/10 bg-black/60 px-3 py-2.5 pr-10 text-sm text-white placeholder-white/30 outline-none transition focus:border-orange-400 focus:ring-2 focus:ring-orange-500/20"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(v => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 transition-colors"
-                style={{ color: '#3a3a48' }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 transition hover:text-white"
               >
-                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
 
           {error && (
-            <div
-              className="rounded-lg px-3 py-2.5 text-sm"
-              style={{
-                background: 'rgba(239,68,68,0.08)',
-                border: '1px solid rgba(239,68,68,0.2)',
-                color: '#f87171',
-              }}
-            >
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
               {error}
             </div>
           )}
@@ -222,26 +127,20 @@ function LoginPageInner() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full font-semibold py-2.5 rounded-xl transition-all duration-150 flex items-center justify-center gap-2 text-sm text-white"
-            style={{
-              background: loading ? 'rgba(249,115,22,0.5)' : 'linear-gradient(135deg, #ea580c, #f97316)',
-              boxShadow: loading ? 'none' : '0 4px 16px rgba(249,115,22,0.25)',
-              cursor: loading ? 'not-allowed' : 'pointer',
-            }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading
-              ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in…</>
-              : <><span>Sign in</span><ArrowRight className="w-4 h-4" /></>
+              ? <><Loader2 className="h-4 w-4 animate-spin" /> Signing in…</>
+              : <><span>Sign in</span><ArrowRight className="h-4 w-4" /></>
             }
           </button>
         </form>
 
-        <p className="text-sm mt-6" style={{ color: '#9494a0' }}>
+        <p className="mt-6 text-sm text-white/60">
           Don&apos;t have an account?{' '}
           <Link
             href="/signup"
-            className="font-semibold transition-colors"
-            style={{ color: '#f97316' }}
+            className="font-semibold text-orange-300 transition hover:text-orange-200"
           >
             Create one free
           </Link>

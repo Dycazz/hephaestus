@@ -21,9 +21,11 @@
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(1200px 800px at 15% -10%, rgba(249, 115, 22, 0.14), transparent 60%),
-    radial-gradient(900px 600px at 85% 10%, rgba(56, 189, 248, 0.08), transparent 55%),
-    radial-gradient(1000px 900px at 50% 120%, rgba(248, 113, 113, 0.06), transparent 60%);
+    radial-gradient(1100px 700px at 12% -10%, rgba(249, 115, 22, 0.18), transparent 62%),
+    radial-gradient(900px 600px at 88% 18%, rgba(249, 115, 22, 0.12), transparent 60%),
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: auto, auto, 80px 80px, 80px 80px;
   background-repeat: no-repeat;
   background-attachment: fixed;
   color: var(--text-primary);
@@ -32,7 +34,7 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  animation: ambientShift 18s ease-in-out infinite;
+  animation: ambientShift 20s ease-in-out infinite;
 }
 
 /* Grain overlay */
@@ -50,13 +52,13 @@ body::after {
 
 @keyframes ambientShift {
   0% {
-    background-position: 15% -10%, 85% 10%, 50% 120%;
+    background-position: 12% -10%, 88% 18%, 0 0, 0 0;
   }
   50% {
-    background-position: 20% 0%, 80% 20%, 45% 110%;
+    background-position: 18% 0%, 82% 24%, 0 0, 0 0;
   }
   100% {
-    background-position: 15% -10%, 85% 10%, 50% 120%;
+    background-position: 12% -10%, 88% 18%, 0 0, 0 0;
   }
 }
 
