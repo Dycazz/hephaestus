@@ -56,5 +56,9 @@ export async function GET() {
     })
   }
 
-  return NextResponse.json({ allowed: true })
+  // Set a session-only marker cookie so middleware can confirm this session
+  // came through the new login flow (no maxAge = expires when browser closes)
+  const res = NextResponse.json({ allowed: true })
+  res.cookies.set('heph_auth', '1', { httpOnly: true, sameSite: 'lax', path: '/' })
+  return res
 }

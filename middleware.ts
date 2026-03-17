@@ -51,6 +51,15 @@ export async function middleware(request: NextRequest) {
 
   // For authenticated users on non-admin protected routes, enforce active plan
   if (user && isProtected) {
+    // Require the session marker set by /api/auth/check-access after login.
+    // Sessions that predate this check (persistent old cookies) won't have it
+    // and must re-authenticate.
+    if (!request.cookies.get('heph_auth')) {
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('reason', 'subscription')
+      return NextResponse.redirect(loginUrl)
+    }
+
     try {
       // Fetch the user's org plan in a single query via their profile
       const { data: rows } = await supabase
