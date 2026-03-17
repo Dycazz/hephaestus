@@ -18,6 +18,7 @@ function LoginPageInner() {
       ? 'Your trial has ended or subscription is inactive. Please subscribe at hephaestus.work to continue.'
       : null
   )
+  const verified = searchParams.get('verified') === 'true'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -119,6 +120,19 @@ function LoginPageInner() {
           </h2>
           <p className="text-sm" style={{ color: '#9494a0' }}>Sign in to your dashboard</p>
         </div>
+
+        {verified && (
+          <div
+            className="rounded-lg px-3 py-2.5 text-sm mb-6"
+            style={{
+              background: 'rgba(34,197,94,0.08)',
+              border: '1px solid rgba(34,197,94,0.2)',
+              color: '#4ade80',
+            }}
+          >
+            Email verified — you can now sign in.
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleLogin} className="space-y-4">

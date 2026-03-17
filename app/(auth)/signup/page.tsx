@@ -28,6 +28,8 @@ function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [submitted, setSubmitted] = useState(false)
+  const [submittedEmail, setSubmittedEmail] = useState('')
 
   // Fetch invite details if token present
   useEffect(() => {
@@ -68,8 +70,8 @@ function SignupForm() {
         setError(data.error ?? 'Something went wrong. Please try again.')
         setLoading(false)
       } else {
-        // Hard navigation avoids Next.js router deadlock in Cloudflare Workers
-        window.location.href = '/dashboard'
+        setSubmittedEmail(email)
+        setSubmitted(true)
       }
     } catch {
       setError('Connection error. Please check your internet and try again.')
@@ -97,122 +99,141 @@ function SignupForm() {
         <div className="rounded-2xl p-8"
           style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 20px 40px rgba(0,0,0,0.4)' }}
         >
-          {/* Invitation loading / error states */}
-          {token && inviteLoading && (
-            <div className="flex items-center justify-center gap-2 py-8 text-slate-400">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span className="text-sm">Loading invitation…</span>
-            </div>
-          )}
-
-          {token && !inviteLoading && inviteError && (
+          {/* Email confirmation sent state */}
+          {submitted && (
             <div className="text-center py-4">
-              <p className="text-sm text-red-400 mb-4">{inviteError}</p>
-              <Link href="/signup" className="text-blue-400 text-sm hover:underline">
-                Sign up without an invitation
-              </Link>
+              <div className="text-4xl mb-4">📬</div>
+              <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
+              <p className="text-sm text-slate-400 mb-1">
+                We sent a verification link to
+              </p>
+              <p className="text-sm font-semibold text-white mb-4 break-all">{submittedEmail}</p>
+              <p className="text-xs text-slate-500">
+                Click the link in the email to verify your account, then sign in.
+              </p>
             </div>
           )}
 
-          {(!token || (!inviteLoading && !inviteError)) && (
+          {/* Invitation loading / error states + signup form */}
+          {!submitted && (
             <>
-              {/* Header */}
-              {invite ? (
-                <div className="mb-6">
-                  <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3"
-                    style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
-                  >
-                    🎉 You&apos;ve been invited
-                  </div>
-                  <h2 className="text-xl font-bold text-white mb-1">Join {invite.orgName}</h2>
-                  <p className="text-sm text-slate-400">
-                    Create your account to accept the invitation as a{' '}
-                    <span className="text-blue-400 font-semibold capitalize">{invite.role}</span>.
-                  </p>
-                </div>
-              ) : (
-                <div className="mb-6">
-                  <h2 className="text-xl font-bold text-white mb-1">Create your account</h2>
-                  <p className="text-sm text-slate-400">Free trial — no credit card required</p>
+              {token && inviteLoading && (
+                <div className="flex items-center justify-center gap-2 py-8 text-slate-400">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Loading invitation…</span>
                 </div>
               )}
 
-              <form onSubmit={handleSignup} className="space-y-4">
-                {/* Business name — only shown for new-org signups */}
-                {!invite && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">Business Name</label>
-                    <input
-                      type="text"
-                      value={businessName}
-                      onChange={e => setBusinessName(e.target.value)}
-                      placeholder="Mike's Plumbing & HVAC"
-                      required
-                      minLength={2}
-                      className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                )}
+              {token && !inviteLoading && inviteError && (
+                <div className="text-center py-4">
+                  <p className="text-sm text-red-400 mb-4">{inviteError}</p>
+                  <Link href="/signup" className="text-blue-400 text-sm hover:underline">
+                    Sign up without an invitation
+                  </Link>
+                </div>
+              )}
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Work Email</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={e => setEmail(e.target.value)}
-                    placeholder="you@yourcompany.com"
-                    required
-                    readOnly={!!invite}
-                    className={`w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${invite ? 'opacity-70 cursor-not-allowed' : ''}`}
-                  />
-                  {invite && (
-                    <p className="text-xs text-slate-500 mt-1">Email is set by the invitation and cannot be changed.</p>
+              {(!token || (!inviteLoading && !inviteError)) && (
+                <>
+                  {/* Header */}
+                  {invite ? (
+                    <div className="mb-6">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold mb-3"
+                        style={{ background: 'rgba(59,130,246,0.15)', color: '#60a5fa', border: '1px solid rgba(59,130,246,0.2)' }}
+                      >
+                        🎉 You&apos;ve been invited
+                      </div>
+                      <h2 className="text-xl font-bold text-white mb-1">Join {invite.orgName}</h2>
+                      <p className="text-sm text-slate-400">
+                        Create your account to accept the invitation as a{' '}
+                        <span className="text-blue-400 font-semibold capitalize">{invite.role}</span>.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mb-6">
+                      <h2 className="text-xl font-bold text-white mb-1">Create your account</h2>
+                      <p className="text-sm text-slate-400">Free trial — no credit card required</p>
+                    </div>
                   )}
-                </div>
 
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="Min 8 characters"
-                      required
-                      minLength={8}
-                      className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
-                    />
+                  <form onSubmit={handleSignup} className="space-y-4">
+                    {/* Business name — only shown for new-org signups */}
+                    {!invite && (
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1">Business Name</label>
+                        <input
+                          type="text"
+                          value={businessName}
+                          onChange={e => setBusinessName(e.target.value)}
+                          placeholder="Mike's Plumbing & HVAC"
+                          required
+                          minLength={2}
+                          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Work Email</label>
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        placeholder="you@yourcompany.com"
+                        required
+                        readOnly={!!invite}
+                        className={`w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${invite ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      />
+                      {invite && (
+                        <p className="text-xs text-slate-500 mt-1">Email is set by the invitation and cannot be changed.</p>
+                      )}
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-400 mb-1">Password</label>
+                      <div className="relative">
+                        <input
+                          type={showPassword ? 'text' : 'password'}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="Min 8 characters"
+                          required
+                          minLength={8}
+                          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(v => !v)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {error && (
+                      <div className="bg-red-900/40 border border-red-700/60 rounded-lg px-3 py-2 text-sm text-red-400">
+                        {error}
+                      </div>
+                    )}
+
                     <button
-                      type="button"
-                      onClick={() => setShowPassword(v => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                      type="submit"
+                      disabled={loading}
+                      className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {loading ? 'Creating account…' : invite ? `Join ${invite.orgName}` : 'Create free account'}
                     </button>
-                  </div>
-                </div>
+                  </form>
 
-                {error && (
-                  <div className="bg-red-900/40 border border-red-700/60 rounded-lg px-3 py-2 text-sm text-red-400">
-                    {error}
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white font-semibold py-2.5 rounded-xl transition-colors"
-                >
-                  {loading ? 'Creating account…' : invite ? `Join ${invite.orgName}` : 'Create free account'}
-                </button>
-              </form>
-
-              <p className="text-center text-sm text-slate-500 mt-6">
-                Already have an account?{' '}
-                <Link href="/login" className="text-blue-400 font-semibold hover:underline">
-                  Sign in
-                </Link>
-              </p>
+                  <p className="text-center text-sm text-slate-500 mt-6">
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-blue-400 font-semibold hover:underline">
+                      Sign in
+                    </Link>
+                  </p>
+                </>
+              )}
             </>
           )}
         </div>

@@ -65,7 +65,13 @@ export async function POST(request: NextRequest) {
 
     // Create auth user
     const supabase = await createClient()
-    const { data: authData, error: authError } = await supabase.auth.signUp({ email, password })
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+      },
+    })
     if (authError || !authData.user) {
       return NextResponse.json(
         { error: authError?.message ?? 'Failed to create account' },
@@ -112,6 +118,9 @@ export async function POST(request: NextRequest) {
   const { data: authData, error: authError } = await supabase.auth.signUp({
     email,
     password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+    },
   })
 
   if (authError || !authData.user) {
