@@ -58,16 +58,22 @@ export async function DELETE(
   const orgId = await getOrgId(supabase)
   if (!orgId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Soft delete — verify ownership via booking_links
+  // Verify ownership via booking_links, then soft delete
+  const { data: owned } = await supabase
+    .from('booking_services')
+    .select('id, booking_links!inner(org_id)')
+    .eq('id', id)
+    .eq('booking_links.org_id', orgId)
+    .single()
+
+  if (!owned) {
+    return NextResponse.json({ error: 'Service not found or access denied' }, { status: 404 })
+  }
+
   const { error } = await supabase
     .from('booking_services')
     .update({ is_active: false })
     .eq('id', id)
-    .eq('booking_link_id', supabase
-      .from('booking_links')
-      .select('id')
-      .eq('org_id', orgId)
-    )
 
   if (error) {
     return NextResponse.json({ error: 'Failed to delete service' }, { status: 500 })

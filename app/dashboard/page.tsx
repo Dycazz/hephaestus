@@ -8,7 +8,6 @@ import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
 import { KanbanBoard } from '@/components/KanbanBoard'
 import { SMSDrawer } from '@/components/SMSDrawer'
-import { WaitlistModal } from '@/components/WaitlistModal'
 import { ToastContainer } from '@/components/ToastContainer'
 import { AddClientModal } from '@/components/AddClientModal'
 import { RescheduleModal } from '@/components/RescheduleModal'
@@ -47,8 +46,6 @@ export default function Dashboard() {
 
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [toasts, setToasts] = useState<Toast[]>([])
-  const [waitlistOpen, setWaitlistOpen] = useState(false)
-  const [cancelledSlot, setCancelledSlot] = useState<Appointment | null>(null)
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
   const [view, setView] = useState<'board' | 'week' | 'calendar'>('board')
@@ -179,10 +176,9 @@ export default function Dashboard() {
       if (!appt) return
 
       handleUpdateAppointment(id, { status: 'cancelled' })
-      setCancelledSlot(appt)
-      setWaitlistOpen(true)
+      addToast({ type: 'info', message: 'Appointment cancelled.' })
     },
-    [appointments, handleUpdateAppointment]
+    [appointments, handleUpdateAppointment, addToast]
   )
 
   const handleAddClient = useCallback(
@@ -312,16 +308,6 @@ export default function Dashboard() {
     [appointments, handleUpdateAppointment, addToast, logMessages]
   )
 
-  const handleNotifyWaitlist = useCallback(() => {
-    if (!cancelledSlot) return
-    addToast({
-      type: 'success',
-      message: `Waitlist notified about the ${cancelledSlot.scheduledTime} opening.`,
-    })
-    setWaitlistOpen(false)
-    setCancelledSlot(null)
-  }, [cancelledSlot, addToast])
-
   if (loading) {
     return (
       <div
@@ -434,17 +420,6 @@ export default function Dashboard() {
           appointment={selectedAppointment}
           onClose={() => setSelectedId(null)}
           onMarkComplete={handleMarkComplete}
-        />
-      )}
-
-      {waitlistOpen && cancelledSlot && (
-        <WaitlistModal
-          cancelledSlot={cancelledSlot}
-          onNotify={handleNotifyWaitlist}
-          onDismiss={() => {
-            setWaitlistOpen(false)
-            setCancelledSlot(null)
-          }}
         />
       )}
 
