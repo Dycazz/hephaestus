@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
+  const adminEmail = 'gavindycus@gmail.com'
 
   // If Supabase is not yet configured, skip auth checks and let all routes through
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -59,8 +60,18 @@ export async function middleware(request: NextRequest) {
     return clearAuthCookies(NextResponse.redirect(loginUrl))
   }
 
+  // Only allow the admin email into /admin
+  if (user && isAdminRoute && user.email !== adminEmail) {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
   // For authenticated users on non-admin protected routes, enforce active plan
   if (user && isProtected) {
+    // Admin override: allow access regardless of subscription status
+    if (user.email === adminEmail) {
+      return supabaseResponse
+    }
+
     // Require the session marker set by /api/auth/check-access after login.
     // Sessions that predate this check (persistent old cookies) won't have it
     // and must re-authenticate.
