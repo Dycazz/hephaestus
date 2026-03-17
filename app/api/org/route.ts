@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getStripe } from '@/lib/stripe'
 
 export async function GET(_request: NextRequest) {
   const supabase = await createClient()
@@ -56,4 +57,64 @@ export async function PATCH(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json({ org })
+}
+
+export async function DELETE(_request: NextRequest) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('org_id, role')
+    .eq('id', user.id)
+    .single()
+  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+  if (profile.role !== 'owner') {
+    return NextResponse.json({ error: 'Only owners can delete the organization' }, { status: 403 })
+  }
+
+  const adminClient = await createClient(true)
+
+  // Cancel active Stripe subscription if one exists
+  const { data: org } = await adminClient
+    .from('organizations')
+    .select('stripe_customer_id')
+    .eq('id', profile.org_id)
+    .single()
+
+  if (org?.stripe_customer_id) {
+    try {
+      const stripe = getStripe()
+      const subs = await stripe.subscriptions.list({
+        customer: org.stripe_customer_id,
+        status: 'active',
+        limit: 5,
+      })
+      for (const sub of subs.data) {
+        await stripe.subscriptions.cancel(sub.id)
+      }
+    } catch { /* non-fatal — proceed with deletion */ }
+  }
+
+  // Collect member IDs before cascade deletion removes profiles
+  const { data: profiles } = await adminClient
+    .from('profiles')
+    .select('id')
+    .eq('org_id', profile.org_id)
+
+  // Delete org — cascades to profiles, appointments, clients, technicians, services, sms_messages, invitations
+  const { error: deleteError } = await adminClient
+    .from('organizations')
+    .delete()
+    .eq('id', profile.org_id)
+
+  if (deleteError) return NextResponse.json({ error: deleteError.message }, { status: 500 })
+
+  // Remove auth users
+  for (const p of profiles ?? []) {
+    await adminClient.auth.admin.deleteUser(p.id).catch(() => {})
+  }
+
+  return NextResponse.json({ success: true })
 }

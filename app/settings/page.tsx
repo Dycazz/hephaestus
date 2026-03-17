@@ -3,12 +3,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
   Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw, Clock,
   Globe, DollarSign, Copy, Calendar,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -999,12 +1001,19 @@ function BookingPortalTab({ orgName, orgSlug }: { orgName: string; orgSlug: stri
 type Tab = 'general' | 'services' | 'plan' | 'booking'
 
 export default function SettingsPage() {
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('general')
 
   // Org state
   const [org, setOrg] = useState<OrgData | null>(null)
   const [role, setRole] = useState<string>('viewer')
   const [orgLoading, setOrgLoading] = useState(true)
+
+  // Delete org state
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText] = useState('')
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
 
   // General form
   const [businessName, setBusinessName] = useState('')
@@ -1096,6 +1105,21 @@ export default function SettingsPage() {
       setGeneralSaving(false)
     }
   }, [businessName, reviewUrl, reminderHoursBefore])
+
+  const handleDeleteOrg = useCallback(async () => {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const res = await fetch('/api/org', { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) { setDeleteError(json.error ?? 'Failed to delete organization'); return }
+      const supabase = createClient()
+      await supabase.auth.signOut()
+      router.push('/')
+    } finally {
+      setDeleting(false)
+    }
+  }, [router])
 
   const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
     setServiceSaving(true)
@@ -1313,6 +1337,29 @@ export default function SettingsPage() {
                 </form>
               )}
 
+              {/* ── Danger Zone (owner only, shown below General form) ── */}
+              {activeTab === 'general' && role === 'owner' && (
+                <div
+                  className="rounded-2xl p-6"
+                  style={{ background: '#1a1d26', border: '1px solid rgba(239,68,68,0.2)' }}
+                >
+                  <div className="flex items-center gap-2 mb-3">
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                    <h2 className="text-sm font-semibold text-red-400">Danger Zone</h2>
+                  </div>
+                  <p className="text-xs text-slate-500 mb-4">
+                    Permanently delete your organization and all associated data. This action cannot be undone.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => { setDeleteConfirmText(''); setDeleteError(null); setShowDeleteModal(true) }}
+                    className="px-4 py-2 rounded-lg text-sm font-semibold border border-red-700/60 text-red-400 hover:bg-red-900/20 transition-all duration-150"
+                  >
+                    Delete Organization
+                  </button>
+                </div>
+              )}
+
               {/* ── Services ── */}
               {activeTab === 'services' && (
                 <div className="space-y-4">
@@ -1426,6 +1473,84 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {/* ── Delete Org Modal ── */}
+      {showDeleteModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl p-6 space-y-4"
+            style={{ background: '#1a1d26', border: '1px solid rgba(239,68,68,0.3)' }}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-900/30 border border-red-700/40 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-4 h-4 text-red-400" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-white">Delete Organization?</h2>
+                <p className="text-xs text-slate-500 mt-0.5">This action is permanent and cannot be undone.</p>
+              </div>
+            </div>
+
+            <ul className="text-xs text-slate-400 space-y-1.5 pl-1">
+              {[
+                'All jobs and appointment history',
+                'All clients and technicians',
+                'All services and SMS messages',
+                'All team members and invitations',
+                'Your active Stripe subscription',
+              ].map(item => (
+                <li key={item} className="flex items-center gap-2">
+                  <X className="w-3 h-3 text-red-500 shrink-0" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                Type <span className="text-white font-bold">{org?.businessName ?? 'your organization name'}</span> to confirm
+              </label>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={e => setDeleteConfirmText(e.target.value)}
+                placeholder={org?.businessName ?? ''}
+                className="w-full bg-slate-800/80 border border-slate-600/60 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-600 outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-500/40 transition-all"
+                autoFocus
+              />
+            </div>
+
+            {deleteError && (
+              <div className="px-3 py-2.5 rounded-lg bg-red-900/30 border border-red-700/40 text-xs text-red-400">
+                {deleteError}
+              </div>
+            )}
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-semibold border border-white/10 text-slate-300 hover:bg-white/5 transition-all disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteOrg}
+                disabled={deleting || deleteConfirmText.trim().toLowerCase() !== (org?.businessName ?? '').trim().toLowerCase()}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-red-600 hover:bg-red-500 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                {deleting ? 'Deleting…' : 'Delete forever'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
