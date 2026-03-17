@@ -72,7 +72,7 @@ export async function middleware(request: NextRequest) {
 
     try {
       // Fetch the user's org plan in a single query via their profile
-      const { data: rows } = await supabase
+      const { data: rows, error } = await supabase
         .from('profiles')
         .select('organizations(plan, trial_ends_at, suspended_at, subscription_status, subscription_period_end)')
         .eq('id', user.id)
@@ -80,32 +80,39 @@ export async function middleware(request: NextRequest) {
 
       const org = (rows?.[0] as { organizations: Record<string, unknown> | null } | undefined)?.organizations
 
-      if (org) {
-        const plan = (org.plan as string) ?? 'trial'
-        let active = false
+      // If we fail to load org or hit an error, force re-auth to avoid bypass
+      if (error || !org) {
+        const loginUrl = new URL('/login', request.url)
+        loginUrl.searchParams.set('reason', 'subscription')
+        return clearAuthCookies(NextResponse.redirect(loginUrl))
+      }
 
-        if (org.suspended_at) {
-          active = false
-        } else if (plan === 'gifted') {
-          active = true
-        } else if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
-          active =
-            org.subscription_status === 'active' &&
-            !!org.subscription_period_end &&
-            new Date(org.subscription_period_end as string) > new Date()
-        } else {
-          // trial plan — subscription required, dashboard access not permitted on trial
-          active = false
-        }
+      const plan = (org.plan as string) ?? 'trial'
+      let active = false
 
-        if (!active) {
-          const loginUrl = new URL('/login', request.url)
-          loginUrl.searchParams.set('reason', 'subscription')
-          return clearAuthCookies(NextResponse.redirect(loginUrl))
-        }
+      if (org.suspended_at) {
+        active = false
+      } else if (plan === 'gifted') {
+        active = true
+      } else if (plan === 'starter' || plan === 'pro' || plan === 'enterprise') {
+        active =
+          org.subscription_status === 'active' &&
+          !!org.subscription_period_end &&
+          new Date(org.subscription_period_end as string) > new Date()
+      } else {
+        // trial plan — subscription required, dashboard access not permitted on trial
+        active = false
+      }
+
+      if (!active) {
+        const loginUrl = new URL('/login', request.url)
+        loginUrl.searchParams.set('reason', 'subscription')
+        return clearAuthCookies(NextResponse.redirect(loginUrl))
       }
     } catch {
-      // If the plan check fails, let the request through rather than locking everyone out
+      const loginUrl = new URL('/login', request.url)
+      loginUrl.searchParams.set('reason', 'subscription')
+      return clearAuthCookies(NextResponse.redirect(loginUrl))
     }
   }
 
