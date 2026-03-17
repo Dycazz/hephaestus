@@ -1175,12 +1175,12 @@ export default function SettingsPage() {
     <div className="min-h-screen bg-black text-white">
 
       {/* Header */}
-      <header style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+      <header className="border-b border-white/10 bg-black/90">
         <div className="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/dashboard"
-              className="flex items-center gap-1.5 text-xs font-medium text-slate-400 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-white/6"
+              className="flex items-center gap-1.5 text-xs font-medium text-white/50 hover:text-white transition-colors px-2 py-1.5 rounded-lg hover:bg-white/5"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Dashboard
@@ -1188,7 +1188,7 @@ export default function SettingsPage() {
             <div className="w-px h-4 bg-white/10" />
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center">
-                <Settings2 className="w-3.5 h-3.5 text-slate-400" />
+                <Settings2 className="w-3.5 h-3.5 text-orange-300" />
               </div>
               <span className="text-sm font-semibold text-white/90">Settings</span>
             </div>
