@@ -84,8 +84,8 @@ export async function middleware(request: NextRequest) {
             !!org.subscription_period_end &&
             new Date(org.subscription_period_end as string) > new Date()
         } else {
-          // trial
-          active = !!org.trial_ends_at && new Date(org.trial_ends_at as string) > new Date()
+          // trial plan — subscription required, dashboard access not permitted on trial
+          active = false
         }
 
         if (!active) {

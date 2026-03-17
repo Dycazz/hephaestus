@@ -43,6 +43,13 @@ export async function GET() {
     })
   }
 
+  if (access.plan === 'trial') {
+    return NextResponse.json({
+      allowed: false,
+      reason: 'A subscription is required. Please subscribe at hephaestus.work to continue.',
+    })
+  }
+
   if (!access.active) {
     if (access.plan === 'trial') {
       return NextResponse.json({
