@@ -20,6 +20,7 @@ export const mockAppointments: Appointment[] = [
     technician: 'Dave Kowalski',
     address: '142 Maple Ave',
     status: 'confirmed',
+    autoReminder: true,
     prepChecklist: [
       'Clear all items from under the kitchen sink',
       'Turn off water supply valve under sink',
@@ -63,6 +64,7 @@ export const mockAppointments: Appointment[] = [
     technician: 'Maria Santos',
     address: '88 Birchwood Dr',
     status: 'confirmed',
+    autoReminder: true,
     prepChecklist: [
       'Locate your air filter — we will inspect and replace if needed',
       'Clear 3-ft clearance around your outdoor AC unit',
@@ -106,6 +108,7 @@ export const mockAppointments: Appointment[] = [
     technician: 'James Lee',
     address: '310 Oak Street',
     status: 'reminder_sent',
+    autoReminder: true,
     prepChecklist: [
       'Ensure your breaker panel is fully accessible',
       'Have a list of outlets or switches needing work',
@@ -135,6 +138,7 @@ export const mockAppointments: Appointment[] = [
     technician: 'Dave Kowalski',
     address: '57 Elm Court, Unit 4B',
     status: 'reminder_sent',
+    autoReminder: true,
     prepChecklist: [
       'Clear out the bathroom vanity cabinet completely',
       'Have towels nearby — minor water spillage may occur',
@@ -164,6 +168,7 @@ export const mockAppointments: Appointment[] = [
     technician: 'Maria Santos',
     address: '29 Pinecrest Blvd',
     status: 'at_risk',
+    autoReminder: true,
     prepChecklist: [
       'Locate your thermostat and note any error codes',
       'Clear access to attic entry if applicable',
