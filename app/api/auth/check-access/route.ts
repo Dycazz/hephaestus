@@ -37,14 +37,8 @@ export async function GET() {
   const access = await getOrgPlanAccess(profile.org_id, admin)
 
   const clearAuthCookies = (res: NextResponse) => {
-    res.cookies.set('heph_auth', '', { path: '/', maxAge: 0 })
-    // Clear any Supabase auth cookies this client might have set during sign-in
-    const cookieStore = supabase.cache?.cookies ?? []
-    const cookiesArray = Array.isArray(cookieStore) ? cookieStore : []
-    cookiesArray.forEach(({ name }) => {
-      if (name.startsWith('sb-')) {
-        res.cookies.set(name, '', { path: '/', maxAge: 0 })
-      }
+    ;['heph_auth', 'sb-access-token', 'sb-refresh-token'].forEach((name) => {
+      res.cookies.set(name, '', { path: '/', maxAge: 0 })
     })
     return res
   }
@@ -64,12 +58,6 @@ export async function GET() {
   }
 
   if (!access.active) {
-    if (access.plan === 'trial') {
-      return clearAuthCookies(NextResponse.json({
-        allowed: false,
-        reason: 'Your free trial has ended. Please subscribe at hephaestus.work to continue.',
-      }))
-    }
     return clearAuthCookies(NextResponse.json({
       allowed: false,
       reason: 'Your subscription is inactive. Please update your billing at hephaestus.work.',
