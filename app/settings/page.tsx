@@ -85,7 +85,7 @@ function SaveButton({ saving, saved }: { saving: boolean; saved: boolean }) {
       type="submit"
       disabled={saving}
       className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 disabled:opacity-60"
-      style={{ background: saved ? '#059669' : '#2563eb', color: 'white' }}
+      style={{ background: saved ? '#f59e0b' : '#f97316', color: 'black' }}
     >
       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
       {saving ? 'Saving…' : saved ? 'Saved!' : 'Save changes'}
@@ -96,8 +96,7 @@ function SaveButton({ saving, saved }: { saving: boolean; saved: boolean }) {
 function SectionCard({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className="rounded-2xl p-6"
-      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
+      className="rounded-2xl border border-white/10 bg-black/70 p-6"
     >
       {children}
     </div>
@@ -105,7 +104,7 @@ function SectionCard({ children }: { children: React.ReactNode }) {
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <label className="block text-xs font-semibold text-slate-400 mb-1.5">{children}</label>
+  return <label className="block text-xs font-semibold text-white/50 mb-1.5">{children}</label>
 }
 
 function TextInput({ value, onChange, placeholder, type = 'text' }: {
@@ -117,7 +116,7 @@ function TextInput({ value, onChange, placeholder, type = 'text' }: {
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className="w-full bg-slate-800/80 border border-slate-600/60 rounded-lg px-3 py-2.5 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500/60 focus:border-blue-500/60 transition-all"
+      className="w-full bg-black/60 border border-white/10 rounded-lg px-3 py-2.5 text-sm text-white placeholder-white/40 outline-none focus:ring-2 focus:ring-orange-500/30 focus:border-orange-400 transition-all"
     />
   )
 }
@@ -1173,7 +1172,7 @@ export default function SettingsPage() {
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen" style={{ background: '#111318' }}>
+    <div className="min-h-screen bg-black text-white">
 
       {/* Header */}
       <header style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
