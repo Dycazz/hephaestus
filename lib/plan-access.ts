@@ -75,7 +75,7 @@ export async function getOrgPlanAccess(
     const periodEnd = org.subscription_period_end ? new Date(org.subscription_period_end) : null
     const isStatusActive = status === 'active' || status === 'trialing'
     const isPeriodValid = !periodEnd || periodEnd > new Date()
-    const isActive = isStatusActive && isPeriodValid
+    const isActive = (status ? isStatusActive : true) && isPeriodValid
 
     return { suspended: false, plan, active: isActive }
   }

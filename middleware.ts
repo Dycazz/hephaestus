@@ -112,7 +112,7 @@ export async function middleware(request: NextRequest) {
           const periodEnd = org.subscription_period_end ? new Date(org.subscription_period_end as string) : null
           const isStatusActive = status === 'active' || status === 'trialing'
           const isPeriodValid = !periodEnd || periodEnd > new Date()
-          active = isStatusActive && isPeriodValid
+          active = (status ? isStatusActive : true) && isPeriodValid
         } else {
         // trial plan — subscription required, dashboard access not permitted on trial
         active = false
