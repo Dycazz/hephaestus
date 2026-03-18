@@ -20,7 +20,7 @@ interface OrgData {
   slug: string
   plan: 'trial' | 'starter' | 'pro' | 'enterprise' | 'gifted'
   reviewUrl: string | null
-  twilioPhoneNumber?: string | null
+  smsPhoneNumber?: string | null
   reminderHoursBefore: number
   createdAt: string
   // Subscription fields
@@ -1069,7 +1069,7 @@ export default function SettingsPage() {
             slug: o.slug,
             plan: o.plan,
             reviewUrl: o.review_url,
-            twilioPhoneNumber: o.twilio_phone_number,
+            smsPhoneNumber: o.sms_phone_number,
             reminderHoursBefore: o.reminder_hours_before ?? 24,
             createdAt: o.created_at,
             stripeCustomerId: o.stripe_customer_id ?? null,

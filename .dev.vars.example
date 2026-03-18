@@ -9,8 +9,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 NEXT_PUBLIC_APP_URL=http://localhost:8788
 
-TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
-TWILIO_PHONE_NUMBER=+1XXXXXXXXXX
+CLICKSEND_USERNAME=your_clicksend_email_here
+CLICKSEND_API_KEY=your_clicksend_api_key_here
+CLICKSEND_FROM_NUMBER=+1XXXXXXXXXX
+CLICKSEND_WEBHOOK_SECRET=a_random_secret_string
 
 CRON_SECRET=a_long_random_secret_for_cron_endpoints

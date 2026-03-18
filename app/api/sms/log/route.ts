@@ -15,7 +15,7 @@ const LogSchema = z.object({
 /**
  * POST /api/sms/log
  * Writes a simulated (or manually triggered) SMS message to the
- * sms_messages table without sending anything via Twilio.
+ * sms_messages table without sending anything via ClickSend.
  * Used by the dashboard to persist reminder / reply / review messages.
  */
 export async function POST(request: NextRequest) {

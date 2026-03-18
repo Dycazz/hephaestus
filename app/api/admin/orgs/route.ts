@@ -29,7 +29,7 @@ export async function GET(_request: NextRequest) {
   // Fetch all orgs
   const { data: orgs, error: orgsError } = await admin
     .from('organizations')
-    .select('id, name, slug, business_name, plan, trial_ends_at, suspended_at, twilio_phone_number, created_at')
+    .select('id, name, slug, business_name, plan, trial_ends_at, suspended_at, sms_phone_number, created_at')
     .order('created_at', { ascending: false })
 
   if (orgsError || !orgs) {
@@ -69,7 +69,7 @@ export async function GET(_request: NextRequest) {
     member_count: memberCountMap[org.id] ?? 0,
     appt_count_total: apptTotalMap[org.id] ?? 0,
     appt_count_30d: appt30dMap[org.id] ?? 0,
-    has_twilio: !!org.twilio_phone_number,
+    has_sms: !!org.sms_phone_number,
   }))
 
   return NextResponse.json({ orgs: result })

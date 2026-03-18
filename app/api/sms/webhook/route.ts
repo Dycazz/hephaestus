@@ -1,53 +1,59 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { validateTwilioSignature } from '@/lib/sms'
-import { confirmationTemplate, rescheduleTemplate } from '@/lib/sms-templates'
 import { sendSMS } from '@/lib/sms'
+import { confirmationTemplate, rescheduleTemplate } from '@/lib/sms-templates'
 import { notifyDispatcherSmsReply } from '@/lib/notifications'
 
 /**
  * POST /api/sms/webhook
- * Twilio calls this URL for every inbound SMS to your Twilio number.
- * Configure in Twilio Console → Phone Numbers → Messaging → Webhook URL.
- *
- * Flow:
- *   "1"  → mark appointment confirmed, send confirmation text
- *   "2"  → mark appointment rescheduling, send reschedule link
- *   else → ignore (or log)
+ * ClickSend calls this URL for every inbound SMS to your number.
+ * Configure in ClickSend Dashboard → SMS → Settings → Inbound SMS Webhook.
  */
 export async function POST(request: NextRequest) {
-  // Parse Twilio's application/x-www-form-urlencoded body
-  const formData = await request.formData()
-  const params: Record<string, string> = {}
-  formData.forEach((value, key) => { params[key] = value.toString() })
+  let fromNumber: string | null = null
+  let toNumber: string | null = null
+  let body = ''
 
-  const fromNumber = params.From   // customer's phone
-  const toNumber   = params.To     // your Twilio number
-  const body       = (params.Body ?? '').trim()
+  const contentType = request.headers.get('content-type') || ''
 
-  // Validate Twilio signature in production
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  if (authToken && process.env.NODE_ENV === 'production') {
-    const signature = request.headers.get('x-twilio-signature') ?? ''
-    const url = `${process.env.NEXT_PUBLIC_APP_URL}/api/sms/webhook`
-    if (!validateTwilioSignature({ authToken, signature, url, params })) {
+  // Validate URL secret in production
+  if (process.env.NODE_ENV === 'production') {
+    const secret = new URL(request.url).searchParams.get('secret')
+    if (secret !== process.env.CLICKSEND_WEBHOOK_SECRET) {
       return new NextResponse('Forbidden', { status: 403 })
     }
+  }
+
+  if (contentType.includes('application/json')) {
+    const json = await request.json()
+    fromNumber = json.from || null
+    toNumber = json.to || null
+    body = (json.body || '').trim()
+  } else {
+    const form = await request.formData()
+    fromNumber = (form.get('from') || form.get('From')) as string | null
+    toNumber = (form.get('to') || form.get('To')) as string | null
+    body = ((form.get('body') || form.get('Text')) as string || '').trim()
+  }
+
+  if (!fromNumber || !toNumber) {
+    console.warn('[Webhook] Missing from/to number in payload')
+    return NextResponse.json({}, { status: 200 })
   }
 
   // Use service role to bypass RLS — webhook has no user session
   const supabase = await createClient(true)
 
-  // Find which org owns this Twilio number
+  // Find which org owns this SMS number
   const { data: org } = await supabase
     .from('organizations')
     .select('id, business_name, review_url')
-    .eq('twilio_phone_number', toNumber)
+    .eq('sms_phone_number', toNumber)
     .single()
 
   if (!org) {
-    console.warn('[Webhook] No org found for Twilio number:', toNumber)
-    return twimlResponse('')  // empty TwiML = no auto-reply
+    console.warn('[Webhook] No org found for SMS number:', toNumber)
+    return NextResponse.json({}, { status: 200 })
   }
 
   // Find the most recent active appointment for this customer phone
@@ -151,7 +157,10 @@ export async function POST(request: NextRequest) {
       delivery_status: 'sent',
     })
 
-    return twimlResponse(confirmMsg)
+    // Send reply via ClickSend
+    await sendSMS({ to: fromNumber, body: confirmMsg, from: toNumber })
+
+    return NextResponse.json({}, { status: 200 })
   }
 
   if (appt && (reply === '2' || reply === 'no' || reply === 'reschedule')) {
@@ -182,16 +191,12 @@ export async function POST(request: NextRequest) {
       delivery_status: 'sent',
     })
 
-    return twimlResponse(rescheduleMsg)
+    // Send reply via ClickSend
+    await sendSMS({ to: fromNumber, body: rescheduleMsg, from: toNumber })
+
+    return NextResponse.json({}, { status: 200 })
   }
 
   // Unrecognised reply — no auto-response
-  return twimlResponse('')
-}
-
-function twimlResponse(message: string) {
-  const xml = message
-    ? `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${message}</Message></Response>`
-    : `<?xml version="1.0" encoding="UTF-8"?><Response></Response>`
-  return new NextResponse(xml, { headers: { 'Content-Type': 'text/xml' } })
+  return NextResponse.json({}, { status: 200 })
 }

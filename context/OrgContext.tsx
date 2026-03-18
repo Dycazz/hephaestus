@@ -9,7 +9,7 @@ interface Org {
   slug: string
   plan: string
   reviewUrl: string | null
-  twilioPhoneNumber: string | null
+  smsPhoneNumber: string | null
   userRole: 'owner' | 'dispatcher' | 'viewer' | 'technician' | null
   userTechnicianId: string | null
 }
@@ -59,7 +59,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
           slug: orgRow.slug,
           plan: orgRow.plan,
           reviewUrl: orgRow.review_url,
-          twilioPhoneNumber: orgRow.twilio_phone_number,
+          smsPhoneNumber: orgRow.sms_phone_number,
           userRole: profile.role as 'owner' | 'dispatcher' | 'viewer' | 'technician',
           userTechnicianId: tech?.id ?? null,
         })

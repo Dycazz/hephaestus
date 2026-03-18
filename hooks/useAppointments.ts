@@ -141,7 +141,7 @@ export function useAppointments(viewAs?: string | null) {
 
   /**
    * Persists one or more SMS messages to the sms_messages table without
-   * invoking Twilio. Used for simulated replies and local reminder logging.
+   * invoking ClickSend. Used for simulated replies and local reminder logging.
    * Fires-and-forgets — UI is already updated optimistically.
    */
   const logMessages = useCallback(async (appointmentId: string, messages: SmsLogEntry[]) => {

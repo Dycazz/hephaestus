@@ -12,12 +12,12 @@ interface OrgRow {
   plan: string
   trial_ends_at: string | null
   suspended_at: string | null
-  twilio_phone_number: string | null
+  sms_phone_number: string | null
   created_at: string
   member_count: number
   appt_count_total: number
   appt_count_30d: number
-  has_twilio: boolean
+  has_sms: boolean
 }
 
 const PLAN_STYLES: Record<string, { label: string; bg: string; text: string; border: string }> = {
@@ -238,7 +238,7 @@ export default function AdminOrgsPage() {
         <table className="w-full text-sm">
           <thead>
             <tr style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-              {['Organization', 'Plan', 'Trial ends', 'Members', 'Appts (30d)', 'Twilio', 'Created', ''].map(h => (
+              {['Organization', 'Plan', 'Trial ends', 'Members', 'Appts (30d)', 'SMS', 'Created', ''].map(h => (
                 <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   {h}
                 </th>
@@ -322,9 +322,9 @@ export default function AdminOrgsPage() {
                   <span className="text-xs text-slate-600 ml-1">/ {org.appt_count_total}</span>
                 </td>
 
-                {/* Twilio */}
+                {/* SMS */}
                 <td className="px-4 py-3">
-                  {org.has_twilio
+                  {org.has_sms
                     ? <Wifi className="w-4 h-4 text-green-400" />
                     : <WifiOff className="w-4 h-4 text-slate-600" />
                   }

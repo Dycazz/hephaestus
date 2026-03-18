@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
   // Fetch appointment + client + technician + org
   const { data: appt, error: apptErr } = await supabase
     .from('appointments')
-    .select(`*, clients(name, phone), technicians(name), organizations(business_name, twilio_phone_number)`)
+    .select(`*, clients(name, phone), technicians(name), organizations(business_name, sms_phone_number)`)
     .eq('id', appointmentId)
     .single()
 
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
   const client = appt.clients as { name: string; phone: string } | null
   const tech = appt.technicians as { name: string } | null
-  const org = appt.organizations as { business_name: string; twilio_phone_number: string | null } | null
+  const org = appt.organizations as { business_name: string; sms_phone_number: string | null } | null
 
   if (!client?.phone) return NextResponse.json({ error: 'No customer phone number' }, { status: 400 })
 
@@ -56,20 +56,20 @@ export async function POST(request: NextRequest) {
     prepChecklist: (appt.prep_checklist as string[]) ?? [],
   })
 
-  // Send via Twilio
-  let twilioSid: string | null = null
+  // Send via ClickSend
+  let providerSid: string | null = null
   let deliveryStatus = 'queued'
 
   try {
-    twilioSid = await sendSMS({
+    providerSid = await sendSMS({
       to: client.phone,
       body: messageBody,
-      from: org?.twilio_phone_number ?? undefined,
+      from: org?.sms_phone_number ?? undefined,
     })
     deliveryStatus = 'sent'
   } catch (err) {
-    // In dev without Twilio credentials, log and continue so UI still updates
-    console.warn('[SMS] Twilio not configured — message not sent:', (err as Error).message)
+    // In dev without credentials, log and continue so UI still updates
+    console.warn('[SMS] ClickSend not configured — message not sent:', (err as Error).message)
     deliveryStatus = 'dev_skipped'
   }
 
@@ -82,10 +82,10 @@ export async function POST(request: NextRequest) {
       direction: 'outbound',
       body: messageBody,
       message_type: type,
-      twilio_sid: twilioSid,
+      provider_sid: providerSid,
       delivery_status: deliveryStatus,
       to_number: client.phone,
-      from_number: org?.twilio_phone_number ?? process.env.TWILIO_PHONE_NUMBER ?? null,
+      from_number: org?.sms_phone_number ?? process.env.CLICKSEND_FROM_NUMBER ?? null,
     })
     .select()
     .single()
@@ -98,5 +98,5 @@ export async function POST(request: NextRequest) {
       .eq('id', appointmentId)
   }
 
-  return NextResponse.json({ message: msg, twilioSid, deliveryStatus }, { status: 201 })
+  return NextResponse.json({ message: msg, providerSid, deliveryStatus }, { status: 201 })
 }

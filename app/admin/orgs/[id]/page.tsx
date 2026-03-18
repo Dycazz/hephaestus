@@ -15,7 +15,7 @@ interface OrgDetail {
   plan: string
   trial_ends_at: string | null
   suspended_at: string | null
-  twilio_phone_number: string | null
+  sms_phone_number: string | null
   review_url: string | null
   created_at: string
 }
@@ -197,7 +197,7 @@ export default function OrgDetailPage() {
               {[
                 { label: 'Plan', value: <span style={{ color: planColor }} className="font-bold capitalize">{org.plan}</span> },
                 { label: 'Trial ends', value: org.trial_ends_at ? formatDate(org.trial_ends_at) : '—' },
-                { label: 'Twilio', value: org.twilio_phone_number ?? 'Not configured' },
+                { label: 'SMS Number', value: org.sms_phone_number ?? 'Not configured' },
                 { label: 'Review URL', value: org.review_url ? <a href={org.review_url} target="_blank" rel="noreferrer" className="text-orange-300 hover:underline truncate flex items-center gap-1"><ExternalLink className="w-3 h-3" />Configured</a> : '—' },
                 { label: 'Org ID', value: <span className="font-mono text-[11px] text-slate-500">{org.id}</span> },
                 { label: 'Created', value: formatDate(org.created_at) },

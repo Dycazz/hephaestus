@@ -1,9 +1,7 @@
-import twilio from 'twilio'
-
 /**
- * Send an outbound SMS via Twilio.
- * Returns the Twilio message SID on success.
- * Throws on failure.
+ * Send an outbound SMS via ClickSend.
+ * Returns the ClickSend message_id on success.
+ * Throws if credentials are missing or the API call fails.
  */
 export async function sendSMS({
   to,
@@ -12,41 +10,46 @@ export async function sendSMS({
 }: {
   to: string
   body: string
-  from?: string   // defaults to env TWILIO_PHONE_NUMBER
+  from?: string   // defaults to env CLICKSEND_FROM_NUMBER
 }): Promise<string> {
-  const accountSid = process.env.TWILIO_ACCOUNT_SID
-  const authToken = process.env.TWILIO_AUTH_TOKEN
-  const fromNumber = from ?? process.env.TWILIO_PHONE_NUMBER
+  const username = process.env.CLICKSEND_USERNAME
+  const apiKey   = process.env.CLICKSEND_API_KEY
+  const fromNum  = from ?? process.env.CLICKSEND_FROM_NUMBER
 
-  if (!accountSid || !authToken || !fromNumber) {
-    throw new Error('Twilio credentials not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE_NUMBER in .env.local')
+  if (!username || !apiKey) {
+    throw new Error(
+      'ClickSend credentials not configured. Set CLICKSEND_USERNAME and CLICKSEND_API_KEY in .env.local',
+    )
   }
 
-  const client = twilio(accountSid, authToken)
+  const payload = {
+    messages: [
+      {
+        to,
+        body,
+        from: fromNum || undefined,  // ClickSend uses a shared pool if omitted
+        source: 'hephaestus-work',
+      },
+    ],
+  }
 
-  const message = await client.messages.create({
-    to,
-    from: fromNumber,
-    body,
+  const auth = Buffer.from(`${username}:${apiKey}`).toString('base64')
+
+  const resp = await fetch('https://rest.clicksend.com/v3/sms/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Basic ${auth}`,
+    },
+    body: JSON.stringify(payload),
   })
 
-  return message.sid
-}
+  if (!resp.ok) {
+    const errText = await resp.text()
+    throw new Error(`ClickSend API error: ${resp.status} — ${errText}`)
+  }
 
-/**
- * Validate an inbound Twilio webhook signature.
- * Returns true if the request is genuinely from Twilio.
- */
-export function validateTwilioSignature({
-  authToken,
-  signature,
-  url,
-  params,
-}: {
-  authToken: string
-  signature: string
-  url: string
-  params: Record<string, string>
-}): boolean {
-  return twilio.validateRequest(authToken, signature, url, params)
+  const data = await resp.json()
+  // ClickSend response: { data: { messages: [{ message_id, status, ... }] } }
+  return (data?.data?.messages?.[0]?.message_id as string) ?? ''
 }
