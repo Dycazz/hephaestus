@@ -15,6 +15,7 @@ interface KanbanBoardProps {
   onReschedule: (id: string) => void
   onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
+  readOnly?: boolean
 }
 
 interface ColumnProps {
@@ -34,6 +35,7 @@ interface ColumnProps {
   onReschedule: (id: string) => void
   onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
+  readOnly?: boolean
 }
 
 function Column({
@@ -53,27 +55,32 @@ function Column({
   onReschedule,
   onScheduleFollowUp,
   onAssignTechnician,
+  readOnly = false,
 }: ColumnProps) {
   return (
     <div className="flex flex-col gap-3">
-      <div className={`flex items-center justify-between rounded-xl border p-3 ${headerBg} border-l-4 ${accentBorder}`}>
-        <div className="flex items-center gap-2.5">
-          {icon}
+      <div className={`flex items-center justify-between rounded-xl border p-3 ${headerBg} border-l-4 ${accentBorder} shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md`}>
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 border border-white/5 shadow-inner">
+            {icon}
+          </div>
           <div>
-            <p className="text-sm font-semibold text-white">{title}</p>
-            <p className="text-xs text-white/50">{subtitle}</p>
+            <p className="text-sm font-bold text-white tracking-tight">{title}</p>
+            <p className="text-[10px] uppercase tracking-wider text-white/40 font-medium">{subtitle}</p>
           </div>
         </div>
-        <span className={`text-2xl font-bold tabular-nums ${accentColor}`}>{count}</span>
+        <span className={`text-2xl font-black tabular-nums ${accentColor} drop-shadow-sm`}>{count}</span>
       </div>
 
       {appointments.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-white/10 bg-white/5 p-8 text-center">
-          <div className="mb-1 flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/5 bg-white/[0.02] p-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/5 text-white/20">
             {icon}
           </div>
-          <p className="text-xs font-medium text-white/50">No appointments here</p>
-          <p className="text-[11px] text-white/35">{subtitle}</p>
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-white/40 tracking-tight text-balance">No active jobs in this stage</p>
+            <p className="text-[10px] text-white/25 leading-relaxed max-w-[12rem] mx-auto">{subtitle}</p>
+          </div>
         </div>
       ) : (
         appointments.map((appt) => (
@@ -88,6 +95,7 @@ function Column({
             onReschedule={onReschedule}
             onScheduleFollowUp={onScheduleFollowUp}
             onAssignTechnician={onAssignTechnician}
+            readOnly={readOnly}
           />
         ))
       )}
@@ -105,6 +113,7 @@ export function KanbanBoard({
   onReschedule,
   onScheduleFollowUp,
   onAssignTechnician,
+  readOnly = false,
 }: KanbanBoardProps) {
   const confirmed = appointments.filter(a => a.status === 'confirmed')
   const pending = appointments.filter(
@@ -133,6 +142,7 @@ export function KanbanBoard({
           onReschedule={onReschedule}
           onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
+          readOnly={readOnly}
         />
 
         <Column
@@ -152,6 +162,7 @@ export function KanbanBoard({
           onReschedule={onReschedule}
           onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
+          readOnly={readOnly}
         />
 
         <Column
@@ -171,6 +182,7 @@ export function KanbanBoard({
           onReschedule={onReschedule}
           onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
+          readOnly={readOnly}
         />
       </div>
 
@@ -196,6 +208,7 @@ export function KanbanBoard({
                 onReschedule={onReschedule}
                 onScheduleFollowUp={onScheduleFollowUp}
                 onAssignTechnician={onAssignTechnician}
+                readOnly={readOnly}
               />
             ))}
           </div>

@@ -12,6 +12,7 @@ interface CalendarViewProps {
   onCalendarDateChange: (date: string) => void
   onSelectAppointment: (id: string) => void
   onAddAtSlot: (technicianId: string, technicianName: string, time: string, date: string) => void
+  readOnly?: boolean
 }
 
 // ─── Date helpers ──────────────────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export function CalendarView({
   onCalendarDateChange,
   onSelectAppointment,
   onAddAtSlot,
+  readOnly = false,
 }: CalendarViewProps) {
   const todayISO = toISODate(new Date())
   const displayDate = formatDisplayDate(calendarDate)
@@ -246,7 +248,7 @@ export function CalendarView({
                           {style.badgeText}
                         </span>
                       </button>
-                    ) : (
+                    ) : !readOnly ? (
                       <button
                         onClick={() => onAddAtSlot(tech.id, tech.name, time, calendarDate)}
                         className="w-full h-full min-h-[52px] rounded-lg border border-dashed flex flex-col items-center justify-center gap-0.5 transition-all duration-150 group"
@@ -267,6 +269,8 @@ export function CalendarView({
                           Book slot
                         </span>
                       </button>
+                    ) : (
+                      <div className="w-full h-full min-h-[52px]" />
                     )}
                   </div>
                 )

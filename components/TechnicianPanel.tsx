@@ -73,7 +73,8 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
   const [invitations, setInvitations] = useState<Invitation[]>([])
   const [inviteLoading, setInviteLoading] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'dispatcher' | 'viewer'>('dispatcher')
+  const [inviteRole, setInviteRole] = useState<'dispatcher' | 'viewer' | 'technician'>('dispatcher')
+  const [selectedTechId, setSelectedTechId] = useState<string | null>(null)
   const [inviteSending, setInviteSending] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
   const [copiedToken, setCopiedToken] = useState<string | null>(null)
@@ -169,7 +170,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
     const res = await fetch('/api/invitations', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole }),
+      body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole, technicianId: selectedTechId }),
     })
     const json = await res.json()
 
@@ -389,8 +390,8 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-400 mb-1">Role</label>
-                <div className="flex gap-2">
-                  {(['dispatcher', 'viewer'] as const).map(r => (
+                <div className="flex gap-2 mb-3">
+                  {(['dispatcher', 'viewer', 'technician'] as const).map(r => (
                     <button
                       key={r}
                       onClick={() => setInviteRole(r)}
@@ -404,10 +405,32 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                     </button>
                   ))}
                 </div>
+
+                {inviteRole === 'technician' && (
+                  <div className="mb-3 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <label className="block text-xs font-semibold text-slate-400 mb-1">Link to Technician</label>
+                    <select
+                      value={selectedTechId ?? ''}
+                      onChange={e => setSelectedTechId(e.target.value || null)}
+                      className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select a technician...</option>
+                      {technicians.map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-slate-500 mt-1">
+                      The user will be restricted to viewing only their own assigned appointments.
+                    </p>
+                  </div>
+                )}
+
                 <p className="text-xs text-slate-600 mt-1.5">
                   {inviteRole === 'dispatcher'
                     ? 'Can view and manage all appointments'
-                    : 'Can view appointments (read-only)'}
+                    : inviteRole === 'viewer'
+                    ? 'Can view appointments (read-only)'
+                    : 'Can view only their own assigned appointments (read-only)'}
                 </p>
               </div>
 

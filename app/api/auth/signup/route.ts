@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     // Validate invitation token
     const { data: invitation, error: inviteError } = await supabaseAdmin
       .from('invitations')
-      .select('id, org_id, email, role, accepted_at, expires_at')
+      .select('id, org_id, email, role, accepted_at, expires_at, technician_id')
       .eq('token', invitationToken)
       .single()
 
@@ -92,6 +92,14 @@ export async function POST(request: NextRequest) {
     if (profileError) {
       await supabaseAdmin.auth.admin.deleteUser(userId)
       return NextResponse.json({ error: 'Failed to set up account' }, { status: 500 })
+    }
+
+    // If this was a technician invitation, link the technician record to the new profile
+    if (invitation.role === 'technician' && invitation.technician_id) {
+      await supabaseAdmin
+        .from('technicians')
+        .update({ profile_id: userId })
+        .eq('id', invitation.technician_id)
     }
 
     // Mark invitation as accepted

@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutGrid, CalendarDays, CalendarRange, Loader2, Eye } from 'lucide-react'
+import { LayoutGrid, CalendarDays, CalendarRange, Eye } from 'lucide-react'
 import { Appointment, Toast, SMSMessage } from '@/types'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
@@ -17,10 +17,13 @@ import { WeekView } from '@/components/WeekView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
 import { useAppointments } from '@/hooks/useAppointments'
 import { useTechnicians } from '@/hooks/useTechnicians'
+import { useOrg } from '@/context/OrgContext'
 import { formatDisplayDate, buildScheduledAt } from '@/lib/dateUtils'
+import { DashboardSkeleton } from '@/components/DashboardSkeleton'
 
 export default function Dashboard() {
   const router = useRouter()
+  const { org } = useOrg()
 
   // Read view_as from URL synchronously on first client render (lazy init)
   const [viewAs] = useState<string | null>(() => {
@@ -328,15 +331,7 @@ export default function Dashboard() {
   )
 
   if (loading) {
-    return (
-      <div
-        className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ background: '#0f1115' }}
-      >
-        <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'rgba(249,115,22,0.6)' }} />
-        <p className="text-sm font-medium tracking-wide fade-in" style={{ color: '#3a3a48' }}>Loading your schedule…</p>
-      </div>
-    )
+    return <DashboardSkeleton />
   }
 
   return (
@@ -416,12 +411,14 @@ export default function Dashboard() {
             onReschedule={handleOpenReschedule}
             onScheduleFollowUp={handleScheduleFollowUp}
             onAssignTechnician={handleAssignTechnician}
+            readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
           />
         ) : view === 'week' ? (
           <WeekView
             appointments={appointments}
             onSelectAppointment={setSelectedId}
             onAddAtSlot={handleAddAtSlotFromWeek}
+            readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
           />
         ) : (
           <CalendarView
@@ -431,6 +428,7 @@ export default function Dashboard() {
             onCalendarDateChange={setCalendarDate}
             onSelectAppointment={setSelectedId}
             onAddAtSlot={handleAddAtSlot}
+            readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
           />
         )}
       </main>
@@ -441,6 +439,7 @@ export default function Dashboard() {
           onClose={() => setSelectedId(null)}
           onMarkComplete={handleMarkComplete}
           onScheduleFollowUp={handleScheduleFollowUp}
+          readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
         />
       )}
 

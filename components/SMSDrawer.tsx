@@ -8,11 +8,12 @@ interface SMSDrawerProps {
   onClose: () => void
   onMarkComplete: (id: string) => void
   onScheduleFollowUp: (appointment: Appointment) => void
+  readOnly?: boolean
 }
 
-export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFollowUp }: SMSDrawerProps) {
-  const canComplete = appointment.status === 'confirmed'
-  const canSendReview = appointment.status === 'completed' && !appointment.reviewRequestSent
+export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFollowUp, readOnly = false }: SMSDrawerProps) {
+  const canComplete = !readOnly && appointment.status === 'confirmed'
+  const canSendReview = !readOnly && appointment.status === 'completed' && !appointment.reviewRequestSent
   const isCompleted = appointment.status === 'completed'
 
   return (
@@ -101,7 +102,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
             </div>
           )}
 
-          {isCompleted && (
+          {isCompleted && !readOnly && (
             <div className="rounded-xl border border-white/10 bg-white/5 p-3">
               <p className="mb-2 text-xs font-medium text-white/50">Follow-up</p>
               <button

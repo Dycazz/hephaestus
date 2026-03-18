@@ -8,6 +8,7 @@ import { Technician } from '@/hooks/useTechnicians'
 interface AppointmentCardProps {
   appointment: Appointment
   technicians: Technician[]
+  readOnly?: boolean
   onSelect: (id: string) => void
   onSendReminder: (id: string) => void
   onMarkComplete: (id: string) => void
@@ -58,6 +59,7 @@ const statusConfig = {
 export function AppointmentCard({
   appointment,
   technicians,
+  readOnly = false,
   onSelect,
   onSendReminder,
   onMarkComplete,
@@ -67,8 +69,8 @@ export function AppointmentCard({
   onAssignTechnician,
 }: AppointmentCardProps) {
   const { badge, label, dot } = statusConfig[appointment.status]
-  const canSendReminder = appointment.status === 'scheduled' || appointment.status === 'at_risk'
-  const canComplete = appointment.status === 'confirmed'
+  const canSendReminder = (appointment.status === 'scheduled' || appointment.status === 'at_risk')
+  const canComplete = ['confirmed', 'scheduled', 'reminder_sent', 'at_risk'].includes(appointment.status)
   const isCompleted = appointment.status === 'completed'
   const canCancel = !['completed', 'cancelled'].includes(appointment.status)
   const canAssign = !['completed', 'cancelled'].includes(appointment.status)
@@ -143,7 +145,7 @@ export function AppointmentCard({
               <span className={isUnassigned ? 'text-slate-500 italic' : ''}>
                 {appointment.technician}
               </span>
-              {canAssign && (
+              {canAssign && !readOnly && (
                 <button
                   onClick={() => setShowTechPicker(v => !v)}
                   className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border transition-all duration-150"
@@ -288,7 +290,13 @@ export function AppointmentCard({
           {canSendReminder && (
             <button
               onClick={() => onSendReminder(appointment.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-blue-900/40"
+              disabled={readOnly}
+              title={readOnly ? "Account permissions required" : ""}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
+                readOnly 
+                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/40'
+              }`}
             >
               Send Reminder
             </button>
@@ -297,7 +305,13 @@ export function AppointmentCard({
           {canComplete && (
             <button
               onClick={() => onMarkComplete(appointment.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-emerald-900/40"
+              disabled={readOnly}
+              title={readOnly ? "Account permissions required" : ""}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
+                readOnly 
+                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/40'
+              }`}
             >
               <Check className="w-3.5 h-3.5" />
               Complete Job
@@ -307,7 +321,13 @@ export function AppointmentCard({
           {isCompleted && (
             <button
               onClick={() => onScheduleFollowUp(appointment)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-indigo-900/40"
+              disabled={readOnly}
+              title={readOnly ? "Account permissions required" : ""}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
+                readOnly 
+                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/40'
+              }`}
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Schedule Follow-up
@@ -317,7 +337,13 @@ export function AppointmentCard({
           {appointment.status === 'rescheduling' && (
             <button
               onClick={() => onReschedule(appointment.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-purple-600 hover:bg-purple-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-purple-900/40"
+              disabled={readOnly}
+              title={readOnly ? "Account permissions required" : ""}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
+                readOnly 
+                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-900/40'
+              }`}
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Pick New Time
@@ -327,7 +353,13 @@ export function AppointmentCard({
           {canCancel && (
             <button
               onClick={() => onCancel(appointment.id)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium hover:bg-red-900/25 hover:text-red-400 hover:border-red-800/50 text-slate-600 rounded-lg transition-all duration-150 ml-auto border border-transparent"
+              disabled={readOnly}
+              title={readOnly ? "Account permissions required" : ""}
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 ml-auto border border-transparent ${
+                readOnly 
+                  ? 'text-slate-700 cursor-not-allowed opacity-50' 
+                  : 'hover:bg-red-900/25 hover:text-red-400 hover:border-red-800/50 text-slate-600'
+              }`}
             >
               <XCircle className="w-3.5 h-3.5" />
               Cancel

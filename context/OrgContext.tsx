@@ -10,6 +10,8 @@ interface Org {
   plan: string
   reviewUrl: string | null
   twilioPhoneNumber: string | null
+  userRole: 'owner' | 'dispatcher' | 'viewer' | 'technician' | null
+  userTechnicianId: string | null
 }
 
 interface OrgContextValue {
@@ -31,11 +33,18 @@ export function OrgProvider({ children }: { children: ReactNode }) {
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('org_id')
+        .select('org_id, role')
         .eq('id', user.id)
         .single()
 
       if (!profile) { setLoading(false); return }
+
+      // Fetch linked technician record for technicians
+      const { data: tech } = await supabase
+        .from('technicians')
+        .select('id')
+        .eq('profile_id', user.id)
+        .maybeSingle()
 
       const { data: orgRow } = await supabase
         .from('organizations')
@@ -51,6 +60,8 @@ export function OrgProvider({ children }: { children: ReactNode }) {
           plan: orgRow.plan,
           reviewUrl: orgRow.review_url,
           twilioPhoneNumber: orgRow.twilio_phone_number,
+          userRole: profile.role as 'owner' | 'dispatcher' | 'viewer' | 'technician',
+          userTechnicianId: tech?.id ?? null,
         })
       }
       setLoading(false)

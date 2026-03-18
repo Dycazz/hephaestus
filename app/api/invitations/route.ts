@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 
 const CreateSchema = z.object({
   email: z.string().email(),
-  role: z.enum(['dispatcher', 'viewer']),
+  role: z.enum(['dispatcher', 'viewer', 'technician']),
+  technicianId: z.string().uuid().optional().nullable(),
 })
 
 // GET /api/invitations — list pending invitations for the current user's org
@@ -22,7 +23,7 @@ export async function GET(_request: NextRequest) {
 
   const { data, error } = await supabase
     .from('invitations')
-    .select('id, email, role, token, created_at, expires_at, accepted_at')
+    .select('id, email, role, token, created_at, expires_at, accepted_at, technician_id')
     .eq('org_id', profile.org_id)
     .is('accepted_at', null)
     .gt('expires_at', new Date().toISOString())
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Insufficient permissions' }, { status: 403 })
   }
 
-  const { email, role } = parsed.data
+  const { email, role, technicianId } = parsed.data
   const normalizedEmail = email.toLowerCase().trim()
 
   // Check for already-pending invite for this email in the same org
@@ -81,6 +82,7 @@ export async function POST(request: NextRequest) {
       org_id: profile.org_id,
       email: normalizedEmail,
       role,
+      technician_id: technicianId ?? null,
       invited_by: user.id,
     })
     .select('id, token')

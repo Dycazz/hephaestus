@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { notifyTechnicianAssigned } from '@/lib/notifications'
+import { sendSMS } from '@/lib/sms'
 
 const UpdateAppointmentSchema = z.object({
   status: z.enum(['scheduled', 'reminder_sent', 'confirmed', 'rescheduling', 'at_risk', 'completed', 'cancelled']).optional(),
@@ -80,14 +81,14 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // ── Fire push notification when a technician is assigned ─────────────────
+  // ── Fire notifications when a technician is assigned ─────────────────────
   if (d.technicianId && data) {
     try {
-      // Fetch push token and customer name in parallel
+      // Fetch tech details and appt context in parallel
       const [techRes, apptRes] = await Promise.all([
         supabase
-          .from('profiles')
-          .select('expo_push_token')
+          .from('technicians')
+          .select('phone, profiles ( expo_push_token )')
           .eq('id', d.technicianId)
           .maybeSingle(),
         supabase
@@ -97,37 +98,47 @@ export async function PATCH(
           .single(),
       ])
 
-      const pushToken = techRes.data?.expo_push_token
-      if (pushToken) {
-        const scheduledAt = new Date((apptRes.data?.scheduled_at as string) ?? data.scheduled_at)
-        const now = new Date()
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-        const tmrw = new Date(today)
-        tmrw.setDate(today.getDate() + 1)
-        const apptDay = new Date(scheduledAt.getFullYear(), scheduledAt.getMonth(), scheduledAt.getDate())
-        const scheduledDate =
-          apptDay.getTime() === today.getTime() ? 'Today' :
-          apptDay.getTime() === tmrw.getTime() ? 'Tomorrow' :
-          scheduledAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        const scheduledTime = scheduledAt.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        })
-        const clientRow = apptRes.data?.clients as unknown as { name: string } | null
+      const techData = techRes.data
+      const pushToken = (techData?.profiles as unknown as { expo_push_token: string | null } | null)?.expo_push_token
+      const apptData = apptRes.data
+      const clientRow = apptData?.clients as unknown as { name: string } | null
+      const scheduledAtStr = (apptData?.scheduled_at as string) ?? data.scheduled_at
+      const scheduledAt = new Date(scheduledAtStr)
+      
+      const scheduledTime = scheduledAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+      const now = new Date()
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const tmrw = new Date(today); tmrw.setDate(today.getDate() + 1)
+      const apptDay = new Date(scheduledAt.getFullYear(), scheduledAt.getMonth(), scheduledAt.getDate())
+      const displayDate =
+        apptDay.getTime() === today.getTime() ? 'Today' :
+        apptDay.getTime() === tmrw.getTime() ? 'Tomorrow' :
+        scheduledAt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 
+      const customerName = clientRow?.name ?? 'Customer'
+      const serviceName = (apptData?.service as string) ?? (data.service as string)
+
+      // 1. Push
+      if (pushToken) {
         await notifyTechnicianAssigned({
           pushToken,
-          customerName: clientRow?.name ?? 'Customer',
-          service: (apptRes.data?.service as string) ?? (data.service as string),
-          scheduledDate,
+          customerName,
+          service: serviceName,
+          scheduledDate: displayDate,
           scheduledTime,
           appointmentId: id,
         })
       }
+
+      // 2. SMS
+      if (techData?.phone) {
+        await sendSMS({
+          to: techData.phone,
+          body: `New job assigned: ${serviceName} for ${customerName} on ${displayDate} at ${scheduledTime}. Check your dashboard for details.`,
+        }).catch(err => console.error('[SMS] Tech notify failed:', err))
+      }
     } catch (notifErr) {
-      // Push failure must never break the response
-      console.error('[Push] Failed to notify technician on assignment:', notifErr)
+      console.error('[Notif] Failed to notify technician on assignment:', notifErr)
     }
   }
   // ─────────────────────────────────────────────────────────────────────────

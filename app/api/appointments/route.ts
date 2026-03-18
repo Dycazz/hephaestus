@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { notifyTechnicianAssigned } from '@/lib/notifications'
+import { sendSMS } from '@/lib/sms'
 import { checkLimit, getOrgPlanAccess } from '@/lib/plan-access'
 
 const CreateAppointmentSchema = z.object({
@@ -215,15 +216,18 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  // Fire-and-forget push notification to the assigned technician (if they have a token)
+  // Fire-and-forget notifications to the assigned technician
   if (d.technicianId && appt) {
     try {
-      const { data: techProfile } = await supabase
-        .from('profiles')
-        .select('expo_push_token')
+      const { data: tech } = await supabase
+        .from('technicians')
+        .select('phone, profiles ( expo_push_token )')
         .eq('id', d.technicianId)
         .maybeSingle()
 
+      const techProfile = (tech?.profiles as unknown as { expo_push_token: string | null } | null)
+
+      // 1. Push notification
       if (techProfile?.expo_push_token) {
         const scheduledAt = new Date(d.scheduledAt)
         const scheduledTime = scheduledAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
@@ -245,9 +249,21 @@ export async function POST(request: NextRequest) {
           appointmentId: appt.id,
         })
       }
+
+      // 2. SMS notification
+      if (tech?.phone) {
+        const scheduledAt = new Date(d.scheduledAt)
+        const scheduledTime = scheduledAt.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+        const scheduledDate = new Date(d.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        
+        await sendSMS({
+          to: tech.phone,
+          body: `New job assigned: ${d.service} for ${d.customerName} on ${scheduledDate} at ${scheduledTime}. Check your dashboard for details.`,
+        }).catch(err => console.error('[SMS] Technician notify failed:', err))
+      }
     } catch (notifErr) {
-      // Push notification failure must never block the response
-      console.error('[Push] Failed to notify technician:', notifErr)
+      // Notification failures must never block the response
+      console.error('[Notif] Failed to notify technician:', notifErr)
     }
   }
 

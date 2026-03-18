@@ -9,6 +9,7 @@ interface WeekViewProps {
   appointments: Appointment[]
   onSelectAppointment: (id: string) => void
   onAddAtSlot?: (isoDate: string, time: string) => void
+  readOnly?: boolean
 }
 
 const HOUR_HEIGHT = 64   // px per hour
@@ -52,7 +53,7 @@ function timeFromY(y: number): string {
   return `${h12}:${String(m).padStart(2, '0')} ${period}`
 }
 
-export function WeekView({ appointments, onSelectAppointment, onAddAtSlot }: WeekViewProps) {
+export function WeekView({ appointments, onSelectAppointment, onAddAtSlot, readOnly = false }: WeekViewProps) {
   const today = toISODate(new Date())
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()))
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -198,10 +199,10 @@ export function WeekView({ appointments, onSelectAppointment, onAddAtSlot }: Wee
                     height: TOTAL_PX,
                     borderLeft: '1px solid rgba(255,255,255,0.05)',
                     backgroundColor: isToday ? 'rgba(59,130,246,0.03)' : undefined,
-                    cursor: onAddAtSlot ? 'pointer' : 'default',
+                    cursor: (onAddAtSlot && !readOnly) ? 'pointer' : 'default',
                   }}
                   onClick={e => {
-                    if (!onAddAtSlot) return
+                    if (!onAddAtSlot || readOnly) return
                     const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
                     const y = e.clientY - rect.top
                     onAddAtSlot(iso, timeFromY(Math.max(0, Math.min(y, TOTAL_PX - 1))))
