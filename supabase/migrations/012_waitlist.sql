@@ -1,5 +1,7 @@
 -- Create waitlist table
-create table if not exists public.waitlist (
+drop table if exists public.waitlist cascade;
+
+create table public.waitlist (
   id uuid primary key default gen_random_uuid(),
   org_id uuid not null references public.organizations(id) on delete cascade,
   customer_name text not null,

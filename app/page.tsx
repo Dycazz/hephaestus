@@ -513,7 +513,7 @@ export default function LandingPage() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { title: 'Booked through the hephaestus.work portal', icon: Phone, desc: 'Log jobs in 15 seconds. Tag the tech. Send the crew.' },
+            { title: 'Have Customers Book Through hephaestus.work Portal', icon: Phone, desc: 'Log jobs in 15 seconds. Tag the tech. Send the crew.' },
             { title: 'The Crew Arrives', icon: LayoutGrid, desc: 'Real-time board tracking. No "where are you?" calls needed.' },
             { title: 'The Review Fires', icon: Star, desc: 'Automatic review requests. Grow your reputation while you sleep.' },
           ].map((step, i) => (
