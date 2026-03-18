@@ -20,7 +20,7 @@ import type {
 } from "@/types";
 
 // Steps in the booking flow
-type BookingStep = "service" | "datetime" | "details" | "confirm" | "success";
+type BookingStep = "service" | "datetime" | "details" | "confirm" | "success" | "waitlist";
 
 interface BookingPageProps {
   link: BookingLink;
@@ -269,6 +269,48 @@ export default function BookingPage({
     }
   };
 
+  const handleWaitlistSubmit = async () => {
+    if (!customerName.trim()) {
+      setError("Please enter your name");
+      return;
+    }
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingLinkId: link.id,
+          customerName: customerName.trim(),
+          customerEmail: customerEmail.trim(),
+          customerPhone: customerPhone.trim(),
+          customerAddress: customerAddress.trim(),
+          serviceId: selectedService?.id,
+          notes: customerNotes.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || "Failed to join waitlist");
+      }
+
+      setSuccessData({
+        bookingId: "WAITLIST",
+        date: "Waitlist",
+        time: "N/A",
+        serviceName: selectedService?.name || "General Service",
+      });
+      setStep("success");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleReset = () => {
     setStep("service");
     setSelectedService(null);
@@ -320,9 +362,13 @@ export default function BookingPage({
               <Check size={40} style={{ color: "#34d399" }} />
             </div>
 
-            <h2 style={{ marginBottom: "0.5rem" }}>Booking Confirmed!</h2>
+            <h2 style={{ marginBottom: "0.5rem" }}>
+              {successData.bookingId === "WAITLIST" ? "Joined Waitlist!" : "Booking Confirmed!"}
+            </h2>
             <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>
-              We&apos;ll be in touch to confirm your appointment.
+              {successData.bookingId === "WAITLIST" 
+                ? "We'll notify you if a spot opens up."
+                : "We'll be in touch to confirm your appointment."}
             </p>
 
             <div
@@ -337,16 +383,27 @@ export default function BookingPage({
               <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Service</p>
               <p style={{ fontWeight: 600, marginBottom: "1rem" }}>{successData.serviceName}</p>
 
-              <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Date &amp; Time</p>
+              <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Status</p>
               <p style={{ fontWeight: 600, marginBottom: "1rem" }}>
-                {successData.date}
-                <br />
-                {formatTime(successData.time)}
+                {successData.bookingId === "WAITLIST" ? "On Waiting List" : "Confirmed"}
               </p>
+
+              {successData.bookingId !== "WAITLIST" && (
+                <>
+                  <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Date &amp; Time</p>
+                  <p style={{ fontWeight: 600, marginBottom: "1rem" }}>
+                    {successData.date}
+                    <br />
+                    {formatTime(successData.time)}
+                  </p>
+                </>
+              )}
 
               <p style={{ fontSize: "0.875rem", color: "var(--text-muted)" }}>Reference</p>
               <p style={{ fontWeight: 600, fontFamily: "monospace" }}>
-                #{successData.bookingId.slice(0, 8).toUpperCase()}
+                {successData.bookingId === "WAITLIST" 
+                  ? "W-" + Math.random().toString(36).substring(7).toUpperCase()
+                  : "#" + successData.bookingId.slice(0, 8).toUpperCase()}
               </p>
             </div>
 
@@ -624,13 +681,132 @@ export default function BookingPage({
                       })}
 
                     {timeSlots.filter((s) => s.available).length === 0 && (
-                      <p style={{ gridColumn: "1 / -1", color: "var(--text-muted)" }}>
-                        No available times for this date
-                      </p>
+                      <div style={{ gridColumn: "1 / -1", textAlign: "center", padding: "2rem 0" }}>
+                        <p style={{ color: "var(--text-muted)", marginBottom: "1rem" }}>
+                          No available times for this date
+                        </p>
+                        <button 
+                          onClick={() => setStep("waitlist")}
+                          className="btn btn-secondary"
+                          style={{ borderColor: link.accent_color, color: link.accent_color }}
+                        >
+                          Join Waitlist for this Day
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
               )}
+            </div>
+            
+            {availableDates.length > 0 && selectedDate && timeSlots.filter(s => s.available).length > 0 && (
+              <div className="mt-xl text-center">
+                <p style={{ color: "var(--text-muted)", fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                  Can&apos;t find a time that works?
+                </p>
+                <button 
+                  onClick={() => setStep("waitlist")}
+                  style={{ color: link.accent_color, fontSize: "0.875rem", fontWeight: 600, textDecoration: "underline" }}
+                >
+                  Join our general waitlist
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ======================================== */}
+        {/* STEP: Waitlist Form */}
+        {/* ======================================== */}
+        {step === "waitlist" && (
+          <div className="animate-fadeIn">
+            <button
+              onClick={() => setStep(selectedDate ? "datetime" : "service")}
+              className="btn btn-ghost mb-md"
+              style={{ marginLeft: "-0.5rem" }}
+            >
+              <ArrowLeft size={18} />
+              Back
+            </button>
+
+            <h2 style={{ marginBottom: "0.5rem" }}>Join the Waitlist</h2>
+            <p style={{ marginBottom: "1.5rem", color: "var(--text-secondary)" }}>
+              We&apos;ll notify you immediately if a spot opens up for {selectedService?.name || "our services"}.
+            </p>
+
+            <div className="flex flex-col gap-md">
+              <div>
+                <label htmlFor="waitlistName">Name *</label>
+                <input
+                  id="waitlistName"
+                  type="text"
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="waitlistPhone">Phone *</label>
+                <input
+                  id="waitlistPhone"
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="(555) 123-4567"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="waitlistEmail">Email</label>
+                <input
+                  id="waitlistEmail"
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="waitlistAddress">Address</label>
+                <input
+                  id="waitlistAddress"
+                  type="text"
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  placeholder="Service address"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="waitlistNotes">Preferred Day/Times or Notes</label>
+                <textarea
+                  id="waitlistNotes"
+                  value={customerNotes}
+                  onChange={(e) => setCustomerNotes(e.target.value)}
+                  placeholder="e.g. afternoons work best, or any day next week..."
+                  rows={3}
+                />
+              </div>
+
+              <button
+                onClick={handleWaitlistSubmit}
+                className="btn btn-primary w-full mt-md"
+                disabled={isSubmitting || !customerName.trim() || !customerPhone.trim()}
+                style={{ background: link.accent_color }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  "Join Waitlist"
+                )}
+              </button>
             </div>
           </div>
         )}

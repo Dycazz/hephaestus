@@ -7,11 +7,13 @@ interface SMSDrawerProps {
   appointment: Appointment
   onClose: () => void
   onMarkComplete: (id: string) => void
+  onScheduleFollowUp: (appointment: Appointment) => void
 }
 
-export function SMSDrawer({ appointment, onClose, onMarkComplete }: SMSDrawerProps) {
+export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFollowUp }: SMSDrawerProps) {
   const canComplete = appointment.status === 'confirmed'
   const canSendReview = appointment.status === 'completed' && !appointment.reviewRequestSent
+  const isCompleted = appointment.status === 'completed'
 
   return (
     <>
@@ -86,7 +88,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete }: SMSDrawerPro
         <div className="shrink-0 space-y-2.5 border-t border-white/10 bg-black/95 p-4">
           {canComplete && (
             <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-              <p className="mb-2 text-xs font-medium text-white/50">Mark job complete</p>
+              <p className="mb-2 text-xs font-medium text-white/50">Job options</p>
               <button
                 onClick={() => {
                   onMarkComplete(appointment.id)
@@ -94,7 +96,22 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete }: SMSDrawerPro
                 }}
                 className="w-full rounded-lg bg-orange-500 py-2 text-sm font-semibold text-black transition hover:bg-orange-400"
               >
-                Complete — queue review request
+                Complete Job
+              </button>
+            </div>
+          )}
+
+          {isCompleted && (
+            <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+              <p className="mb-2 text-xs font-medium text-white/50">Follow-up</p>
+              <button
+                onClick={() => {
+                  onScheduleFollowUp(appointment)
+                  onClose()
+                }}
+                className="w-full rounded-lg border border-orange-400/40 bg-orange-500/10 py-2 text-sm font-semibold text-orange-200 transition hover:bg-orange-500/20"
+              >
+                Schedule Follow-up
               </button>
             </div>
           )}

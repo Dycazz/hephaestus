@@ -13,6 +13,7 @@ interface AppointmentCardProps {
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 

@@ -11,6 +11,7 @@ import { SMSDrawer } from '@/components/SMSDrawer'
 import { ToastContainer } from '@/components/ToastContainer'
 import { AddClientModal } from '@/components/AddClientModal'
 import { RescheduleModal } from '@/components/RescheduleModal'
+import { WaitlistRecommendationModal } from '@/components/WaitlistRecommendationModal'
 import { CalendarView } from '@/components/CalendarView'
 import { WeekView } from '@/components/WeekView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
@@ -48,6 +49,7 @@ export default function Dashboard() {
   const [toasts, setToasts] = useState<Toast[]>([])
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
+  const [canceledApptForWaitlist, setCanceledApptForWaitlist] = useState<Appointment | null>(null)
   const [view, setView] = useState<'board' | 'week' | 'calendar'>('board')
   const [calendarDate, setCalendarDate] = useState<string>(() => {
     // Use local date, not UTC, so it always matches wall-clock "today"
@@ -58,7 +60,8 @@ export default function Dashboard() {
     return `${y}-${m}-${d}`
   })
   const [addClientDefaults, setAddClientDefaults] = useState<{
-    time?: string; technicianId?: string; date?: string
+    time?: string; technicianId?: string; date?: string;
+    name?: string; phone?: string; address?: string;
   }>({})
   const [teamPanelOpen, setTeamPanelOpen] = useState(false)
 
@@ -177,6 +180,9 @@ export default function Dashboard() {
 
       handleUpdateAppointment(id, { status: 'cancelled' })
       addToast({ type: 'info', message: 'Appointment cancelled.' })
+      
+      // Trigger waitlist recommendation
+      setCanceledApptForWaitlist(appt)
     },
     [appointments, handleUpdateAppointment, addToast]
   )
@@ -433,6 +439,9 @@ export default function Dashboard() {
           defaultTime={addClientDefaults.time}
           defaultTechnicianId={addClientDefaults.technicianId}
           defaultDate={addClientDefaults.date}
+          defaultName={addClientDefaults.name}
+          defaultPhone={addClientDefaults.phone}
+          defaultAddress={addClientDefaults.address}
         />
       )}
 
@@ -442,6 +451,29 @@ export default function Dashboard() {
           existingTimes={existingTimes}
           onReschedule={handleReschedule}
           onClose={() => setRescheduleTarget(null)}
+        />
+      )}
+
+      {canceledApptForWaitlist && (
+        <WaitlistRecommendationModal
+          canceledAppointment={canceledApptForWaitlist}
+          onClose={() => setCanceledApptForWaitlist(null)}
+          onBookWaitlist={(entry) => {
+            setAddClientDefaults({
+              date: canceledApptForWaitlist.scheduledDate === 'Today' 
+                ? new Date().toISOString().split('T')[0]
+                : canceledApptForWaitlist.scheduledDate === 'Tomorrow'
+                ? new Date(Date.now() + 86400000).toISOString().split('T')[0]
+                : canceledApptForWaitlist.scheduledDate,
+              time: canceledApptForWaitlist.scheduledTime,
+              technicianId: canceledApptForWaitlist.technicianId,
+              name: entry.customer_name,
+              phone: entry.customer_phone,
+              address: entry.customer_address,
+            })
+            setAddClientOpen(true)
+            setCanceledApptForWaitlist(null)
+          }}
         />
       )}
 

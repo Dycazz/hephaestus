@@ -15,6 +15,9 @@ interface AddClientModalProps {
   defaultTime?: string
   defaultTechnicianId?: string
   defaultDate?: string         // ISO date "YYYY-MM-DD" (defaults to today)
+  defaultName?: string
+  defaultPhone?: string
+  defaultAddress?: string
 }
 
 // ─── Duration options ─────────────────────────────────────────────────────────
@@ -52,15 +55,18 @@ export function AddClientModal({
   defaultTime,
   defaultTechnicianId,
   defaultDate,
+  defaultName,
+  defaultPhone,
+  defaultAddress,
 }: AddClientModalProps) {
   const todayISO = toISODate(new Date())
 
   // ── Core fields ─────────────────────────────────────────────────────────────
-  const [name, setName]       = useState('')
-  const [phone, setPhone]     = useState('')
+  const [name, setName]       = useState(defaultName ?? '')
+  const [phone, setPhone]     = useState(defaultPhone ?? '')
   const [dateISO, setDateISO] = useState<string>(defaultDate ?? todayISO)
   const [time, setTime]       = useState<string | null>(defaultTime ?? null)
-  const [address, setAddress] = useState('')
+  const [address, setAddress] = useState(defaultAddress ?? '')
   const [errors, setErrors]   = useState<Record<string, string>>({})
 
   // ── Service ─────────────────────────────────────────────────────────────────

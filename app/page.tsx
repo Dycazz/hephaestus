@@ -4,7 +4,7 @@ import {
   MessageSquare, CalendarDays, LayoutGrid,
   Check, Zap, Star, ArrowRight, Users, Shield, Plus,
   RefreshCw, ClipboardList, Bell, Phone, X,
-  Sparkles, TrendingUp, Timer, MapPin, MousePointer2,
+  Sparkles, TrendingUp, Timer, MapPin,
 } from 'lucide-react'
 
 // ── Data ───────────────────────────────────────────────────────────────────
@@ -282,29 +282,29 @@ export default function LandingPage() {
               }}
             >
               <Sparkles className="w-3 h-3" />
-              Built for field service teams
+              Streamlined field service management
             </div>
 
             <h1
               className="font-display font-extrabold tracking-tight mb-6 fade-up"
               style={{
                 fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
-                lineHeight: 1,
-                letterSpacing: '-0.04em',
+                lineHeight: 1.05,
+                letterSpacing: '-0.03em',
                 color: '#f0ece3',
                 animationDelay: '80ms',
               }}
             >
-              Built for the trades.<br />
-              <span style={{ color: '#d97706' }}>Not for the office.</span>
+              Dispatch smarter.<br />
+              <span style={{ color: '#d97706' }}>Never miss a job.</span>
             </h1>
 
             <p
               className="text-lg mb-10 leading-relaxed fade-up"
               style={{ color: '#9494a0', maxWidth: '36rem', animationDelay: '160ms' }}
             >
-              The industrial-grade dispatch board for plumbing, HVAC, and electrical crews. 
-              Kill the paperwork, automate your SMS, and win more reviews without lifting a finger.
+              The all-in-one dispatch platform for HVAC, plumbing, and electrical service crews. 
+              Automate scheduling, eliminate paperwork, and grow your revenue with integrated tools.
             </p>
 
             <div
@@ -319,7 +319,7 @@ export default function LandingPage() {
                   boxShadow: '0 4px 20px rgba(217,119,6,0.3)',
                 }}
               >
-                Launch your forge
+                Get started for free
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -327,7 +327,7 @@ export default function LandingPage() {
                 className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium transition-colors border border-white/5 hover:bg-white/5"
                 style={{ color: '#9494a0' }}
               >
-                Dispatcher login
+                Sign in to dashboard
               </Link>
             </div>
 
@@ -357,14 +357,6 @@ export default function LandingPage() {
                 boxShadow: '0 25px 80px -20px rgba(0,0,0,0.6)',
               }}
             >
-              {/* Live Cursor */}
-              <div className="live-cursor absolute z-50 pointer-events-none">
-                <MousePointer2 className="w-5 h-5 text-amber-500 fill-amber-500 drop-shadow-md" />
-                <div className="ml-3 mt-2 px-2 py-1 rounded bg-amber-500 text-[9px] font-bold text-black uppercase tracking-tighter shadow-lg">
-                  Dispatcher Kira
-                </div>
-              </div>
-
               {/* Header / Toggle bar */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10">
@@ -511,13 +503,13 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 pb-20">
         <div className="mb-10">
           <h2 className="font-display font-bold mb-3 tracking-tight" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#f0ece3' }}>
-            Built for the grease and grime
+            A comprehensive service workflow
           </h2>
-          <p style={{ color: '#9494a0' }}>Dispatch faster. Notify earlier. Review automatically.</p>
+          <p style={{ color: '#9494a0' }}>Automate dispatching, notifications, and customer reviews in one place.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { title: 'The Call Comes In', icon: Phone, desc: 'Log jobs in 15 seconds. Tag the tech. Send the crew.' },
+            { title: 'Booked through the hephaestus.work portal', icon: Phone, desc: 'Log jobs in 15 seconds. Tag the tech. Send the crew.' },
             { title: 'The Crew Arrives', icon: LayoutGrid, desc: 'Real-time board tracking. No "where are you?" calls needed.' },
             { title: 'The Review Fires', icon: Star, desc: 'Automatic review requests. Grow your reputation while you sleep.' },
           ].map((step, i) => (
@@ -541,10 +533,10 @@ export default function LandingPage() {
             className="font-display font-bold mb-3 tracking-tight"
             style={{ fontSize: 'clamp(1.6rem, 3vw, 2.22rem)', color: '#f0ece3', letterSpacing: '-0.04em' }}
           >
-            Industrial-grade pricing
+            Transparent pricing
           </h2>
           <p style={{ color: '#9494a0' }}>
-            No sales calls. No enterprise quotes. Just the tools you need to run your crew.
+            Simple plans for every stage of growth. No hidden fees or surprise costs.
           </p>
         </div>
 
@@ -778,7 +770,7 @@ export default function LandingPage() {
               boxShadow: '0 4px 24px rgba(217,119,6,0.3)',
             }}
           >
-            Open your shop
+            Start your free trial
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -793,7 +785,7 @@ export default function LandingPage() {
             </div>
             <span className="font-display text-xs font-bold tracking-widest uppercase" style={{ color: '#3a3a48' }}>hephaestus.work</span>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2a2a36' }}>Built for the trades · zero bloat</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2a2a36' }}>Modern field service management</p>
           <div className="flex items-center gap-5">
             <a href="#pricing" className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Pricing</a>
             <Link href="/login"  className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Sign in</Link>
