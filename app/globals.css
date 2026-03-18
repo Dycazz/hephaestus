@@ -55,11 +55,38 @@ body::after {
     background-position: 12% -10%, 88% 18%, 0 0, 0 0;
   }
   50% {
-    background-position: 18% 0%, 82% 24%, 0 0, 0 0;
+    background-position: 24% 5%, 76% 28%, 0 0, 0 0;
   }
   100% {
     background-position: 12% -10%, 88% 18%, 0 0, 0 0;
   }
+}
+
+@keyframes beamShift {
+  0%, 100% { opacity: 0.2; transform: translateY(0) rotate(-15deg); }
+  50% { opacity: 0.5; transform: translateY(-40px) rotate(-12deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes cursor-move {
+  0%, 100% { transform: translate(120px, 140px); }
+  25% { transform: translate(280px, 90px); }
+  50% { transform: translate(450px, 180px); }
+  75% { transform: translate(200px, 220px); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 rgba(217, 119, 6, 0); }
+  50% { box-shadow: 0 0 20px rgba(217, 119, 6, 0.15); }
 }
 
 /* Display font utility */
@@ -135,23 +162,46 @@ body::after {
 /* ── Animation classes ─────────────────────────────────────────────────────── */
 
 .fade-up {
-  animation: fade-up 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: fade-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .fade-in {
-  animation: fade-in 0.2s ease-out both;
+  animation: fade-in 0.3s ease-out both;
 }
 
 .slide-up-in {
-  animation: slide-up-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: slide-up-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.animate-in {
-  animation: animate-in 0.22s ease-out;
+.animate-shimmer {
+  position: relative;
+  overflow: hidden;
 }
 
-.slide-in-from-right {
-  animation: animate-in 0.25s ease-out;
+.animate-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+  animation: shimmer 2.5s infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.hover-glow {
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  border-color: rgba(217, 119, 6, 0.4) !important;
+  box-shadow: 0 0 30px rgba(217, 119, 6, 0.1) !important;
+  transform: translateY(-2px);
+}
+
+.live-cursor {
+  animation: cursor-move 12s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
 
 /* ── Booking Portal ─────────────────────────────────────────────────────────── */

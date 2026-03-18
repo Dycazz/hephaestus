@@ -4,7 +4,7 @@ import {
   MessageSquare, CalendarDays, LayoutGrid,
   Check, Zap, Star, ArrowRight, Users, Shield, Plus,
   RefreshCw, ClipboardList, Bell, Phone, X,
-  Sparkles, TrendingUp, Timer, MapPin,
+  Sparkles, TrendingUp, Timer, MapPin, MousePointer2,
 } from 'lucide-react'
 
 // ── Data ───────────────────────────────────────────────────────────────────
@@ -242,7 +242,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="flex items-center gap-1.5 text-sm font-semibold text-black px-4 py-1.5 rounded-lg transition-all hover:bg-amber-500"
+              className="animate-shimmer flex items-center gap-1.5 text-sm font-semibold text-black px-4 py-1.5 rounded-lg transition-all hover:bg-amber-500"
               style={{ background: '#d97706', boxShadow: '0 2px 12px rgba(217,119,6,0.25)' }}
             >
               Get started
@@ -289,58 +289,64 @@ export default function LandingPage() {
               className="font-display font-extrabold tracking-tight mb-6 fade-up"
               style={{
                 fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
-                lineHeight: 1.05,
-                letterSpacing: '-0.03em',
+                lineHeight: 1,
+                letterSpacing: '-0.04em',
                 color: '#f0ece3',
                 animationDelay: '80ms',
               }}
             >
-              Dispatch smarter.<br />
-              <span style={{ color: '#d97706' }}>Never miss a job.</span>
+              Built for the trades.<br />
+              <span style={{ color: '#d97706' }}>Not for the office.</span>
             </h1>
 
             <p
               className="text-lg mb-10 leading-relaxed fade-up"
               style={{ color: '#9494a0', maxWidth: '36rem', animationDelay: '160ms' }}
             >
-              hephaestus.work is the all-in-one dispatch platform for plumbers, HVAC techs, electricians, and field crews.
-              Schedule jobs, send automated SMS reminders, and collect Google reviews — all in one place.
+              The industrial-grade dispatch board for plumbing, HVAC, and electrical crews. 
+              Kill the paperwork, automate your SMS, and win more reviews without lifting a finger.
             </p>
 
             <div
-              className="flex flex-col sm:flex-row items-start gap-3 fade-up"
+              className="flex flex-col sm:flex-row items-start gap-4 fade-up"
               style={{ animationDelay: '240ms' }}
             >
               <Link
                 href="/signup"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all"
+                className="animate-shimmer flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-black transition-all hover:bg-amber-500"
                 style={{
-                  background: 'linear-gradient(135deg, #c2410c, #d97706)',
+                  background: '#d97706',
                   boxShadow: '0 4px 20px rgba(217,119,6,0.3)',
                 }}
               >
-                Start for free
+                Launch your forge
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-base font-medium transition-colors"
-                style={{ color: '#9494a0', border: '1px solid rgba(255,255,255,0.08)' }}
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium transition-colors border border-white/5 hover:bg-white/5"
+                style={{ color: '#9494a0' }}
               >
-                Sign in to your account
+                Dispatcher login
               </Link>
             </div>
 
             <p
-              className="text-xs mt-5 fade-up"
+              className="text-[11px] font-medium mt-6 fade-up uppercase tracking-widest"
               style={{ color: '#3a3a48', animationDelay: '300ms' }}
             >
-              No credit card required · 14-day free trial included
+              14-day free trial · no credit card · zero bloat
             </p>
           </div>
 
           {/* Hero visual */}
-          <div className="relative fade-up" style={{ animationDelay: '200ms' }}>
+          <div className="relative fade-up animate-float" style={{ animationDelay: '200ms' }}>
+            {/* Forge Beams */}
+            <div className="absolute -inset-20 blur-[100px] pointer-events-none opacity-20">
+              <div className="absolute top-0 left-1/4 w-1/2 h-full bg-amber-600/20" style={{ animation: 'beamShift 8s infinite ease-in-out' }} />
+              <div className="absolute bottom-0 right-1/4 w-1/3 h-2/3 bg-orange-600/10" style={{ animation: 'beamShift 12s infinite ease-in-out reverse' }} />
+            </div>
+
             <div
               className="rounded-3xl p-6 overflow-hidden relative"
               style={{
@@ -351,6 +357,14 @@ export default function LandingPage() {
                 boxShadow: '0 25px 80px -20px rgba(0,0,0,0.6)',
               }}
             >
+              {/* Live Cursor */}
+              <div className="live-cursor absolute z-50 pointer-events-none">
+                <MousePointer2 className="w-5 h-5 text-amber-500 fill-amber-500 drop-shadow-md" />
+                <div className="ml-3 mt-2 px-2 py-1 rounded bg-amber-500 text-[9px] font-bold text-black uppercase tracking-tighter shadow-lg">
+                  Dispatcher Kira
+                </div>
+              </div>
+
               {/* Header / Toggle bar */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10">
@@ -364,7 +378,7 @@ export default function LandingPage() {
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 opacity-50">
                   <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10" />
                   <div className="w-24 h-8 rounded-xl bg-amber-600/10 border border-amber-600/20" />
                 </div>
@@ -380,16 +394,17 @@ export default function LandingPage() {
                   <div key={col.title} className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#3a3a48]">{col.title}</h4>
-                      <span className="text-[10px] text-white/20">{col.jobs.length}</span>
+                      <span className="text-[10px] text-white/10">{col.jobs.length}</span>
                     </div>
                     {col.jobs.map(job => (
                       <div
                         key={job.name}
-                        className="p-4 rounded-2xl border transition-all"
+                        className="p-4 rounded-2xl border transition-all hover:scale-[1.02] cursor-default"
                         style={{
                           background: 'rgba(255,255,255,0.03)',
                           borderColor: i === 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)',
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                          animation: i === 1 ? 'pulse-glow 4s infinite' : undefined
                         }}
                       >
                         <div className="flex items-center gap-2 mb-2">
@@ -408,8 +423,8 @@ export default function LandingPage() {
                       </div>
                     ))}
                     {i < 2 && (
-                      <div className="h-24 rounded-2xl border border-dashed border-white/5 flex items-center justify-center">
-                        <Plus className="w-4 h-4 text-white/5" />
+                      <div className="h-24 rounded-2xl border border-dashed border-white/5 flex items-center justify-center opacity-30">
+                        <Plus className="w-4 h-4 text-white" />
                       </div>
                     )}
                   </div>
@@ -473,7 +488,7 @@ export default function LandingPage() {
             return (
               <div
                 key={f.title}
-                className="p-5 rounded-xl fade-up"
+                className="p-5 rounded-xl fade-up hover-glow"
                 style={{
                   background: '#14171d',
                   border: '1px solid rgba(255,255,255,0.05)',
@@ -495,18 +510,18 @@ export default function LandingPage() {
       {/* ── How it works ── */}
       <section className="max-w-6xl mx-auto px-6 pb-20">
         <div className="mb-10">
-          <h2 className="font-display font-bold mb-3" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#f0ece3' }}>
-            A faster day from dispatch to review
+          <h2 className="font-display font-bold mb-3 tracking-tight" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', color: '#f0ece3' }}>
+            Built for the grease and grime
           </h2>
-          <p style={{ color: '#9494a0' }}>Three steps to a tighter schedule and happier customers.</p>
+          <p style={{ color: '#9494a0' }}>Dispatch faster. Notify earlier. Review automatically.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            { title: 'Book', icon: Phone, desc: 'Customer books or calls in — your team logs the job in seconds.' },
-            { title: 'Dispatch', icon: LayoutGrid, desc: 'Auto‑notify the right tech and update status in real time.' },
-            { title: 'Review', icon: Star, desc: 'Automated follow‑ups capture reviews after every completed job.' },
+            { title: 'The Call Comes In', icon: Phone, desc: 'Log jobs in 15 seconds. Tag the tech. Send the crew.' },
+            { title: 'The Crew Arrives', icon: LayoutGrid, desc: 'Real-time board tracking. No "where are you?" calls needed.' },
+            { title: 'The Review Fires', icon: Star, desc: 'Automatic review requests. Grow your reputation while you sleep.' },
           ].map((step, i) => (
-            <div key={step.title} className="p-5 rounded-2xl fade-up" style={{ background: '#0f0f12', border: '1px solid rgba(255,255,255,0.06)', animationDelay: `${i * 80}ms` }}>
+            <div key={step.title} className="p-5 rounded-2xl fade-up border border-white/5 hover:bg-white/5 transition-colors" style={{ background: '#0f0f12', animationDelay: `${i * 80}ms` }}>
               <div className="flex items-center gap-2 mb-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(217,119,6,0.12)', color: '#d97706' }}>
                   <step.icon className="w-4 h-4" />
@@ -523,13 +538,13 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 pb-16" id="pricing">
         <div className="mb-14">
           <h2
-            className="font-display font-bold mb-3"
-            style={{ fontSize: 'clamp(1.6rem, 3vw, 2.2rem)', color: '#f0ece3', letterSpacing: '-0.02em' }}
+            className="font-display font-bold mb-3 tracking-tight"
+            style={{ fontSize: 'clamp(1.6rem, 3vw, 2.22rem)', color: '#f0ece3', letterSpacing: '-0.04em' }}
           >
-            Simple, honest pricing
+            Industrial-grade pricing
           </h2>
           <p style={{ color: '#9494a0' }}>
-            Start free for 14 days. No credit card required. Upgrade when your business grows.
+            No sales calls. No enterprise quotes. Just the tools you need to run your crew.
           </p>
         </div>
 
@@ -537,7 +552,7 @@ export default function LandingPage() {
           {TIERS.map(tier => (
             <div
               key={tier.name}
-              className="rounded-2xl p-6 flex flex-col relative"
+              className="rounded-2xl p-6 flex flex-col relative hover-glow group"
               style={{
                 background: tier.highlight
                   ? 'linear-gradient(145deg, #15120d, #1c1409)'
@@ -757,13 +772,13 @@ export default function LandingPage() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all"
+            className="animate-shimmer inline-flex items-center gap-2 px-10 py-4 rounded-xl text-base font-bold text-black transition-all hover:bg-amber-500"
             style={{
-              background: 'linear-gradient(135deg, #c2410c, #d97706)',
+              background: '#d97706',
               boxShadow: '0 4px 24px rgba(217,119,6,0.3)',
             }}
           >
-            Get started free
+            Open your shop
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -776,9 +791,9 @@ export default function LandingPage() {
             <div className="bg-white rounded-md overflow-hidden shrink-0" style={{ width: 20, height: 20 }}>
               <Image src="/logo.png" alt="hephaestus.work" width={20} height={20} className="object-contain" />
             </div>
-            <span className="font-display text-xs font-semibold" style={{ color: '#3a3a48' }}>hephaestus.work</span>
+            <span className="font-display text-xs font-bold tracking-widest uppercase" style={{ color: '#3a3a48' }}>hephaestus.work</span>
           </div>
-          <p className="text-xs" style={{ color: '#3a3a48' }}>Field service dispatch, done right.</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2a2a36' }}>Built for the trades · zero bloat</p>
           <div className="flex items-center gap-5">
             <a href="#pricing" className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Pricing</a>
             <Link href="/login"  className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Sign in</Link>
