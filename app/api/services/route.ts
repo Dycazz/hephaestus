@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
   if (link?.id) {
     await supabase.from('booking_services').insert({
       booking_link_id: link.id,
-      service_id: data.id,
       name: d.name,
     })
   }
