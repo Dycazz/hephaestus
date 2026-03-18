@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+        emailRedirectTo: `${new URL(request.url).origin}/auth/confirm`,
       },
     })
     if (authError || !authData.user) {

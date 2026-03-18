@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     type: 'signup',
     email,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+      emailRedirectTo: `${new URL(request.url).origin}/auth/confirm`,
     },
   })
 
