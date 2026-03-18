@@ -66,11 +66,6 @@ const FEATURES = [
   },
 ]
 
-const STATS = [
-  { label: 'Average no-show reduction', value: '38%' },
-  { label: 'Faster dispatch time', value: '2.1x' },
-  { label: 'More reviews per week', value: '+52%' },
-]
 
 type FeatureValue = boolean | string | null
 
@@ -388,46 +383,11 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {[
-                  { label: 'Confirmed', value: '18', icon: Check },
-                  { label: 'Active routes', value: '6', icon: MapPin },
-                  { label: 'Avg. response', value: '7m', icon: Timer },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-xl px-3 py-2" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div className="flex items-center gap-1.5 text-[10px]" style={{ color: '#9494a0' }}>
-                      <stat.icon className="w-3 h-3" /> {stat.label}
-                    </div>
-                    <p className="text-sm font-semibold" style={{ color: '#f0ece3' }}>{stat.value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div
-              className="absolute -bottom-6 -left-6 rounded-2xl px-4 py-3"
-              style={{ background: '#0f0f12', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 10px 28px rgba(0,0,0,0.35)' }}
-            >
-              <div className="flex items-center gap-2 text-xs" style={{ color: '#9494a0' }}>
-                <TrendingUp className="w-3.5 h-3.5" style={{ color: '#e65c00' }} />
-                Reviews up <span style={{ color: '#f0ece3', fontWeight: 600 }}>+52%</span>
-              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Stats strip ── */}
-      <section style={{ borderTop: '1px solid rgba(255,255,255,0.05)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 sm:grid-cols-3 gap-6">
-          {STATS.map((s, i) => (
-            <div key={s.label} className="fade-up" style={{ animationDelay: `${i * 80}ms` }}>
-              <p className="text-xs" style={{ color: '#3a3a48' }}>{s.label}</p>
-              <p className="font-display text-2xl font-bold" style={{ color: '#f0ece3' }}>{s.value}</p>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* ── Feature ticker strip ── */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }} className="py-4">

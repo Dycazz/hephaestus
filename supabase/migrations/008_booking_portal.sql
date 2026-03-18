@@ -7,7 +7,7 @@
 alter table booking_links
   add column if not exists business_logo_url text,
   add column if not exists business_phone text,
-  add column if not exists accent_color text default '#e65c00',
+  add column if not exists accent_color text default '#d97706',
   add column if not exists background_color text default '#0f1115',
   add column if not exists text_color text default '#f0ece3',
   add column if not exists show_pricing boolean default true,

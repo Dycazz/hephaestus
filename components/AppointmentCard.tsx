@@ -146,7 +146,7 @@ export function AppointmentCard({
                   className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border transition-all duration-150"
                   style={
                     isUnassigned
-                      ? { background: 'rgba(230,115,22,0.15)', borderColor: 'rgba(230,115,22,0.35)', color: '#e65c00' }
+                      ? { background: 'rgba(217,119,6,0.15)', borderColor: 'rgba(217,119,6,0.35)', color: '#d97706' }
                       : { background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#64748b' }
                   }
                   onMouseEnter={e => {
@@ -196,7 +196,7 @@ export function AppointmentCard({
                     >
                       <span
                         className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                        style={{ background: 'rgba(230,115,22,0.2)', color: '#e65c00' }}
+                        style={{ background: 'rgba(217,119,6,0.2)', color: '#d97706' }}
                       >
                         {tech.initials || tech.name.charAt(0)}
                       </span>

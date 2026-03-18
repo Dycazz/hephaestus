@@ -41,11 +41,11 @@ interface Appointment {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  trial: '#cbd5f5', starter: '#e65c00', pro: '#fb923c', enterprise: '#f59e0b', gifted: '#facc15',
+  trial: '#cbd5f5', starter: '#d97706', pro: '#fb923c', enterprise: '#f59e0b', gifted: '#facc15',
 }
 
 const STATUS_COLORS: Record<string, string> = {
-  confirmed: '#e65c00', scheduled: '#94a3b8', completed: '#cbd5f5',
+  confirmed: '#d97706', scheduled: '#94a3b8', completed: '#cbd5f5',
   at_risk: '#ef4444', rescheduling: '#fb923c', reminder_sent: '#f59e0b', cancelled: '#6b7280',
 }
 
