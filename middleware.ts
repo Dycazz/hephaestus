@@ -114,8 +114,9 @@ export async function middleware(request: NextRequest) {
           const isPeriodValid = !periodEnd || periodEnd > new Date()
           active = (status ? isStatusActive : true) && isPeriodValid
         } else {
-        // trial plan — subscription required, dashboard access not permitted on trial
-        active = false
+        // trial plan — active only while trial_ends_at is in the future
+        const trialEnd = org.trial_ends_at ? new Date(org.trial_ends_at as string) : null
+        active = !!trialEnd && trialEnd > new Date()
       }
 
       if (!active) {

@@ -59,10 +59,10 @@ export async function GET() {
     }))
   }
 
-  if (access.plan === 'trial') {
+  if (access.plan === 'trial' && !access.active) {
     return clearAuthCookies(NextResponse.json({
       allowed: false,
-      reason: 'A subscription is required. Please subscribe at hephaestus.work to continue.',
+      reason: 'Your free trial has expired. Please subscribe at hephaestus.work to continue.',
     }))
   }
 

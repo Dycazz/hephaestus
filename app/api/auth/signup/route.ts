@@ -146,6 +146,7 @@ export async function POST(request: NextRequest) {
       slug,
       business_name: businessName,
       plan: 'trial',
+      trial_ends_at: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
     })
     .select()
     .single()
