@@ -313,7 +313,7 @@ export default function Dashboard() {
     return (
       <div
         className="min-h-screen flex flex-col items-center justify-center gap-4"
-        style={{ background: '#090909' }}
+        style={{ background: '#0f1115' }}
       >
         <Loader2 className="w-7 h-7 animate-spin" style={{ color: 'rgba(249,115,22,0.6)' }} />
         <p className="text-sm font-medium tracking-wide fade-in" style={{ color: '#3a3a48' }}>Loading your schedule…</p>
@@ -325,7 +325,7 @@ export default function Dashboard() {
     <div
       className="min-h-screen"
       style={{
-        background: '#090909',
+        background: '#0f1115',
         backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)',
         backgroundSize: '28px 28px',
       }}
@@ -374,7 +374,7 @@ export default function Dashboard() {
                   view === id
                     ? {
                         background: 'linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,88,12,0.15))',
-                        color: '#f97316',
+                        color: '#e65c00',
                         boxShadow: '0 2px 8px rgba(249,115,22,0.15)',
                       }
                     : { color: '#3a3a48' }

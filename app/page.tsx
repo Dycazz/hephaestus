@@ -14,7 +14,7 @@ const FEATURES = [
     icon: LayoutGrid,
     title: 'Kanban dispatch board',
     description: 'Drag job cards through status columns — scheduled, confirmed, at risk, complete — all in one view.',
-    color: '#f97316',
+    color: '#e65c00',
   },
   {
     icon: MessageSquare,
@@ -141,7 +141,7 @@ const TIERS = [
     name: 'Pro',
     price: '$49.99',
     period: '/ month',
-    color: '#f97316',
+    color: '#e65c00',
     description: 'For growing operations that need more capacity and reach.',
     highlight: true,
     features: [
@@ -208,11 +208,11 @@ function FeatureCell({ value, color }: { value: FeatureValue; color: string }) {
 
 export default function LandingPage() {
   const starterColor    = '#60a5fa'
-  const proColor        = '#f97316'
+  const proColor        = '#e65c00'
   const enterpriseColor = '#fbbf24'
 
   return (
-    <div style={{ background: '#090909', color: '#f0ece3', minHeight: '100vh' }}>
+    <div style={{ background: '#0f1115', color: '#f0ece3', minHeight: '100vh' }}>
 
       {/* ── Nav ── */}
       <nav style={{
@@ -250,7 +250,7 @@ export default function LandingPage() {
             <Link
               href="/signup"
               className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-1.5 rounded-lg transition-all"
-              style={{ background: '#f97316', boxShadow: '0 2px 12px rgba(249,115,22,0.3)' }}
+              style={{ background: '#e65c00', boxShadow: '0 2px 12px rgba(230,92,0,0.3)' }}
             >
               Get started
               <ArrowRight className="w-3.5 h-3.5" />
@@ -271,7 +271,7 @@ export default function LandingPage() {
             transform: 'translateX(-50%)',
             width: '900px',
             height: '520px',
-            background: 'radial-gradient(ellipse 700px 420px at 50% 0%, rgba(249,115,22,0.07) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse 700px 420px at 50% 0%, rgba(230,92,0,0.07) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
@@ -282,8 +282,8 @@ export default function LandingPage() {
             <div
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-8 fade-up"
               style={{
-                background: 'rgba(249,115,22,0.1)',
-                border: '1px solid rgba(249,115,22,0.25)',
+                background: 'rgba(230,92,0,0.1)',
+                border: '1px solid rgba(230,92,0,0.25)',
                 color: '#fb923c',
                 animationDelay: '0ms',
               }}
@@ -303,7 +303,7 @@ export default function LandingPage() {
               }}
             >
               Dispatch smarter.<br />
-              <span style={{ color: '#f97316' }}>Never miss a job.</span>
+              <span style={{ color: '#e65c00' }}>Never miss a job.</span>
             </h1>
 
             <p
@@ -322,8 +322,8 @@ export default function LandingPage() {
                 href="/signup"
                 className="flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all"
                 style={{
-                  background: 'linear-gradient(135deg, #ea580c, #f97316)',
-                  boxShadow: '0 4px 20px rgba(249,115,22,0.3)',
+                  background: 'linear-gradient(135deg, #c2410c, #e65c00)',
+                  boxShadow: '0 4px 20px rgba(230,92,0,0.3)',
                 }}
               >
                 Start for free
@@ -358,10 +358,10 @@ export default function LandingPage() {
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ background: '#f97316' }} />
+                  <div className="w-2 h-2 rounded-full" style={{ background: '#e65c00' }} />
                   <span className="text-xs" style={{ color: '#9494a0' }}>Live dispatch</span>
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: '#f97316', background: 'rgba(249,115,22,0.12)' }}>
+                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: '#e65c00', background: 'rgba(230,92,0,0.12)' }}>
                   Real-time
                 </span>
               </div>
@@ -369,7 +369,7 @@ export default function LandingPage() {
               <div className="space-y-3">
                 {[
                   { name: 'Lopez Home HVAC', status: 'Confirmed', time: '2:30 PM', tech: 'Kira', color: '#34d399' },
-                  { name: 'Harris Water Heater', status: 'At Risk', time: '4:00 PM', tech: 'Jalen', color: '#f97316' },
+                  { name: 'Harris Water Heater', status: 'At Risk', time: '4:00 PM', tech: 'Jalen', color: '#e65c00' },
                   { name: 'Swift Electrical Panel', status: 'Scheduled', time: '5:15 PM', tech: 'Mo', color: '#60a5fa' },
                 ].map((job) => (
                   <div
@@ -409,7 +409,7 @@ export default function LandingPage() {
               style={{ background: '#0f0f12', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 10px 28px rgba(0,0,0,0.35)' }}
             >
               <div className="flex items-center gap-2 text-xs" style={{ color: '#9494a0' }}>
-                <TrendingUp className="w-3.5 h-3.5" style={{ color: '#f97316' }} />
+                <TrendingUp className="w-3.5 h-3.5" style={{ color: '#e65c00' }} />
                 Reviews up <span style={{ color: '#f0ece3', fontWeight: 600 }}>+52%</span>
               </div>
             </div>
@@ -444,7 +444,7 @@ export default function LandingPage() {
             ].map((item, i) => (
               <div key={item} className="flex items-center">
                 {i > 0 && (
-                  <span style={{ color: '#f97316', fontSize: '8px', margin: '0 16px' }}>●</span>
+                  <span style={{ color: '#e65c00', fontSize: '8px', margin: '0 16px' }}>●</span>
                 )}
                 <span className="text-xs font-medium" style={{ color: '#3a3a48' }}>{item}</span>
               </div>
@@ -475,7 +475,7 @@ export default function LandingPage() {
                 key={f.title}
                 className="p-5 rounded-xl fade-up"
                 style={{
-                  background: '#111114',
+                  background: '#14171d',
                   border: '1px solid rgba(255,255,255,0.05)',
                   borderLeft: `2px solid ${f.color}`,
                   animationDelay: `${i * 60}ms`,
@@ -508,7 +508,7 @@ export default function LandingPage() {
           ].map((step, i) => (
             <div key={step.title} className="p-5 rounded-2xl fade-up" style={{ background: '#0f0f12', border: '1px solid rgba(255,255,255,0.06)', animationDelay: `${i * 80}ms` }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(249,115,22,0.12)', color: '#f97316' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(230,92,0,0.12)', color: '#e65c00' }}>
                   <step.icon className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold" style={{ color: '#f0ece3' }}>{step.title}</span>
@@ -541,12 +541,12 @@ export default function LandingPage() {
               style={{
                 background: tier.highlight
                   ? 'linear-gradient(145deg, #15120d, #1c1409)'
-                  : '#111114',
+                  : '#14171d',
                 border: tier.highlight
-                  ? `1px solid rgba(249,115,22,0.35)`
+                  ? `1px solid rgba(230,92,0,0.35)`
                   : '1px solid rgba(255,255,255,0.05)',
                 boxShadow: tier.highlight
-                  ? '0 8px 40px rgba(249,115,22,0.12)'
+                  ? '0 8px 40px rgba(230,92,0,0.12)'
                   : undefined,
               }}
             >
@@ -554,9 +554,9 @@ export default function LandingPage() {
                 <div
                   className="inline-flex self-start items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold mb-4"
                   style={{
-                    background: 'rgba(249,115,22,0.15)',
-                    color: '#f97316',
-                    border: '1px solid rgba(249,115,22,0.3)',
+                    background: 'rgba(230,92,0,0.15)',
+                    color: '#e65c00',
+                    border: '1px solid rgba(230,92,0,0.3)',
                   }}
                 >
                   Most popular
@@ -605,9 +605,9 @@ export default function LandingPage() {
                 style={
                   tier.highlight
                     ? {
-                        background: 'linear-gradient(135deg, #ea580c, #f97316)',
+                        background: 'linear-gradient(135deg, #c2410c, #e65c00)',
                         color: 'white',
-                        boxShadow: '0 4px 16px rgba(249,115,22,0.3)',
+                        boxShadow: '0 4px 16px rgba(230,92,0,0.3)',
                       }
                     : {
                         background: `${tier.color}10`,
@@ -675,12 +675,12 @@ export default function LandingPage() {
                   <div
                     key={`section-${row.section}`}
                     className="grid grid-cols-4"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(249,115,22,0.03)' }}
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(230,92,0,0.03)' }}
                   >
                     <div className="col-span-4 px-5 py-2.5">
                       <span
                         className="font-display text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: '#f97316', opacity: 0.7 }}
+                        style={{ color: '#e65c00', opacity: 0.7 }}
                       >
                         {row.section}
                       </span>
@@ -742,7 +742,7 @@ export default function LandingPage() {
         className="py-20"
         style={{
           borderTop: '1px solid rgba(255,255,255,0.06)',
-          background: 'linear-gradient(180deg, #0e0c09 0%, #090909 100%)',
+          background: 'linear-gradient(180deg, #161920 0%, #0f1115 100%)',
         }}
       >
         <div className="max-w-2xl mx-auto px-6">
@@ -759,8 +759,8 @@ export default function LandingPage() {
             href="/signup"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all"
             style={{
-              background: 'linear-gradient(135deg, #ea580c, #f97316)',
-              boxShadow: '0 4px 24px rgba(249,115,22,0.3)',
+              background: 'linear-gradient(135deg, #c2410c, #e65c00)',
+              boxShadow: '0 4px 24px rgba(230,92,0,0.3)',
             }}
           >
             Get started free
@@ -770,7 +770,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: '#090909' }} className="py-8">
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: '#0f1115' }} className="py-8">
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="bg-white rounded-md overflow-hidden shrink-0" style={{ width: 20, height: 20 }}>

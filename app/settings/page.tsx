@@ -54,7 +54,7 @@ const COLOR_OPTIONS: { name: string; value: string; hex: string }[] = [
   { name: 'Teal',    value: 'teal',    hex: '#14b8a6' },
   { name: 'Indigo',  value: 'indigo',  hex: '#6366f1' },
   { name: 'Purple',  value: 'purple',  hex: '#a855f7' },
-  { name: 'Orange',  value: 'orange',  hex: '#f97316' },
+  { name: 'Orange',  value: 'orange',  hex: '#e65c00' },
   { name: 'Yellow',  value: 'yellow',  hex: '#eab308' },
   { name: 'Red',     value: 'red',     hex: '#ef4444' },
   { name: 'Pink',    value: 'pink',    hex: '#ec4899' },
@@ -85,7 +85,7 @@ function SaveButton({ saving, saved }: { saving: boolean; saved: boolean }) {
       type="submit"
       disabled={saving}
       className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-150 disabled:opacity-60"
-      style={{ background: saved ? '#f59e0b' : '#f97316', color: 'black' }}
+      style={{ background: saved ? '#f59e0b' : '#e65c00', color: 'black' }}
     >
       {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
       {saving ? 'Saving…' : saved ? 'Saved!' : 'Save changes'}
@@ -597,7 +597,7 @@ const DEFAULT_AVAILABILITY: Record<number, DayAvailability> = {
 }
 
 const ACCENT_COLORS = [
-  { label: 'Orange', value: '#f97316' },
+  { label: 'Orange', value: '#e65c00' },
   { label: 'Blue',   value: '#3b82f6' },
   { label: 'Green',  value: '#22c55e' },
   { label: 'Purple', value: '#a855f7' },
@@ -677,7 +677,7 @@ function BookingPortalTab({ orgName, orgSlug }: { orgName: string; orgSlug: stri
   // Portal form fields
   const [businessName, setBusinessName]   = useState(orgName)
   const [businessPhone, setBusinessPhone] = useState('')
-  const [accentColor, setAccentColor]     = useState('#f97316')
+  const [accentColor, setAccentColor]     = useState('#e65c00')
   const [showPricing, setShowPricing]     = useState(true)
   const [requireEmail, setRequireEmail]   = useState(true)
   const [requirePhone, setRequirePhone]   = useState(true)

@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
         technician_id: null,
         service: serviceName,
         service_icon: "📅",
-        service_color: link.accent_color || "#f97316",
+        service_color: link.accent_color || "#e65c00",
         scheduled_at: scheduledAt,
         status: "scheduled",
         address: validatedData.customerAddress || null,
