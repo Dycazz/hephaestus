@@ -111,10 +111,7 @@ const COMPARISON: ComparisonFeature[] = [
 
 const TIERS = [
   {
-    name: 'Starter',
-    price: '$24.99',
-    period: '/ month',
-    color: '#60a5fa',
+    color: '#3b82f6',
     description: 'For solo operators and small crews just getting started.',
     highlight: false,
     features: [
@@ -136,7 +133,7 @@ const TIERS = [
     name: 'Pro',
     price: '$49.99',
     period: '/ month',
-    color: '#d97706',
+    color: '#a855f7',
     description: 'For growing operations that need more capacity and reach.',
     highlight: true,
     features: [
@@ -156,7 +153,7 @@ const TIERS = [
     name: 'Enterprise',
     price: '$99.99',
     period: '/ month',
-    color: '#fbbf24',
+    color: '#f59e0b',
     description: 'For large operations that demand unlimited scale and white-glove service.',
     highlight: false,
     features: [
@@ -202,12 +199,12 @@ function FeatureCell({ value, color }: { value: FeatureValue; color: string }) {
 // ── Page ───────────────────────────────────────────────────────────────────
 
 export default function LandingPage() {
-  const starterColor    = '#60a5fa'
-  const proColor        = '#d97706'
-  const enterpriseColor = '#fbbf24'
+  const starterColor    = '#3b82f6'
+  const proColor        = '#a855f7'
+  const enterpriseColor = '#f59e0b'
 
   return (
-    <div style={{ background: '#0f1115', color: '#f0ece3', minHeight: '100vh' }}>
+    <div style={{ color: '#f0ece3', minHeight: '100vh' }}>
 
       {/* ── Nav ── */}
       <nav style={{
@@ -243,7 +240,7 @@ export default function LandingPage() {
             <Link
               href="/signup"
               className="animate-shimmer flex items-center gap-1.5 text-sm font-semibold text-black px-4 py-1.5 rounded-lg transition-all hover:bg-amber-500"
-              style={{ background: '#d97706', boxShadow: '0 2px 12px rgba(217,119,6,0.25)' }}
+              style={{ background: enterpriseColor, boxShadow: `0 2px 12px ${enterpriseColor}40` }}
             >
               Get started
               <ArrowRight className="w-3.5 h-3.5" />
@@ -296,7 +293,7 @@ export default function LandingPage() {
               }}
             >
               Dispatch smarter.<br />
-              <span style={{ color: '#d97706' }}>Never miss a job.</span>
+              <span style={{ color: proColor }}>Never miss a job.</span>
             </h1>
 
             <p
@@ -315,8 +312,8 @@ export default function LandingPage() {
                 href="/signup"
                 className="animate-shimmer flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-black transition-all hover:bg-amber-500"
                 style={{
-                  background: '#d97706',
-                  boxShadow: '0 4px 20px rgba(217,119,6,0.3)',
+                  background: enterpriseColor,
+                  boxShadow: `0 4px 20px ${enterpriseColor}40`,
                 }}
               >
                 Get started for free
@@ -350,13 +347,20 @@ export default function LandingPage() {
             <div
               className="rounded-3xl p-6 overflow-hidden relative"
               style={{
-                background: '#0f1115',
+                background: 'rgba(15, 17, 21, 0.8)',
                 backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px)',
                 backgroundSize: '24px 24px',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.1)',
                 boxShadow: '0 25px 80px -20px rgba(0,0,0,0.6)',
+                backdropFilter: 'blur(12px)',
               }}
             >
+              {/* Forge Beams - multi-colored integrated activity */}
+              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
+                <div className="absolute top-[-20%] left-[10%] w-[40%] h-[140%] bg-gradient-to-b from-transparent via-blue-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '0s' }} />
+                <div className="absolute top-[-20%] left-[50%] w-[30%] h-[140%] bg-gradient-to-b from-transparent via-purple-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '-4s' }} />
+                <div className="absolute top-[-20%] left-[80%] w-[25%] h-[140%] bg-gradient-to-b from-transparent via-amber-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '-8s' }} />
+              </div>
               {/* Header / Toggle bar */}
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10">
@@ -364,7 +368,7 @@ export default function LandingPage() {
                     <div
                       key={label}
                       className="px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-                      style={i === 0 ? { background: 'rgba(217,119,6,0.15)', color: '#d97706', border: '1px solid rgba(217,119,6,0.2)' } : { color: '#3a3a48' }}
+                      style={i === 0 ? { background: `${proColor}15`, color: proColor, border: `1px solid ${proColor}25` } : { color: '#3a3a48' }}
                     >
                       {label}
                     </div>
@@ -372,7 +376,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center gap-3 opacity-50">
                   <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10" />
-                  <div className="w-24 h-8 rounded-xl bg-amber-600/10 border border-amber-600/20" />
+                  <div className="w-24 h-8 rounded-xl opacity-20" style={{ background: proColor, border: `1px solid ${proColor}` }} />
                 </div>
               </div>
 
@@ -400,7 +404,7 @@ export default function LandingPage() {
                         }}
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : '#d97706' }} />
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : (i === 1 ? proColor : enterpriseColor) }} />
                           <p className="text-xs font-bold text-white truncate">{job.name}</p>
                         </div>
                         <div className="flex items-center justify-between mt-3">
@@ -427,7 +431,7 @@ export default function LandingPage() {
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
-                  background: 'radial-gradient(circle at 12% -10%, rgba(217,119,6,0.05), transparent 40%)',
+                  background: `radial-gradient(circle at 12% -10%, ${proColor}15, transparent 40%)`,
                 }}
               />
             </div>
@@ -612,9 +616,9 @@ export default function LandingPage() {
                 style={
                   tier.highlight
                     ? {
-                        background: 'linear-gradient(135deg, #c2410c, #d97706)',
-                        color: 'white',
-                        boxShadow: '0 4px 16px rgba(217,119,6,0.3)',
+                        background: tier.color,
+                        color: 'black',
+                        boxShadow: `0 4px 16px ${tier.color}40`,
                       }
                     : {
                         background: `${tier.color}10`,
@@ -749,7 +753,7 @@ export default function LandingPage() {
         className="py-20"
         style={{
           borderTop: '1px solid rgba(255,255,255,0.06)',
-          background: 'linear-gradient(180deg, #161920 0%, #0f1115 100%)',
+          background: 'linear-gradient(180deg, rgba(22,25,32,0) 0%, rgba(15,17,21,0.5) 100%)',
         }}
       >
         <div className="max-w-2xl mx-auto px-6">
@@ -766,8 +770,8 @@ export default function LandingPage() {
             href="/signup"
             className="animate-shimmer inline-flex items-center gap-2 px-10 py-4 rounded-xl text-base font-bold text-black transition-all hover:bg-amber-500"
             style={{
-              background: '#d97706',
-              boxShadow: '0 4px 24px rgba(217,119,6,0.3)',
+              background: proColor,
+              boxShadow: `0 4px 24px ${proColor}40`,
             }}
           >
             Start your free trial
