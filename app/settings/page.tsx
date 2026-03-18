@@ -1024,6 +1024,7 @@ export default function SettingsPage() {
 
   // Services state
   const [services, setServices] = useState<Service[]>([])
+  const [servicesLoaded, setServicesLoaded] = useState(false)
   const [servicesLoading, setServicesLoading] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [addingService, setAddingService] = useState(false)
@@ -1070,13 +1071,13 @@ export default function SettingsPage() {
 
   // Load services when tab is active
   useEffect(() => {
-    if (activeTab !== 'services' || servicesLoading || services.length > 0) return
+    if (activeTab !== 'services' || servicesLoaded) return
     setServicesLoading(true)
     fetch('/api/services')
       .then(r => r.json())
       .then(({ services: s }) => setServices(s ?? []))
-      .finally(() => setServicesLoading(false))
-  }, [activeTab, servicesLoading, services.length])
+      .finally(() => { setServicesLoading(false); setServicesLoaded(true) })
+  }, [activeTab, servicesLoaded])
 
   // ── Handlers ────────────────────────────────────────────────────────────
 
