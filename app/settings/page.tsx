@@ -1029,6 +1029,7 @@ export default function SettingsPage() {
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [addingService, setAddingService] = useState(false)
   const [serviceSaving, setServiceSaving] = useState(false)
+  const [serviceError, setServiceError] = useState<string | null>(null)
 
   // Check for checkout redirect in URL params and switch to plan tab
   useEffect(() => {
@@ -1123,6 +1124,7 @@ export default function SettingsPage() {
 
   const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
     setServiceSaving(true)
+    setServiceError(null)
     try {
       const res = await fetch('/api/services', {
         method: 'POST',
@@ -1130,7 +1132,14 @@ export default function SettingsPage() {
         body: JSON.stringify(data),
       })
       const json = await res.json()
-      if (res.ok) { setServices(p => [...p, json.service]); setAddingService(false) }
+      if (res.ok) {
+        setServices(p => [...p, json.service])
+        setAddingService(false)
+      } else {
+        setServiceError(json.error ?? 'Failed to add service. Please try again.')
+      }
+    } catch {
+      setServiceError('Network error. Please try again.')
     } finally {
       setServiceSaving(false)
     }
@@ -1139,6 +1148,7 @@ export default function SettingsPage() {
   const handleUpdateService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
     if (!editingService) return
     setServiceSaving(true)
+    setServiceError(null)
     try {
       const res = await fetch(`/api/services/${editingService.id}`, {
         method: 'PATCH',
@@ -1149,7 +1159,11 @@ export default function SettingsPage() {
       if (res.ok) {
         setServices(p => p.map(s => s.id === editingService.id ? json.service : s))
         setEditingService(null)
+      } else {
+        setServiceError(json.error ?? 'Failed to update service. Please try again.')
       }
+    } catch {
+      setServiceError('Network error. Please try again.')
     } finally {
       setServiceSaving(false)
     }
@@ -1372,7 +1386,7 @@ export default function SettingsPage() {
                       </div>
                       {!addingService && !editingService && (
                         <button
-                          onClick={() => setAddingService(true)}
+                          onClick={() => { setAddingService(true); setServiceError(null) }}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all"
                         >
                           <Plus className="w-3.5 h-3.5" /> Add service
@@ -1387,12 +1401,18 @@ export default function SettingsPage() {
                       </div>
                     ) : (
                       <div className="space-y-3">
+                        {serviceError && (
+                          <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl border border-red-700/40 bg-red-900/20 text-sm text-red-400">
+                            <AlertTriangle className="w-4 h-4 shrink-0" />
+                            {serviceError}
+                          </div>
+                        )}
                         {addingService && (
                           <div className="p-4 rounded-xl border border-blue-500/20 bg-blue-900/10">
                             <p className="text-xs font-semibold text-blue-300 mb-4">New service</p>
                             <ServiceForm
                               onSave={handleAddService}
-                              onCancel={() => setAddingService(false)}
+                              onCancel={() => { setAddingService(false); setServiceError(null) }}
                               saving={serviceSaving}
                             />
                           </div>
@@ -1408,7 +1428,7 @@ export default function SettingsPage() {
                                   <ServiceForm
                                     initial={svc}
                                     onSave={handleUpdateService}
-                                    onCancel={() => setEditingService(null)}
+                                    onCancel={() => { setEditingService(null); setServiceError(null) }}
                                     saving={serviceSaving}
                                   />
                                 </div>
