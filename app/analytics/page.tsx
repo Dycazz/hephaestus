@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   DollarSign, TrendingUp, CheckCircle2, MessageSquare,
   Users, Wrench, ArrowLeft, Loader2, BarChart2,
-  Receipt, Minus, Percent, Pencil, Check, X, Trash2, Plus,
+  Receipt, Minus, Percent, Trash2, Plus,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -167,10 +167,6 @@ export default function AccountingPage() {
   const [taxInput, setTaxInput]     = useState('')
   const [taxSaving, setTaxSaving]   = useState(false)
 
-  // Commission editing
-  const [editingCommission, setEditingCommission] = useState<string | null>(null)
-  const [commissionInput,   setCommissionInput]   = useState('')
-
   // Add expense form
   const [showExpForm,  setShowExpForm]  = useState(false)
   const [expName,      setExpName]      = useState('')
@@ -235,17 +231,6 @@ export default function AccountingPage() {
       body: JSON.stringify({ taxRatePercent: parseFloat(taxInput || '0') }),
     })
     setTaxSaving(false)
-    fetchAnalytics()
-  }
-
-  // ── Commission save ─────────────────────────────────────────────────────
-  async function saveCommission(techId: string) {
-    await fetch(`/api/technicians/${techId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ commission_percent: parseFloat(commissionInput || '0') }),
-    })
-    setEditingCommission(null)
     fetchAnalytics()
   }
 
@@ -395,30 +380,8 @@ export default function AccountingPage() {
                         </td>
                         <td className="py-3 px-4 text-right text-white font-semibold text-xs">{t.completed}</td>
                         <td className="py-3 px-4 text-right text-green-400 font-semibold text-xs">{fmt(t.revenueCents)}</td>
-                        <td className="py-3 px-4 text-right text-xs">
-                          {editingCommission === t.id ? (
-                            <span className="flex items-center justify-end gap-1">
-                              <input
-                                type="number" min="0" max="100" step="0.5"
-                                value={commissionInput}
-                                onChange={e => setCommissionInput(e.target.value)}
-                                className="w-16 text-right rounded px-1.5 py-0.5 text-xs text-white border"
-                                style={{ background: '#111318', borderColor: 'rgba(255,255,255,0.2)' }}
-                                autoFocus
-                              />
-                              <span className="text-slate-500">%</span>
-                              <button onClick={() => saveCommission(t.id)} className="text-green-400 hover:text-green-300"><Check className="w-3.5 h-3.5" /></button>
-                              <button onClick={() => setEditingCommission(null)} className="text-slate-500 hover:text-slate-300"><X className="w-3.5 h-3.5" /></button>
-                            </span>
-                          ) : (
-                            <span className="flex items-center justify-end gap-1.5 group">
-                              <span className="text-slate-400">{t.commissionPercent}%</span>
-                              <button
-                                onClick={() => { setEditingCommission(t.id); setCommissionInput(String(t.commissionPercent)) }}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-slate-300"
-                              ><Pencil className="w-3 h-3" /></button>
-                            </span>
-                          )}
+                        <td className="py-3 px-4 text-right text-slate-400 text-xs">
+                          {t.commissionPercent}%
                         </td>
                         <td className="py-3 pl-4 text-right text-amber-400 font-semibold text-xs">{fmt(t.commissionCents)}</td>
                       </tr>

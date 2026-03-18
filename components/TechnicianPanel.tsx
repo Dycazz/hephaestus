@@ -11,6 +11,7 @@ interface Technician {
   color: string
   phone: string | null
   is_active: boolean
+  commission_percent: number
 }
 
 interface Invitation {
@@ -49,9 +50,10 @@ interface FormState {
   name: string
   color: string
   phone: string
+  commission: string
 }
 
-const BLANK: FormState = { name: '', color: 'blue', phone: '' }
+const BLANK: FormState = { name: '', color: 'blue', phone: '', commission: '' }
 
 type PanelTab = 'technicians' | 'invitations'
 
@@ -106,7 +108,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
   // ── Technician handlers ───────────────────────────────────────────────────
   const startEdit = (tech: Technician) => {
     setEditingId(tech.id)
-    setForm({ name: tech.name, color: tech.color ?? 'blue', phone: tech.phone ?? '' })
+    setForm({ name: tech.name, color: tech.color ?? 'blue', phone: tech.phone ?? '', commission: String(tech.commission_percent ?? 0) })
     setTechError(null)
   }
 
@@ -142,7 +144,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
       const res = await fetch(`/api/technicians/${editingId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name.trim(), color: form.color, phone: form.phone || null, initials }),
+        body: JSON.stringify({ name: form.name.trim(), color: form.color, phone: form.phone || null, initials, commission_percent: parseFloat(form.commission) || 0 }),
       })
       if (res.ok) {
         await fetchTechnicians()
@@ -291,6 +293,9 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-sm text-white">{tech.name}</p>
                             {tech.phone && <p className="text-xs text-slate-400">{tech.phone}</p>}
+                            {(tech.commission_percent ?? 0) > 0 && (
+                              <p className="text-[10px] text-amber-400/80">{tech.commission_percent}% commission</p>
+                            )}
                           </div>
                           <div className="flex items-center gap-1">
                             <button
@@ -551,6 +556,20 @@ function TechForm({
           placeholder="(555) 000-0000"
           className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
         />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-400 mb-1">Commission % (optional)</label>
+        <div className="flex items-center gap-2">
+          <input
+            type="number" min="0" max="100" step="0.5"
+            value={form.commission}
+            onChange={e => setForm(f => ({ ...f, commission: e.target.value }))}
+            placeholder="0"
+            className="w-24 bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="text-xs text-slate-500">% of job revenue</span>
+        </div>
       </div>
 
       <div>

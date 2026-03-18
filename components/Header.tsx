@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, LogOut, Users, Settings, BarChart2, Eye } from 'lucide-react'
+import { PlusCircle, LogOut, Users, Settings, DollarSign, Eye } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useOrg } from '@/context/OrgContext'
@@ -75,10 +75,11 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
 
               <Link
                 href="/analytics"
-                title="Analytics"
-                className="rounded-md p-1.5 text-white/50 transition hover:bg-white/5 hover:text-white"
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                style={{ color: '#4ade80', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)' }}
               >
-                <BarChart2 className="h-4 w-4" />
+                <DollarSign className="h-3.5 w-3.5" />
+                Accounting
               </Link>
             </>
           )}
