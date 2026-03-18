@@ -63,11 +63,13 @@ export function AppointmentCard({
   onMarkComplete,
   onCancel,
   onReschedule,
+  onScheduleFollowUp,
   onAssignTechnician,
 }: AppointmentCardProps) {
   const { badge, label, dot } = statusConfig[appointment.status]
   const canSendReminder = appointment.status === 'scheduled' || appointment.status === 'at_risk'
   const canComplete = appointment.status === 'confirmed'
+  const isCompleted = appointment.status === 'completed'
   const canCancel = !['completed', 'cancelled'].includes(appointment.status)
   const canAssign = !['completed', 'cancelled'].includes(appointment.status)
   const isUnassigned = appointment.technician === 'Unassigned'
@@ -268,14 +270,11 @@ export function AppointmentCard({
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
             className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border"
             style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.1)' }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)' }}
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
@@ -301,7 +300,17 @@ export function AppointmentCard({
               className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-emerald-900/40"
             >
               <Check className="w-3.5 h-3.5" />
-              Complete
+              Complete Job
+            </button>
+          )}
+
+          {isCompleted && (
+            <button
+              onClick={() => onScheduleFollowUp(appointment)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg transition-all duration-150 shadow-sm shadow-indigo-900/40"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Schedule Follow-up
             </button>
           )}
 

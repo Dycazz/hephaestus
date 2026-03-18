@@ -13,6 +13,7 @@ interface KanbanBoardProps {
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 
@@ -31,6 +32,7 @@ interface ColumnProps {
   onMarkComplete: (id: string) => void
   onCancel: (id: string) => void
   onReschedule: (id: string) => void
+  onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
 }
 
@@ -49,6 +51,7 @@ function Column({
   onMarkComplete,
   onCancel,
   onReschedule,
+  onScheduleFollowUp,
   onAssignTechnician,
 }: ColumnProps) {
   return (
@@ -83,6 +86,7 @@ function Column({
             onMarkComplete={onMarkComplete}
             onCancel={onCancel}
             onReschedule={onReschedule}
+            onScheduleFollowUp={onScheduleFollowUp}
             onAssignTechnician={onAssignTechnician}
           />
         ))
@@ -99,6 +103,7 @@ export function KanbanBoard({
   onMarkComplete,
   onCancel,
   onReschedule,
+  onScheduleFollowUp,
   onAssignTechnician,
 }: KanbanBoardProps) {
   const confirmed = appointments.filter(a => a.status === 'confirmed')
@@ -126,6 +131,7 @@ export function KanbanBoard({
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
         />
 
@@ -144,6 +150,7 @@ export function KanbanBoard({
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
         />
 
@@ -162,6 +169,7 @@ export function KanbanBoard({
           onMarkComplete={onMarkComplete}
           onCancel={onCancel}
           onReschedule={onReschedule}
+          onScheduleFollowUp={onScheduleFollowUp}
           onAssignTechnician={onAssignTechnician}
         />
       </div>
@@ -186,6 +194,7 @@ export function KanbanBoard({
                 onMarkComplete={onMarkComplete}
                 onCancel={onCancel}
                 onReschedule={onReschedule}
+                onScheduleFollowUp={onScheduleFollowUp}
                 onAssignTechnician={onAssignTechnician}
               />
             ))}

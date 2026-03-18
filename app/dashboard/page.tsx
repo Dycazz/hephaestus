@@ -285,6 +285,18 @@ export default function Dashboard() {
   )
 
   // Updated: accepts ISO date string instead of 'Today'|'Tomorrow'
+  const handleScheduleFollowUp = useCallback(
+    (appt: Appointment) => {
+      setAddClientDefaults({
+        name: appt.customerName,
+        phone: appt.customerPhone,
+        address: appt.address,
+      })
+      setAddClientOpen(true)
+    },
+    []
+  )
+
   const handleReschedule = useCallback(
     (id: string, newDateISO: string, newTime: string) => {
       const appt = appointments.find(a => a.id === id)
@@ -402,6 +414,7 @@ export default function Dashboard() {
             onMarkComplete={handleMarkComplete}
             onCancel={handleCancel}
             onReschedule={handleOpenReschedule}
+            onScheduleFollowUp={handleScheduleFollowUp}
             onAssignTechnician={handleAssignTechnician}
           />
         ) : view === 'week' ? (
@@ -427,6 +440,7 @@ export default function Dashboard() {
           appointment={selectedAppointment}
           onClose={() => setSelectedId(null)}
           onMarkComplete={handleMarkComplete}
+          onScheduleFollowUp={handleScheduleFollowUp}
         />
       )}
 
