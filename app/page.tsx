@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import {
   MessageSquare, CalendarDays, LayoutGrid,
-  Check, Zap, Star, ArrowRight, Users, Shield,
+  Check, Zap, Star, ArrowRight, Users, Shield, Plus,
   RefreshCw, ClipboardList, Bell, Phone, X,
   Sparkles, TrendingUp, Timer, MapPin,
 } from 'lucide-react'
@@ -14,7 +14,7 @@ const FEATURES = [
     icon: LayoutGrid,
     title: 'Kanban dispatch board',
     description: 'Drag job cards through status columns — scheduled, confirmed, at risk, complete — all in one view.',
-    color: '#e65c00',
+    color: '#d97706',
   },
   {
     icon: MessageSquare,
@@ -37,7 +37,7 @@ const FEATURES = [
   {
     icon: RefreshCw,
     title: 'Recurring appointments',
-    description: 'Set daily, weekly, bi-weekly, or monthly repeating jobs and let Hephaestus handle the schedule.',
+    description: 'Set daily, weekly, bi-weekly, or monthly repeating jobs and let hephaestus.work handle the schedule.',
     color: '#a78bfa',
   },
   {
@@ -136,7 +136,7 @@ const TIERS = [
     name: 'Pro',
     price: '$49.99',
     period: '/ month',
-    color: '#e65c00',
+    color: '#d97706',
     description: 'For growing operations that need more capacity and reach.',
     highlight: true,
     features: [
@@ -203,7 +203,7 @@ function FeatureCell({ value, color }: { value: FeatureValue; color: string }) {
 
 export default function LandingPage() {
   const starterColor    = '#60a5fa'
-  const proColor        = '#e65c00'
+  const proColor        = '#d97706'
   const enterpriseColor = '#fbbf24'
 
   return (
@@ -219,12 +219,10 @@ export default function LandingPage() {
         backdropFilter: 'blur(14px)',
       }}>
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="bg-white rounded-lg overflow-hidden flex items-center justify-center shrink-0" style={{ width: 30, height: 30 }}>
-              <Image src="/logo.png" alt="Hephaestus" width={26} height={26} className="object-contain" priority />
-            </div>
-            <span className="font-display text-sm font-bold tracking-tight" style={{ color: '#f0ece3', letterSpacing: '-0.01em' }}>
-              Hephaestus
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="hephaestus.work" width={32} height={32} className="object-contain" priority />
+            <span className="font-display text-base font-bold tracking-tight" style={{ color: '#f0ece3', letterSpacing: '-0.02em' }}>
+              hephaestus.work
             </span>
           </div>
           <div className="flex items-center gap-4">
@@ -244,8 +242,8 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/signup"
-              className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-1.5 rounded-lg transition-all"
-              style={{ background: '#e65c00', boxShadow: '0 2px 12px rgba(230,92,0,0.3)' }}
+              className="flex items-center gap-1.5 text-sm font-semibold text-black px-4 py-1.5 rounded-lg transition-all hover:bg-amber-500"
+              style={{ background: '#d97706', boxShadow: '0 2px 12px rgba(217,119,6,0.25)' }}
             >
               Get started
               <ArrowRight className="w-3.5 h-3.5" />
@@ -266,7 +264,7 @@ export default function LandingPage() {
             transform: 'translateX(-50%)',
             width: '900px',
             height: '520px',
-            background: 'radial-gradient(ellipse 700px 420px at 50% 0%, rgba(230,92,0,0.07) 0%, transparent 70%)',
+            background: 'radial-gradient(ellipse 700px 420px at 50% 0%, rgba(217,119,6,0.07) 0%, transparent 70%)',
             pointerEvents: 'none',
           }}
         />
@@ -277,8 +275,8 @@ export default function LandingPage() {
             <div
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-8 fade-up"
               style={{
-                background: 'rgba(230,92,0,0.1)',
-                border: '1px solid rgba(230,92,0,0.25)',
+                background: 'rgba(217,119,6,0.1)',
+                border: '1px solid rgba(217,119,6,0.25)',
                 color: '#fb923c',
                 animationDelay: '0ms',
               }}
@@ -298,14 +296,14 @@ export default function LandingPage() {
               }}
             >
               Dispatch smarter.<br />
-              <span style={{ color: '#e65c00' }}>Never miss a job.</span>
+              <span style={{ color: '#d97706' }}>Never miss a job.</span>
             </h1>
 
             <p
               className="text-lg mb-10 leading-relaxed fade-up"
               style={{ color: '#9494a0', maxWidth: '36rem', animationDelay: '160ms' }}
             >
-              Hephaestus is the all-in-one dispatch platform for plumbers, HVAC techs, electricians, and field crews.
+              hephaestus.work is the all-in-one dispatch platform for plumbers, HVAC techs, electricians, and field crews.
               Schedule jobs, send automated SMS reminders, and collect Google reviews — all in one place.
             </p>
 
@@ -317,8 +315,8 @@ export default function LandingPage() {
                 href="/signup"
                 className="flex items-center gap-2 px-6 py-3 rounded-xl text-base font-semibold text-white transition-all"
                 style={{
-                  background: 'linear-gradient(135deg, #c2410c, #e65c00)',
-                  boxShadow: '0 4px 20px rgba(230,92,0,0.3)',
+                  background: 'linear-gradient(135deg, #c2410c, #d97706)',
+                  boxShadow: '0 4px 20px rgba(217,119,6,0.3)',
                 }}
               >
                 Start for free
@@ -344,45 +342,87 @@ export default function LandingPage() {
           {/* Hero visual */}
           <div className="relative fade-up" style={{ animationDelay: '200ms' }}>
             <div
-              className="rounded-3xl p-5"
+              className="rounded-3xl p-6 overflow-hidden relative"
               style={{
-                background: 'linear-gradient(180deg, rgba(17,17,20,0.9), rgba(12,12,14,0.9))',
+                background: '#0f1115',
+                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px)',
+                backgroundSize: '24px 24px',
                 border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 18px 60px rgba(0,0,0,0.45)',
+                boxShadow: '0 25px 80px -20px rgba(0,0,0,0.6)',
               }}
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full" style={{ background: '#e65c00' }} />
-                  <span className="text-xs" style={{ color: '#9494a0' }}>Live dispatch</span>
+              {/* Header / Toggle bar */}
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10">
+                  {['Board', 'Week', 'Day'].map((label, i) => (
+                    <div
+                      key={label}
+                      className="px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all"
+                      style={i === 0 ? { background: 'rgba(217,119,6,0.15)', color: '#d97706', border: '1px solid rgba(217,119,6,0.2)' } : { color: '#3a3a48' }}
+                    >
+                      {label}
+                    </div>
+                  ))}
                 </div>
-                <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ color: '#e65c00', background: 'rgba(230,92,0,0.12)' }}>
-                  Real-time
-                </span>
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10" />
+                  <div className="w-24 h-8 rounded-xl bg-amber-600/10 border border-amber-600/20" />
+                </div>
               </div>
 
-              <div className="space-y-3">
+              {/* Kanban Columns */}
+              <div className="grid grid-cols-3 gap-6">
                 {[
-                  { name: 'Lopez Home HVAC', status: 'Confirmed', time: '2:30 PM', tech: 'Kira', color: '#34d399' },
-                  { name: 'Harris Water Heater', status: 'At Risk', time: '4:00 PM', tech: 'Jalen', color: '#e65c00' },
-                  { name: 'Swift Electrical Panel', status: 'Scheduled', time: '5:15 PM', tech: 'Mo', color: '#60a5fa' },
-                ].map((job) => (
-                  <div
-                    key={job.name}
-                    className="flex items-center justify-between rounded-2xl px-4 py-3"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
-                  >
-                    <div>
-                      <p className="text-sm font-semibold" style={{ color: '#f0ece3' }}>{job.name}</p>
-                      <p className="text-[11px]" style={{ color: '#3a3a48' }}>{job.time} · Tech {job.tech}</p>
+                  { title: 'Confirmed', jobs: [{ name: 'Lopez HVAC', tech: 'Kira', time: '2:30 PM' }] },
+                  { title: 'In Progress', jobs: [{ name: 'Harris Plumbing', tech: 'Jalen', time: '4:00 PM' }] },
+                  { title: 'At Risk', jobs: [{ name: 'Swift Elec.', tech: 'Mo', time: '5:15 PM' }] },
+                ].map((col, i) => (
+                  <div key={col.title} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#3a3a48]">{col.title}</h4>
+                      <span className="text-[10px] text-white/20">{col.jobs.length}</span>
                     </div>
-                    <div className="text-[11px] font-semibold px-2 py-1 rounded-full" style={{ color: job.color, background: `${job.color}1A` }}>
-                      {job.status}
-                    </div>
+                    {col.jobs.map(job => (
+                      <div
+                        key={job.name}
+                        className="p-4 rounded-2xl border transition-all"
+                        style={{
+                          background: 'rgba(255,255,255,0.03)',
+                          borderColor: i === 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        }}
+                      >
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : '#d97706' }} />
+                          <p className="text-xs font-bold text-white truncate">{job.name}</p>
+                        </div>
+                        <div className="flex items-center justify-between mt-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[8px] font-bold text-[#9494a0]">
+                              {job.tech.charAt(0)}
+                            </div>
+                            <span className="text-[10px] text-[#3a3a48]">{job.tech}</span>
+                          </div>
+                          <span className="text-[10px] font-medium text-[#9494a0]">{job.time}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {i < 2 && (
+                      <div className="h-24 rounded-2xl border border-dashed border-white/5 flex items-center justify-center">
+                        <Plus className="w-4 h-4 text-white/5" />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
 
+              {/* Dashboard Glow */}
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  background: 'radial-gradient(circle at 12% -10%, rgba(217,119,6,0.05), transparent 40%)',
+                }}
+              />
             </div>
           </div>
         </div>
@@ -404,7 +444,7 @@ export default function LandingPage() {
             ].map((item, i) => (
               <div key={item} className="flex items-center">
                 {i > 0 && (
-                  <span style={{ color: '#e65c00', fontSize: '8px', margin: '0 16px' }}>●</span>
+                  <span style={{ color: '#d97706', fontSize: '8px', margin: '0 16px' }}>●</span>
                 )}
                 <span className="text-xs font-medium" style={{ color: '#3a3a48' }}>{item}</span>
               </div>
@@ -423,7 +463,7 @@ export default function LandingPage() {
             Everything your crew needs
           </h2>
           <p style={{ color: '#9494a0', maxWidth: '36rem' }}>
-            From the first booking to the final review request — Hephaestus handles the busywork so your team can focus on the work.
+            From the first booking to the final review request — hephaestus.work handles the busywork so your team can focus on the work.
           </p>
         </div>
 
@@ -468,7 +508,7 @@ export default function LandingPage() {
           ].map((step, i) => (
             <div key={step.title} className="p-5 rounded-2xl fade-up" style={{ background: '#0f0f12', border: '1px solid rgba(255,255,255,0.06)', animationDelay: `${i * 80}ms` }}>
               <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(230,92,0,0.12)', color: '#e65c00' }}>
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(217,119,6,0.12)', color: '#d97706' }}>
                   <step.icon className="w-4 h-4" />
                 </div>
                 <span className="text-sm font-semibold" style={{ color: '#f0ece3' }}>{step.title}</span>
@@ -503,10 +543,10 @@ export default function LandingPage() {
                   ? 'linear-gradient(145deg, #15120d, #1c1409)'
                   : '#14171d',
                 border: tier.highlight
-                  ? `1px solid rgba(230,92,0,0.35)`
+                  ? `1px solid rgba(217,119,6,0.35)`
                   : '1px solid rgba(255,255,255,0.05)',
                 boxShadow: tier.highlight
-                  ? '0 8px 40px rgba(230,92,0,0.12)'
+                  ? '0 8px 40px rgba(217,119,6,0.12)'
                   : undefined,
               }}
             >
@@ -514,9 +554,9 @@ export default function LandingPage() {
                 <div
                   className="inline-flex self-start items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold mb-4"
                   style={{
-                    background: 'rgba(230,92,0,0.15)',
-                    color: '#e65c00',
-                    border: '1px solid rgba(230,92,0,0.3)',
+                    background: 'rgba(217,119,6,0.15)',
+                    color: '#d97706',
+                    border: '1px solid rgba(217,119,6,0.3)',
                   }}
                 >
                   Most popular
@@ -565,9 +605,9 @@ export default function LandingPage() {
                 style={
                   tier.highlight
                     ? {
-                        background: 'linear-gradient(135deg, #c2410c, #e65c00)',
+                        background: 'linear-gradient(135deg, #c2410c, #d97706)',
                         color: 'white',
-                        boxShadow: '0 4px 16px rgba(230,92,0,0.3)',
+                        boxShadow: '0 4px 16px rgba(217,119,6,0.3)',
                       }
                     : {
                         background: `${tier.color}10`,
@@ -635,12 +675,12 @@ export default function LandingPage() {
                   <div
                     key={`section-${row.section}`}
                     className="grid grid-cols-4"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(230,92,0,0.03)' }}
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', background: 'rgba(217,119,6,0.03)' }}
                   >
                     <div className="col-span-4 px-5 py-2.5">
                       <span
                         className="font-display text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: '#e65c00', opacity: 0.7 }}
+                        style={{ color: '#d97706', opacity: 0.7 }}
                       >
                         {row.section}
                       </span>
@@ -713,14 +753,14 @@ export default function LandingPage() {
             Ready to run a tighter ship?
           </h2>
           <p className="mb-8" style={{ color: '#9494a0' }}>
-            Join field service businesses using Hephaestus to dispatch faster, reduce no-shows, and get more reviews.
+            Join field service businesses using hephaestus.work to dispatch faster, reduce no-shows, and get more reviews.
           </p>
           <Link
             href="/signup"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all"
             style={{
-              background: 'linear-gradient(135deg, #c2410c, #e65c00)',
-              boxShadow: '0 4px 24px rgba(230,92,0,0.3)',
+              background: 'linear-gradient(135deg, #c2410c, #d97706)',
+              boxShadow: '0 4px 24px rgba(217,119,6,0.3)',
             }}
           >
             Get started free
@@ -734,9 +774,9 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="bg-white rounded-md overflow-hidden shrink-0" style={{ width: 20, height: 20 }}>
-              <Image src="/logo.png" alt="Hephaestus" width={20} height={20} className="object-contain" />
+              <Image src="/logo.png" alt="hephaestus.work" width={20} height={20} className="object-contain" />
             </div>
-            <span className="font-display text-xs font-semibold" style={{ color: '#3a3a48' }}>Hephaestus</span>
+            <span className="font-display text-xs font-semibold" style={{ color: '#3a3a48' }}>hephaestus.work</span>
           </div>
           <p className="text-xs" style={{ color: '#3a3a48' }}>Field service dispatch, done right.</p>
           <div className="flex items-center gap-5">

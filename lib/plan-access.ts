@@ -1,5 +1,5 @@
 /**
- * Plan access helpers for Hephaestus.
+ * Plan access helpers for hephaestus.work.
  *
  * Determines what an org can do based on their current plan,
  * subscription status, trial state, and suspension status.

@@ -40,7 +40,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <div className="w-6 h-6 bg-amber-500 rounded flex items-center justify-center">
               <span className="text-xs font-black text-black">H</span>
             </div>
-            <span className="text-white font-bold text-sm">Hephaestus</span>
+            <span className="text-white font-bold text-sm">hephaestus.work</span>
           </div>
           <span
             className="text-xs font-semibold px-1.5 py-0.5 rounded"

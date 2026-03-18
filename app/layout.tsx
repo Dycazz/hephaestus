@@ -17,7 +17,7 @@ const instrumentSans = Instrument_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Hephaestus — Field Service Management",
+  title: "hephaestus.work — Field Service Management",
   description: "Appointment scheduling, automated SMS reminders, and job management for field service businesses.",
 };
 

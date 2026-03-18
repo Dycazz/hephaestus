@@ -7,9 +7,19 @@ export async function GET(_request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  // Fix: only get services for this user's organization
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('org_id')
+    .eq('id', user.id)
+    .single()
+
+  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+
   const { data, error } = await supabase
     .from('services')
     .select('*')
+    .eq('org_id', profile.org_id)
     .eq('is_active', true)
     .order('created_at', { ascending: true })
 
@@ -22,6 +32,7 @@ const CreateServiceSchema = z.object({
   icon:          z.string().default('🔧'),
   color:         z.string().default('blue'),
   prepTemplates: z.array(z.string()).default([]),
+  priceCents:    z.number().int().min(0).default(0),
 })
 
 export async function POST(request: NextRequest) {
@@ -49,6 +60,7 @@ export async function POST(request: NextRequest) {
       icon: d.icon,
       color: d.color,
       prep_templates: d.prepTemplates,
+      price_cents: d.priceCents,
     })
     .select()
     .single()
@@ -65,6 +77,7 @@ export async function POST(request: NextRequest) {
     await supabase.from('booking_services').insert({
       booking_link_id: link.id,
       name: d.name,
+      price_cents: d.priceCents,
     })
   }
 

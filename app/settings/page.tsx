@@ -36,6 +36,7 @@ interface Service {
   icon: string
   color: string
   prep_templates: string[]
+  price_cents: number
   is_active: boolean
 }
 
@@ -130,13 +131,14 @@ function ServiceForm({
   saving,
 }: {
   initial?: Partial<Service>
-  onSave: (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => void
+  onSave: (data: { name: string; icon: string; color: string; prepTemplates: string[]; priceCents: number }) => void
   onCancel: () => void
   saving: boolean
 }) {
   const [name, setName] = useState(initial?.name ?? '')
   const [icon, setIcon] = useState(initial?.icon ?? '🔧')
   const [color, setColor] = useState(initial?.color ?? 'blue')
+  const [price, setPrice] = useState(initial?.price_cents ? (initial.price_cents / 100).toFixed(2) : '')
   const [templates, setTemplates] = useState<string[]>(initial?.prep_templates ?? [])
   const [newTemplate, setNewTemplate] = useState('')
 
@@ -153,19 +155,30 @@ function ServiceForm({
           <TextInput value={name} onChange={setName} placeholder="e.g. Plumbing" />
         </div>
         <div>
-          <FieldLabel>Icon</FieldLabel>
-          <div className="flex flex-wrap gap-1.5 p-2 rounded-lg border border-slate-600/60 bg-slate-800/80" style={{ maxHeight: 80, overflowY: 'auto' }}>
-            {ICON_OPTIONS.map(e => (
-              <button
-                key={e}
-                type="button"
-                onClick={() => setIcon(e)}
-                className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all ${icon === e ? 'ring-2 ring-blue-500 scale-110' : 'hover:bg-slate-700'}`}
-              >
-                {e}
-              </button>
-            ))}
-          </div>
+          <FieldLabel>Price ($)</FieldLabel>
+          <TextInput
+            value={price}
+            onChange={v => {
+              if (v === '' || /^\d*\.?\d{0,2}$/.test(v)) setPrice(v)
+            }}
+            placeholder="0.00"
+          />
+        </div>
+      </div>
+
+      <div>
+        <FieldLabel>Icon</FieldLabel>
+        <div className="flex flex-wrap gap-1.5 p-2 rounded-lg border border-slate-600/60 bg-slate-800/80" style={{ maxHeight: 80, overflowY: 'auto' }}>
+          {ICON_OPTIONS.map(e => (
+            <button
+              key={e}
+              type="button"
+              onClick={() => setIcon(e)}
+              className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-all ${icon === e ? 'ring-2 ring-blue-500 scale-110' : 'hover:bg-slate-700'}`}
+            >
+              {e}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -218,7 +231,10 @@ function ServiceForm({
       <div className="flex gap-2 pt-1">
         <button
           type="button"
-          onClick={() => onSave({ name, icon, color, prepTemplates: templates })}
+          onClick={() => {
+            const priceCents = Math.round(parseFloat(price || '0') * 100)
+            onSave({ name, icon, color, prepTemplates: templates, priceCents })
+          }}
           disabled={saving || !name.trim()}
           className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white transition-all"
         >
@@ -540,7 +556,7 @@ function PlanTab({ org, role }: { org: OrgData; role: string }) {
             <div>
               <p className="text-sm font-semibold text-white">Complimentary access</p>
               <p className="text-xs text-slate-500 mt-1">
-                Your organization has been granted complimentary full-feature access by the Hephaestus team.
+                Your organization has been granted complimentary full-feature access by the hephaestus.work team.
                 No payment is required.
               </p>
             </div>
@@ -1122,7 +1138,7 @@ export default function SettingsPage() {
     }
   }, [router])
 
-  const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
+  const handleAddService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[]; priceCents: number }) => {
     setServiceSaving(true)
     setServiceError(null)
     try {
@@ -1145,7 +1161,7 @@ export default function SettingsPage() {
     }
   }, [])
 
-  const handleUpdateService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[] }) => {
+  const handleUpdateService = useCallback(async (data: { name: string; icon: string; color: string; prepTemplates: string[]; priceCents: number }) => {
     if (!editingService) return
     setServiceSaving(true)
     setServiceError(null)
@@ -1209,10 +1225,10 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Image src="/logo.png" alt="Hephaestus" width={28} height={28} className="rounded-lg bg-white p-0.5" />
-            <span className="text-sm font-bold text-white/80 hidden sm:block">
-              {org?.businessName ?? 'Hephaestus'}
+          <div className="flex items-center gap-3">
+            <Image src="/logo.png" alt="hephaestus.work" width={32} height={32} className="object-contain" />
+            <span className="text-sm font-bold text-white/90 hidden sm:block">
+              {org?.businessName ?? 'hephaestus.work'}
             </span>
           </div>
         </div>
@@ -1278,7 +1294,7 @@ export default function SettingsPage() {
                       <div>
                         <FieldLabel>Org slug</FieldLabel>
                         <div className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-slate-900/60 border border-slate-700/40">
-                          <span className="text-xs text-slate-500">hephaestus.app/</span>
+                          <span className="text-xs text-slate-500">hephaestus.work/</span>
                           <span className="text-xs font-mono text-slate-300">{org?.slug ?? '—'}</span>
                         </div>
                         <p className="text-[11px] text-slate-600 mt-1">Slug cannot be changed.</p>
@@ -1441,6 +1457,7 @@ export default function SettingsPage() {
                                   <div className="flex-1 min-w-0">
                                     <p className="text-sm font-semibold text-white/90">{svc.name}</p>
                                     <p className="text-[11px] text-slate-600">
+                                      {svc.price_cents > 0 ? `$${(svc.price_cents / 100).toFixed(2)} • ` : ''}
                                       {svc.prep_templates?.length
                                         ? `${svc.prep_templates.length} default checklist item${svc.prep_templates.length > 1 ? 's' : ''}`
                                         : 'No default checklist'}

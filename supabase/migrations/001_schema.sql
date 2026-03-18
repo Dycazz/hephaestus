@@ -1,5 +1,5 @@
 -- ============================================================
--- 001_schema.sql — Hephaestus core tables
+-- 001_schema.sql — hephaestus.work core tables
 -- Runs on Supabase (PostgreSQL 15+).
 -- Uses gen_random_uuid() — built-in, no extension needed.
 -- ============================================================

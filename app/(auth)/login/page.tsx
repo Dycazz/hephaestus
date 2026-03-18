@@ -59,13 +59,11 @@ function LoginPageInner() {
       <div className="pointer-events-none absolute -right-20 top-0 h-72 w-72 rounded-full bg-orange-400/10 blur-[120px]" />
 
       <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-black/70 p-8 shadow-[0_30px_60px_-40px_rgba(249,115,22,0.7)]">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white">
-            <Image src="/logo.png" alt="Hephaestus" width={28} height={28} className="object-contain" priority />
-          </div>
+        <div className="mb-8 flex items-center gap-4">
+          <Image src="/logo.png" alt="hephaestus.work" width={48} height={48} className="object-contain" priority />
           <div>
-            <h1 className="font-display text-lg font-semibold text-white">Hephaestus</h1>
-            <p className="text-xs uppercase tracking-[0.28em] text-white/40">Dispatch</p>
+            <h1 className="font-display text-xl font-bold tracking-tight text-white leading-tight">hephaestus.work</h1>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-medium">Dispatch</p>
           </div>
         </div>
 

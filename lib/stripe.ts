@@ -1,5 +1,5 @@
 /**
- * Stripe client and plan configuration for Hephaestus.
+ * Stripe client and plan configuration for hephaestus.work.
  *
  * Secrets are read from the Cloudflare Workers request context
  * (via globalThis[Symbol.for('__cloudflare-context__')]) so they are

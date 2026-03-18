@@ -32,12 +32,10 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
     <header className="sticky top-0 z-40 border-b border-white/10 bg-black/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-white">
-            <Image src="/logo.png" alt="Hephaestus" width={22} height={22} className="object-contain" priority />
-          </div>
+          <Image src="/logo.png" alt="hephaestus.work" width={32} height={32} className="object-contain" priority />
           <div>
-            <span className="font-display text-sm font-semibold text-white">Hephaestus</span>
-            <p className="text-[11px] uppercase tracking-[0.28em] text-white/40">Dispatch</p>
+            <span className="font-display text-base font-bold tracking-tight text-white leading-tight">hephaestus.work</span>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-white/40 font-medium">Dispatch</p>
           </div>
         </div>
 

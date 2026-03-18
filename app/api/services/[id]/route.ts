@@ -25,11 +25,11 @@ export async function PATCH(
   if ('icon' in body) updates.icon = body.icon
   if ('color' in body) updates.color = body.color
   if ('prepTemplates' in body) updates.prep_templates = body.prepTemplates
+  if ('priceCents' in body) updates.price_cents = body.priceCents
 
   // Capture old name before update so we can match the booking_services row by name
-  const oldName = updates.name
-    ? (await supabase.from('services').select('name').eq('id', id).single()).data?.name
-    : null
+  // Also capture old price if we need to sync it
+  const oldData = (await supabase.from('services').select('name, price_cents').eq('id', id).single()).data
 
   const { data, error } = await supabase
     .from('services')
@@ -40,15 +40,19 @@ export async function PATCH(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
-  // Sync name change to booking portal (match by old name within org's booking link)
-  if (updates.name && oldName) {
-    const linkId = await getBookingLinkId(supabase, user.id)
-    if (linkId) {
+  // Sync to booking portal
+  const linkId = await getBookingLinkId(supabase, user.id)
+  if (linkId) {
+    const syncUpdates: Record<string, unknown> = {}
+    if (updates.name) syncUpdates.name = updates.name
+    if ('price_cents' in updates) syncUpdates.price_cents = updates.price_cents
+
+    if (Object.keys(syncUpdates).length > 0 && oldData?.name) {
       await supabase
         .from('booking_services')
-        .update({ name: updates.name as string })
+        .update(syncUpdates)
         .eq('booking_link_id', linkId)
-        .eq('name', oldName)
+        .eq('name', oldData.name)
     }
   }
 

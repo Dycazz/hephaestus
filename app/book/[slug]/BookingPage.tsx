@@ -839,7 +839,7 @@ export default function BookingPage({
         <div className="container text-center">
           <p style={{ fontSize: "0.8125rem", color: "var(--text-muted)" }}>
             Powered by{" "}
-            <span style={{ color: link.accent_color }}>Hephaestus</span>
+            <span style={{ color: link.accent_color }}>hephaestus.work</span>
           </p>
         </div>
       </footer>

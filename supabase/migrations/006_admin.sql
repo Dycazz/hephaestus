@@ -1,5 +1,5 @@
 -- Internal admin support
--- is_admin: set manually in Supabase for Hephaestus team members
+-- is_admin: set manually in Supabase for hephaestus.work team members
 -- trial_ends_at: allows per-org trial extension
 -- suspended_at: soft-suspend an org (set to non-null = suspended)
 

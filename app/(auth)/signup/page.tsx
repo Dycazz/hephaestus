@@ -18,13 +18,11 @@ function PageShell({ children }: { children: React.ReactNode }) {
       <div className="pointer-events-none absolute -left-20 top-0 h-72 w-72 rounded-full bg-orange-500/10 blur-[120px]" />
       <div className="pointer-events-none absolute -right-32 bottom-0 h-80 w-80 rounded-full bg-orange-500/15 blur-[140px]" />
       <div className="w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-white/10 bg-white">
-            <Image src="/logo.png" alt="Hephaestus" width={64} height={64} className="object-contain" priority />
-          </div>
+        <div className="mb-8 flex flex-col items-center gap-4">
+          <Image src="/logo.png" alt="hephaestus.work" width={80} height={80} className="object-contain" priority />
           <div className="text-center">
-            <h1 className="font-display text-2xl font-semibold text-white">Hephaestus</h1>
-            <p className="text-xs uppercase tracking-[0.28em] text-white/40">Dispatch</p>
+            <h1 className="font-display text-3xl font-bold tracking-tight text-white leading-tight">hephaestus.work</h1>
+            <p className="text-xs uppercase tracking-[0.3em] text-white/30 font-medium mt-1">Dispatch</p>
           </div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/70 p-8 shadow-[0_30px_60px_-40px_rgba(249,115,22,0.6)]">
