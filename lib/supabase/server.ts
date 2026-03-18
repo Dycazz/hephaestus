@@ -69,9 +69,16 @@ export async function createClient(serviceRole = false) {
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) => {
-              // Strip maxAge and expires to keep auth cookies session-only
-              const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
-              cookieStore.set(name, value, sessionOptions)
+              // PKCE code-verifier cookies must keep their maxAge so they survive
+              // the user opening the email confirmation link in a new tab or after
+              // restarting the browser. Session token cookies (access/refresh tokens)
+              // remain session-only (expire when the browser closes).
+              if (name.includes('code-verifier')) {
+                cookieStore.set(name, value, options ?? {})
+              } else {
+                const { maxAge: _m, expires: _e, ...sessionOptions } = options ?? {}
+                cookieStore.set(name, value, sessionOptions)
+              }
             })
           } catch {
             // setAll called from a Server Component — ignored, middleware handles refresh
