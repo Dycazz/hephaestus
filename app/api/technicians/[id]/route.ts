@@ -3,11 +3,12 @@ import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 
 const UpdateTechSchema = z.object({
-  name:      z.string().min(1).max(100).optional(),
-  initials:  z.string().max(3).optional(),
-  color:     z.string().optional(),
-  phone:     z.string().nullable().optional(),
-  is_active: z.boolean().optional(),
+  name:               z.string().min(1).max(100).optional(),
+  initials:           z.string().max(3).optional(),
+  color:              z.string().optional(),
+  phone:              z.string().nullable().optional(),
+  is_active:          z.boolean().optional(),
+  commission_percent: z.number().min(0).max(100).optional(),
 })
 
 export async function PATCH(
