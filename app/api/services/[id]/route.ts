@@ -27,6 +27,15 @@ export async function PATCH(
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  // Sync name change to linked booking service
+  if (updates.name) {
+    await supabase
+      .from('booking_services')
+      .update({ name: updates.name })
+      .eq('service_id', id)
+  }
+
   return NextResponse.json({ service: data })
 }
 
@@ -45,5 +54,12 @@ export async function DELETE(
     .eq('id', id)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
+
+  // Sync deactivation to linked booking service
+  await supabase
+    .from('booking_services')
+    .update({ is_active: false })
+    .eq('service_id', id)
+
   return NextResponse.json({ success: true })
 }

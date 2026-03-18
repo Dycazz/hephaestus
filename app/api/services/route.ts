@@ -54,5 +54,20 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Sync to booking portal if one exists for this org
+  const { data: link } = await supabase
+    .from('booking_links')
+    .select('id')
+    .eq('org_id', profile.org_id)
+    .single()
+  if (link?.id) {
+    await supabase.from('booking_services').insert({
+      booking_link_id: link.id,
+      service_id: data.id,
+      name: d.name,
+    })
+  }
+
   return NextResponse.json({ service: data }, { status: 201 })
 }
