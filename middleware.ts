@@ -131,9 +131,13 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect authenticated users away from auth pages
+  // Redirect authenticated users away from auth pages.
+  // If they clicked a pricing card (?plan=*), send them straight to the plan tab.
   if (user && (pathname === '/login' || pathname === '/signup')) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const plan = request.nextUrl.searchParams.get('plan')
+    const validPlans = ['starter', 'pro', 'enterprise']
+    const dest = plan && validPlans.includes(plan) ? '/settings?tab=plan' : '/dashboard'
+    return NextResponse.redirect(new URL(dest, request.url))
   }
 
   // Authenticated users at root go straight to dashboard
