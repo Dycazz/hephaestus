@@ -111,6 +111,9 @@ const COMPARISON: ComparisonFeature[] = [
 
 const TIERS = [
   {
+    name: 'Starter',
+    price: '$24.99',
+    period: '/ month',
     color: '#3b82f6',
     description: 'For solo operators and small crews just getting started.',
     highlight: false,
