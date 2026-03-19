@@ -21,7 +21,7 @@ export function StatsBar({ appointments }: StatsBarProps) {
     { label: 'Confirmed', value: confirmed, icon: CheckCircle, color: 'text-orange-300' },
     { label: 'Awaiting reply', value: pending, icon: Clock, color: 'text-amber-300' },
     { label: 'At risk', value: atRisk, icon: AlertTriangle, color: 'text-red-400' },
-    { label: 'Completed', value: completed, icon: Star, color: 'text-white/70' },
+    { label: 'Completed', value: completed, icon: Star, color: 'text-text-secondary/70' },
   ]
 
   return (

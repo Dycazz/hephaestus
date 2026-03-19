@@ -217,7 +217,7 @@ export function AddClientModal({
       <div className="glass-morphism rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
  
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 backdrop-blur-md p-5 border-b border-white/5 shrink-0">
+        <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 backdrop-blur-md p-5 border-b border-[rgba(44,52,64,0.3)] shrink-0">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-bold text-lg text-text-primary">New Appointment</p>
@@ -319,7 +319,7 @@ export function AddClientModal({
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-2 block">Date & Time</label>
             {errors.time && <p className="text-xs text-red-400 mb-1.5">{errors.time}</p>}
-            <div className="border border-white/5 rounded-xl p-3 bg-white/5 backdrop-blur-sm">
+            <div className="border border-[rgba(44,52,64,0.3)] rounded-xl p-3 bg-[rgba(44,52,64,0.1)] backdrop-blur-sm">
               <DateTimePicker
                 date={dateISO}
                 time={time}
@@ -385,7 +385,7 @@ export function AddClientModal({
                     <label className="text-xs font-semibold text-text-secondary mb-1.5 block">
                       Repeat until <span className="font-normal text-text-muted">(leave blank for 1 year)</span>
                     </label>
-                    <div className="border border-white/5 rounded-xl p-3 bg-white/5">
+                    <div className="border border-[rgba(44,52,64,0.3)] rounded-xl p-3 bg-[rgba(44,52,64,0.1)]">
                       <DateTimePicker
                         date={recurrenceEndDate}
                         time={null}
@@ -449,7 +449,7 @@ export function AddClientModal({
           </div>
  
           {/* Auto-reminder toggle */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)]">
             <div className="flex items-center gap-2.5">
               {autoReminder
                 ? <Bell className="w-4 h-4 text-accent" />
