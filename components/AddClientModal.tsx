@@ -363,7 +363,7 @@ export function AddClientModal({
             </button>
  
             {showRecurrence && (
-              <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded-xl space-y-3">
+              <div className="mt-3 p-3 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-xl space-y-3">
                 <div className="flex gap-1.5 flex-wrap">
                   {RECURRENCE_OPTIONS.map(opt => (
                     <button
@@ -437,7 +437,7 @@ export function AddClientModal({
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addChecklistItem()}
                 placeholder="Add a custom prep item…"
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
+                className="flex-1 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 placeholder-text-muted/40"
               />
               <button
                 onClick={addChecklistItem}
@@ -466,7 +466,7 @@ export function AddClientModal({
               type="button"
               onClick={() => setAutoReminder(v => !v)}
               className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                autoReminder ? 'bg-accent' : 'bg-white/10'
+                autoReminder ? 'bg-accent' : 'bg-[rgba(44,52,64,0.2)]'
               }`}
               role="switch"
               aria-checked={autoReminder}

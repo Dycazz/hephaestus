@@ -173,11 +173,11 @@ export function AppointmentCard({
               <div
                 className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border border-[rgba(44,52,64,0.3)] shadow-2xl py-1 glass-morphism backdrop-blur-xl"
               >
-                <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                <p className="px-3 pt-1 pb-1.5 text-[10px] font-bold text-text-muted uppercase tracking-wider">
                   Assign technician
                 </p>
                 {technicians.length === 0 ? (
-                  <p className="px-3 py-2 text-xs text-slate-500">No technicians added yet</p>
+                  <p className="px-3 py-2 text-xs text-text-muted">No technicians added yet</p>
                 ) : (
                   technicians.map(tech => (
                     <button
@@ -186,9 +186,9 @@ export function AppointmentCard({
                         onAssignTechnician(appointment.id, tech.id, tech.name)
                         setShowTechPicker(false)
                       }}
-                      className="w-full text-left px-3 py-1.5 text-xs text-slate-300 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-3 py-1.5 text-xs text-text-secondary transition-colors flex items-center gap-2"
                       style={{ background: 'transparent' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(44,52,64,0.2)' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(44,52,64,0.15)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <span
@@ -280,7 +280,7 @@ export function AppointmentCard({
               title={readOnly ? "Account permissions required" : ""}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
                 readOnly 
-                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  ? 'bg-[rgba(44,52,64,0.15)] text-text-muted cursor-not-allowed border-[rgba(44,52,64,0.1)] opacity-50' 
                   : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-900/40'
               }`}
             >
@@ -295,7 +295,7 @@ export function AppointmentCard({
               title={readOnly ? "Account permissions required" : ""}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
                 readOnly 
-                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  ? 'bg-[rgba(44,52,64,0.15)] text-text-muted cursor-not-allowed border-[rgba(44,52,64,0.1)] opacity-50' 
                   : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/40'
               }`}
             >
@@ -311,7 +311,7 @@ export function AppointmentCard({
               title={readOnly ? "Account permissions required" : ""}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
                 readOnly 
-                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  ? 'bg-[rgba(44,52,64,0.15)] text-text-muted cursor-not-allowed border-[rgba(44,52,64,0.1)] opacity-50' 
                   : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-900/40'
               }`}
             >
@@ -327,7 +327,7 @@ export function AppointmentCard({
               title={readOnly ? "Account permissions required" : ""}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 shadow-sm ${
                 readOnly 
-                  ? 'bg-slate-800/80 text-slate-500 cursor-not-allowed border-white/5 opacity-50' 
+                  ? 'bg-[rgba(44,52,64,0.15)] text-text-muted cursor-not-allowed border-[rgba(44,52,64,0.1)] opacity-50' 
                   : 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-900/40'
               }`}
             >
@@ -343,8 +343,8 @@ export function AppointmentCard({
               title={readOnly ? "Account permissions required" : ""}
               className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 ml-auto border border-transparent ${
                 readOnly 
-                  ? 'text-slate-700 cursor-not-allowed opacity-50' 
-                  : 'hover:bg-red-900/25 hover:text-red-400 hover:border-red-800/50 text-slate-600'
+                  ? 'text-text-muted/40 cursor-not-allowed opacity-50' 
+                  : 'hover:bg-red-400/10 hover:text-red-400 hover:border-red-400/20 text-text-muted'
               }`}
             >
               <XCircle className="w-3.5 h-3.5" />

@@ -114,12 +114,10 @@ export function DateTimePicker({
     const isPast = iso < effectiveMin
     const isSel  = iso === date
     const isTod  = iso === today
-    if (isPast) return 'text-slate-300 cursor-not-allowed'
-    if (isSel)  return isBlue ? 'bg-blue-600 text-white font-bold rounded-full' : 'bg-purple-600 text-white font-bold rounded-full'
-    if (isTod)  return isBlue
-      ? 'ring-2 ring-blue-400 rounded-full font-semibold text-blue-700 cursor-pointer hover:bg-blue-50'
-      : 'ring-2 ring-purple-400 rounded-full font-semibold text-purple-700 cursor-pointer hover:bg-purple-50'
-    return 'text-slate-700 cursor-pointer hover:bg-slate-100 rounded-full'
+    if (isPast) return 'text-text-muted/30 cursor-not-allowed'
+    if (isSel)  return 'bg-accent text-white font-bold rounded-lg shadow-[0_0_12px_rgba(217,119,6,0.3)]'
+    if (isTod)  return 'ring-1 ring-accent/50 rounded-lg font-semibold text-accent cursor-pointer hover:bg-accent/10'
+    return 'text-text-secondary cursor-pointer hover:bg-[rgba(44,52,64,0.15)] hover:text-text-primary rounded-lg transition-colors'
   }
 
   const handleDayClick = (day: number) => {
@@ -158,19 +156,19 @@ export function DateTimePicker({
       {/* ── Calendar panel ──────────────────────────────────────────────────── */}
       <div className="flex-shrink-0">
         {/* Month / year header */}
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-3 px-1">
           <button
             onClick={prevMonth}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-[rgba(44,52,64,0.15)] transition-all"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm font-semibold text-slate-700">
+          <span className="text-sm font-bold text-text-primary tracking-tight">
             {MONTH_NAMES[viewMonth]} {viewYear}
           </span>
           <button
             onClick={nextMonth}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-[rgba(44,52,64,0.15)] transition-all"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -179,7 +177,7 @@ export function DateTimePicker({
         {/* Day-of-week headers */}
         <div className="grid grid-cols-7 mb-1">
           {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
-            <div key={d} className="flex items-center justify-center w-9 text-[11px] font-semibold text-slate-400 py-0.5">
+            <div key={d} className="flex items-center justify-center w-9 text-[10px] uppercase font-bold text-text-muted/60 py-1">
               {d}
             </div>
           ))}
@@ -209,15 +207,15 @@ export function DateTimePicker({
       {!dateOnly && (
         <div className="flex-1 min-w-0">
           {!date ? (
-            <div className="flex items-center justify-center h-full min-h-[128px] border-2 border-dashed border-slate-200 rounded-xl text-slate-400 text-xs text-center p-4">
+            <div className="flex items-center justify-center h-full min-h-[128px] border border-dashed border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.05)] rounded-xl text-text-muted text-xs text-center p-4">
               ← Pick a date to<br />see available times
             </div>
           ) : (
             <>
-              <p className="text-xs font-semibold text-slate-500 mb-2 flex items-center gap-1">
+              <p className="text-[10px] uppercase tracking-wider font-bold text-text-muted mb-2 flex items-center gap-1">
                 Available Times
                 {isDayOff && (
-                  <span className="text-[10px] text-amber-600 font-normal bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 ml-1">
+                  <span className="text-[9px] text-orange-400 font-bold bg-orange-400/10 border border-orange-400/20 rounded px-1.5 py-0.5 ml-1 uppercase">
                     Day off
                   </span>
                 )}
@@ -233,25 +231,21 @@ export function DateTimePicker({
                       onClick={() => !booked && onTimeChange(slot)}
                       disabled={booked}
                       title={booked ? 'Already booked' : outside ? 'Outside working hours' : undefined}
-                      className={`py-1.5 px-1 rounded-lg text-[11px] font-medium border transition-colors ${
+                      className={`py-2 px-1 rounded-lg text-[11px] font-semibold border transition-all ${
                         booked
-                          ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                          ? 'bg-[rgba(44,52,64,0.05)] text-text-muted/40 border-[rgba(44,52,64,0.1)] cursor-not-allowed'
                           : selected
-                          ? isBlue
-                            ? 'bg-blue-600 text-white border-blue-600'
-                            : 'bg-purple-600 text-white border-purple-600'
+                          ? 'bg-accent text-white border-accent shadow-[0_0_10px_rgba(217,119,6,0.2)]'
                           : outside
-                          ? 'text-slate-400 border-slate-200 cursor-pointer hover:border-slate-300'
-                          : isBlue
-                          ? 'bg-white text-slate-700 border-slate-300 hover:border-blue-400 hover:bg-blue-50'
-                          : 'bg-white text-slate-700 border-slate-300 hover:border-purple-400 hover:bg-purple-50'
+                          ? 'text-text-muted border-[rgba(44,52,64,0.2)] cursor-pointer hover:border-[rgba(44,52,64,0.3)] hover:bg-[rgba(44,52,64,0.05)]'
+                          : 'bg-[rgba(44,52,64,0.1)] text-text-secondary border-[rgba(44,52,64,0.3)] hover:border-accent/40 hover:bg-accent/5 hover:text-text-primary'
                       }`}
                       style={outside && !booked && !selected ? {
-                        backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(0,0,0,0.04) 3px, rgba(0,0,0,0.04) 6px)',
+                        backgroundImage: 'repeating-linear-gradient(-45deg, transparent, transparent 3px, rgba(44,52,64,0.1) 3px, rgba(44,52,64,0.1) 6px)',
                       } : undefined}
                     >
                       {slot}
-                      {booked && <span className="block text-[8px] leading-none mt-0.5 text-slate-400">Booked</span>}
+                      {booked && <span className="block text-[8px] leading-none mt-0.5 opacity-50">Booked</span>}
                     </button>
                   )
                 })}

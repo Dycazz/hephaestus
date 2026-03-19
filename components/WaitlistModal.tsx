@@ -16,20 +16,20 @@ export function WaitlistModal({ cancelledSlot, onNotify, onDismiss }: WaitlistMo
   return (
     <>
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        <div className="glass-morphism rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-500 text-white p-5">
+          <div className="bg-gradient-to-r from-emerald-600/20 to-emerald-500/10 backdrop-blur-md p-5 border-b border-[rgba(44,52,64,0.3)]">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="bg-white/20 rounded-full p-2">
-                  <Users className="w-5 h-5" />
+                <div className="bg-emerald-500/20 rounded-full p-2">
+                  <Users className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <p className="font-bold text-lg">Gap-Filling Opportunity!</p>
-                  <p className="text-sm text-emerald-100">Auto-detected open slot</p>
+                  <p className="font-bold text-lg text-text-primary">Gap-Filling Opportunity!</p>
+                  <p className="text-sm text-text-secondary/70">Auto-detected open slot</p>
                 </div>
               </div>
-              <button onClick={onDismiss} className="text-white/70 hover:text-white transition-colors">
+              <button onClick={onDismiss} className="text-text-muted hover:text-text-primary transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -37,11 +37,11 @@ export function WaitlistModal({ cancelledSlot, onNotify, onDismiss }: WaitlistMo
 
           <div className="p-5 space-y-4">
             {/* Slot info */}
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
-              <p className="text-sm font-semibold text-emerald-800">
+            <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-xl p-3">
+              <p className="text-sm font-semibold text-emerald-400">
                 🕐 {cancelledSlot.scheduledTime} slot just opened up
               </p>
-              <p className="text-xs text-emerald-600 mt-1">
+              <p className="text-xs text-text-secondary/80 mt-1">
                 {cancelledSlot.customerName} cancelled their {cancelledSlot.service} appointment.
                 Revenue can be recovered!
               </p>
@@ -49,43 +49,43 @@ export function WaitlistModal({ cancelledSlot, onNotify, onDismiss }: WaitlistMo
 
             {/* Waitlist contacts */}
             <div>
-              <p className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-1.5">
-                <Users className="w-4 h-4" />
+              <p className="text-sm font-semibold text-text-primary mb-2 flex items-center gap-1.5">
+                <Users className="w-4 h-4 text-text-muted" />
                 Waitlist contacts to notify ({waitlistContacts.length})
               </p>
               <div className="space-y-2">
                 {waitlistContacts.map((contact) => (
                   <div
                     key={contact.phone}
-                    className="flex items-center justify-between bg-slate-50 rounded-lg px-3 py-2 border border-slate-200"
+                    className="flex items-center justify-between bg-[rgba(44,52,64,0.1)] rounded-lg px-3 py-2 border border-[rgba(44,52,64,0.2)]"
                   >
                     <div>
-                      <p className="text-sm font-medium text-slate-700">{contact.name}</p>
-                      <p className="text-xs text-slate-500">{contact.phone}</p>
+                      <p className="text-sm font-medium text-text-primary">{contact.name}</p>
+                      <p className="text-xs text-text-muted">{contact.phone}</p>
                     </div>
-                    <MessageSquare className="w-4 h-4 text-slate-400" />
+                    <MessageSquare className="w-4 h-4 text-text-muted" />
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Preview SMS */}
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-              <p className="text-xs font-semibold text-blue-700 mb-1.5">📱 Text preview:</p>
-              <p className="text-sm text-blue-800 leading-snug italic">&ldquo;{previewText}&rdquo;</p>
+            <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-3">
+              <p className="text-xs font-semibold text-blue-400 mb-1.5">📱 Text preview:</p>
+              <p className="text-sm text-text-secondary leading-snug italic">&ldquo;{previewText}&rdquo;</p>
             </div>
 
             {/* Actions */}
             <div className="flex gap-3">
               <button
                 onClick={onDismiss}
-                className="flex-1 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors"
+                className="flex-1 py-2.5 border border-[rgba(44,52,64,0.3)] text-text-secondary text-sm font-medium rounded-xl hover:bg-[rgba(44,52,64,0.1)] transition-colors"
               >
                 Skip
               </button>
               <button
                 onClick={onNotify}
-                className="flex-2 flex-grow py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                className="flex-2 flex-grow py-2.5 bg-emerald-600 hover:filter hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]"
               >
                 ✓ Notify Waitlist Now
               </button>

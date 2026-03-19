@@ -46,37 +46,37 @@ export function RescheduleModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-black/95 text-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-white/10 px-5 py-4">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl border border-[rgba(44,52,64,0.3)] bg-black/95 text-white shadow-2xl">
+        <div className="flex items-start justify-between border-b border-[rgba(44,52,64,0.3)] px-5 py-4">
           <div>
             <p className="text-lg font-semibold">Reschedule Appointment</p>
-            <p className="text-sm text-white/60">Pick a new time for {appointment.customerName}</p>
+            <p className="text-sm text-text-secondary/60">Pick a new time for {appointment.customerName}</p>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="space-y-4 p-5">
-          <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-white/50">Current appointment</p>
-            <div className="flex items-center gap-2 text-xs text-white/70">
+          <div className="rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-3">
+            <p className="mb-1 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">Current appointment</p>
+            <div className="flex items-center gap-2 text-xs text-text-secondary/70">
               <Clock className="w-3.5 h-3.5 shrink-0" />
               {appointment.scheduledDate} at {appointment.scheduledTime}
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/70">
+            <div className="flex items-center gap-2 text-xs text-text-secondary/70">
               <User className="w-3.5 h-3.5 shrink-0" />
               {appointment.technician}
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/70">
+            <div className="flex items-center gap-2 text-xs text-text-secondary/70">
               <MapPin className="w-3.5 h-3.5 shrink-0" />
               {appointment.address}
             </div>
           </div>
 
           <div>
-            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-white/50">New Date & Time</label>
-            <div className="rounded-xl border border-white/10 bg-black/80 p-3">
+            <label className="mb-2 block text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">New Date & Time</label>
+            <div className="rounded-xl border border-[rgba(44,52,64,0.3)] bg-black/80 p-3">
               <DateTimePicker
                 date={selectedDateISO}
                 time={selectedTime}
@@ -84,7 +84,7 @@ export function RescheduleModal({
                 onTimeChange={setSelectedTime}
                 bookedTimes={bookedTimesForDate}
                 minDate={todayISO}
-                accentColor="blue"
+                accentColor="orange"
               />
             </div>
           </div>
@@ -92,14 +92,14 @@ export function RescheduleModal({
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl border border-white/10 py-2.5 text-sm font-medium text-white/60 transition hover:bg-white/5"
+              className="flex-1 rounded-xl border border-[rgba(44,52,64,0.3)] py-2.5 text-sm font-medium text-text-secondary/60 transition hover:bg-[rgba(44,52,64,0.1)]"
             >
               Cancel
             </button>
             <button
               onClick={handleConfirm}
               disabled={!selectedDateISO || !selectedTime}
-              className="flex-grow rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex-grow rounded-xl bg-orange-500 py-2.5 text-sm font-semibold text-black transition hover:bg-orange-400 disabled:cursor-not-allowed disabled:opacity-50 shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]"
             >
               {confirmLabel}
             </button>

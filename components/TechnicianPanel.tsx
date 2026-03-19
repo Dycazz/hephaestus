@@ -218,32 +218,27 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40" onClick={onClose} />
 
       <div
-        className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col"
-        style={{ background: '#0d0f17', borderLeft: '1px solid rgba(255,255,255,0.07)' }}
+        className="fixed right-0 top-0 h-full w-full max-w-md shadow-2xl z-50 flex flex-col glass-morphism border-l border-[rgba(44,52,64,0.3)]"
       >
         {/* Header */}
-        <div className="text-white px-5 py-4 flex items-center justify-between shrink-0"
-          style={{ background: '#0d0f17', borderBottom: '1px solid rgba(255,255,255,0.07)' }}
-        >
+        <div className="px-5 py-4 flex items-center justify-between shrink-0 border-b border-[rgba(44,52,64,0.2)]">
           <div>
-            <h2 className="font-bold text-base">Manage Team</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Technicians & member invitations</p>
+            <h2 className="font-bold text-base text-text-primary">Manage Team</h2>
+            <p className="text-xs text-text-muted mt-0.5">Technicians & member invitations</p>
           </div>
-          <button onClick={onClose} className="text-slate-600 hover:text-slate-300 transition-colors">
+          <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab bar */}
-        <div className="flex shrink-0 px-4 pt-3 gap-1"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-        >
+        <div className="flex shrink-0 px-4 pt-3 gap-1 border-b border-[rgba(44,52,64,0.1)]">
           <button
             onClick={() => setActiveTab('technicians')}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-semibold transition-colors ${
               activeTab === 'technicians'
-                ? 'text-white border-b-2 border-blue-500'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-text-muted hover:text-text-primary'
             }`}
           >
             <Users className="w-3.5 h-3.5" />
@@ -253,8 +248,8 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
             onClick={() => setActiveTab('invitations')}
             className={`flex items-center gap-1.5 px-3 py-2 rounded-t-lg text-xs font-semibold transition-colors ${
               activeTab === 'invitations'
-                ? 'text-white border-b-2 border-blue-500'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-accent border-b-2 border-accent'
+                : 'text-text-muted hover:text-text-primary'
             }`}
           >
             <Mail className="w-3.5 h-3.5" />
@@ -267,14 +262,13 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
           <>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {loading ? (
-                <div className="flex items-center justify-center h-32 text-slate-400">
+                <div className="flex items-center justify-center h-32 text-text-muted">
                   <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading…
                 </div>
               ) : (
                 <>
                   {technicians.map(tech => (
-                    <div key={tech.id} className="rounded-xl overflow-hidden"
-                      style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
+                    <div key={tech.id} className="rounded-xl overflow-hidden bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] shadow-sm"
                     >
                       {editingId === tech.id ? (
                         <TechForm
@@ -290,11 +284,11 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                           <div className={`w-9 h-9 rounded-full ${colorBgMap[tech.color] ?? 'bg-blue-500'} flex items-center justify-center text-white text-xs font-bold shrink-0`}>
                             {tech.initials || getInitials(tech.name)}
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm text-white">{tech.name}</p>
-                            {tech.phone && <p className="text-xs text-slate-400">{tech.phone}</p>}
+                          <div className-="flex-1 min-w-0">
+                            <p className="font-semibold text-sm text-text-primary">{tech.name}</p>
+                            {tech.phone && <p className="text-xs text-text-muted">{tech.phone}</p>}
                             {(tech.commission_percent ?? 0) > 0 && (
-                              <p className="text-[10px] text-amber-400/80">{tech.commission_percent}% commission</p>
+                              <p className="text-[10px] text-accent/80">{tech.commission_percent}% commission</p>
                             )}
                           </div>
                           <div className="flex items-center gap-1">
@@ -324,18 +318,17 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                   ))}
 
                   {technicians.length === 0 && editingId !== 'new' && (
-                    <div className="text-center py-8 text-slate-500">
-                      <User className="w-10 h-10 mx-auto mb-2 opacity-20" />
+                    <div className="text-center py-8 text-text-muted">
+                      <User className="w-10 h-10 mx-auto mb-2 opacity-10" />
                       <p className="text-sm">No technicians yet</p>
                     </div>
                   )}
 
                   {/* Add new form */}
                   {editingId === 'new' && (
-                    <div className="rounded-xl overflow-hidden"
-                      style={{ border: '1px solid rgba(59,130,246,0.3)', background: 'rgba(59,130,246,0.05)' }}
+                    <div className="rounded-xl overflow-hidden border border-accent/30 bg-accent/5"
                     >
-                      <div className="px-3 pt-3 pb-1 text-xs font-semibold text-blue-400">New Technician</div>
+                      <div className="px-3 pt-3 pb-1 text-xs font-bold uppercase tracking-wider text-accent">New Technician</div>
                       <TechForm
                         form={form}
                         setForm={setForm}
@@ -352,11 +345,10 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
             {/* Footer */}
             {editingId !== 'new' && (
-              <div className="shrink-0 p-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="shrink-0 p-4 border-t border-[rgba(44,52,64,0.1)]">
                 <button
                   onClick={startNew}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-white text-sm font-semibold transition-colors"
-                  style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)' }}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-text-primary text-sm font-bold bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] hover:bg-[rgba(44,52,64,0.15)] transition-all"
                 >
                   <Plus className="w-4 h-4" />
                   Add technician
@@ -370,40 +362,38 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
         {activeTab === 'invitations' && (
           <div className="flex-1 overflow-y-auto p-4 space-y-5">
             {/* Invite form */}
-            <div className="rounded-xl p-4 space-y-3"
-              style={{ background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.2)' }}
-            >
-              <p className="text-xs font-semibold text-blue-300 flex items-center gap-1.5">
+            <div className="rounded-xl p-4 space-y-3 bg-accent/5 border border-accent/20">
+              <p className="text-xs font-bold uppercase tracking-wider text-accent flex items-center gap-1.5">
                 <UserPlus className="w-3.5 h-3.5" />
                 Invite a team member
               </p>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-text-muted">
                 They&apos;ll receive a link to create their account and join your org automatically.
               </p>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Email address</label>
+                <label className="block text-xs font-bold text-text-muted mb-1 px-1">Email address</label>
                 <input
                   type="email"
                   value={inviteEmail}
                   onChange={e => setInviteEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleSendInvite()}
                   placeholder="team@example.com"
-                  className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted/40 outline-none focus:ring-2 focus:ring-accent/50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Role</label>
+                <label className="block text-xs font-bold text-text-muted mb-1 px-1">Role</label>
                 <div className="flex gap-2 mb-3">
                   {(['dispatcher', 'viewer', 'technician'] as const).map(r => (
                     <button
                       key={r}
                       onClick={() => setInviteRole(r)}
-                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-colors capitalize ${
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all capitalize ${
                         inviteRole === r
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-slate-800 text-slate-400 border-slate-600 hover:border-blue-500'
+                          ? 'bg-accent text-white border-accent shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]'
+                          : 'bg-[rgba(44,52,64,0.1)] text-text-secondary border-[rgba(44,52,64,0.3)] hover:border-accent'
                       }`}
                     >
                       {r}
@@ -413,24 +403,24 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
                 {inviteRole === 'technician' && (
                   <div className="mb-3 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">Link to Technician</label>
+                    <label className="block text-xs font-bold text-text-muted mb-1 px-1">Link to Technician</label>
                     <select
                       value={selectedTechId ?? ''}
                       onChange={e => setSelectedTechId(e.target.value || null)}
-                      className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
                     >
                       <option value="">Select a technician...</option>
                       {technicians.map(t => (
                         <option key={t.id} value={t.id}>{t.name}</option>
                       ))}
                     </select>
-                    <p className="text-[10px] text-slate-500 mt-1">
+                    <p className="text-[10px] text-text-muted mt-1 px-1">
                       The user will be restricted to viewing only their own assigned appointments.
                     </p>
                   </div>
                 )}
 
-                <p className="text-xs text-slate-600 mt-1.5">
+                <p className="text-[10px] uppercase font-bold text-text-muted/60 mt-1.5 px-1 tracking-tight">
                   {inviteRole === 'dispatcher'
                     ? 'Can view and manage all appointments'
                     : inviteRole === 'viewer'
@@ -446,7 +436,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
               <button
                 onClick={handleSendInvite}
                 disabled={inviteSending}
-                className="w-full flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-sm font-semibold rounded-lg transition-colors"
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-accent hover:filter hover:brightness-110 disabled:opacity-60 text-white text-sm font-bold rounded-lg transition-all shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]"
               >
                 {inviteSending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
                 {inviteSending ? 'Creating link…' : 'Generate invite link'}
@@ -455,7 +445,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
             {/* Pending invitations list */}
             <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+              <p className="text-xs font-bold text-text-muted uppercase tracking-[0.2em] mb-3 px-1">
                 Pending Invitations
               </p>
 
@@ -474,21 +464,20 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
 
               <div className="space-y-2">
                 {invitations.map(inv => (
-                  <div key={inv.id} className="rounded-xl p-3"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
+                  <div key={inv.id} className="rounded-xl p-3 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)]"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm text-white font-medium truncate">{inv.email}</p>
+                        <p className="text-sm text-text-primary font-bold truncate">{inv.email}</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                             inv.role === 'dispatcher'
-                              ? 'bg-blue-900/50 text-blue-300'
-                              : 'bg-slate-700 text-slate-400'
+                              ? 'bg-accent/20 text-accent'
+                              : 'bg-[rgba(44,52,64,0.2)] text-text-muted'
                           }`}>
                             {inv.role}
                           </span>
-                          <span className="text-[10px] text-slate-600">
+                          <span className="text-[10px] text-text-muted/60">
                             Expires {formatExpiry(inv.expires_at)}
                           </span>
                         </div>
@@ -497,7 +486,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                         <button
                           onClick={() => copyInviteLink(inv.token)}
                           title="Copy invite link"
-                          className="p-1.5 text-slate-500 hover:text-blue-400 hover:bg-blue-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-text-muted hover:text-accent hover:bg-accent/10 rounded-lg transition-colors"
                         >
                           {copiedToken === inv.token
                             ? <CheckCheck className="w-3.5 h-3.5 text-green-400" />
@@ -507,7 +496,7 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
                         <button
                           onClick={() => handleRevokeInvite(inv.id)}
                           title="Revoke invitation"
-                          className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-900/30 rounded-lg transition-colors"
+                          className="p-1.5 text-text-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -537,49 +526,49 @@ function TechForm({
   return (
     <div className="p-3 space-y-3">
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Full Name *</label>
+        <label className="block text-xs font-bold text-text-muted mb-1 px-1">Full Name *</label>
         <input
           type="text"
           value={form.name}
           onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
           placeholder="e.g. Alex Torres"
-          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted/40 outline-none focus:ring-2 focus:ring-accent/50"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Phone (optional)</label>
+        <label className="block text-xs font-bold text-text-muted mb-1 px-1">Phone (optional)</label>
         <input
           type="tel"
           value={form.phone}
           onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
           placeholder="(555) 000-0000"
-          className="w-full bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary placeholder-text-muted/40 outline-none focus:ring-2 focus:ring-accent/50"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-1">Commission % (optional)</label>
+        <label className="block text-xs font-bold text-text-muted mb-1 px-1">Commission % (optional)</label>
         <div className="flex items-center gap-2">
           <input
             type="number" min="0" max="100" step="0.5"
             value={form.commission}
             onChange={e => setForm(f => ({ ...f, commission: e.target.value }))}
             placeholder="0"
-            className="w-24 bg-slate-800/80 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-24 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
           />
-          <span className="text-xs text-slate-500">% of job revenue</span>
+          <span className="text-[10px] uppercase font-bold text-text-muted/60">% of job revenue</span>
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-400 mb-2">Colour</label>
+        <label className="block text-xs font-bold text-text-muted mb-2 px-1">Colour</label>
         <div className="flex gap-2">
           {COLOR_OPTIONS.map(c => (
             <button
               key={c.value}
               onClick={() => setForm(f => ({ ...f, color: c.value }))}
-              className={`w-7 h-7 rounded-full ${c.cls} flex items-center justify-center transition-transform ${form.color === c.value ? 'ring-2 ring-offset-2 ring-offset-slate-900 ring-blue-500 scale-110' : 'hover:scale-110'}`}
+              className={`w-7 h-7 rounded-full ${c.cls} flex items-center justify-center transition-transform ${form.color === c.value ? 'ring-2 ring-offset-2 ring-offset-[#1a1d26] ring-accent scale-110' : 'hover:scale-110'}`}
               title={c.label}
             >
               {form.color === c.value && <Check className="w-3.5 h-3.5 text-white" />}
@@ -592,18 +581,17 @@ function TechForm({
         <p className="text-xs text-red-400 bg-red-900/30 border border-red-700/50 rounded-lg px-3 py-2">{error}</p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 pt-2">
         <button
           onClick={onSave}
           disabled={saving}
-          className="flex-1 py-2 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-60"
-          style={{ background: '#2563eb' }}
+          className="flex-1 py-2.5 bg-accent hover:filter hover:brightness-110 text-white text-sm font-bold rounded-lg transition-all shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)] disabled:opacity-60"
         >
           {saving ? 'Saving…' : 'Save'}
         </button>
         <button
           onClick={onCancel}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm font-semibold rounded-lg transition-colors"
+          className="px-4 py-2.5 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] hover:bg-[rgba(44,52,64,0.15)] text-text-secondary text-sm font-bold rounded-lg transition-all"
         >
           Cancel
         </button>
