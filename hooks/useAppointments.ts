@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { Appointment } from '@/types'
 import { formatDisplayDate } from '@/lib/dateUtils'
 import { createClient } from '@/lib/supabase/client'
@@ -77,18 +77,25 @@ export function useAppointments(viewAs?: string | null) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const fetchIdRef = useRef(0)
+
   const fetchAppointments = useCallback(async () => {
+    fetchIdRef.current += 1
+    const currentId = fetchIdRef.current
     try {
       const url = viewAs ? `/api/appointments?view_as=${viewAs}` : '/api/appointments'
       const res = await fetch(url, { cache: 'no-store' })
       if (!res.ok) throw new Error('Failed to load appointments')
       const json = await res.json()
+      // Discard stale responses — a newer fetch has already completed
+      if (currentId !== fetchIdRef.current) return
       setAppointments((json.appointments as Record<string, unknown>[]).map(mapDbAppointment))
       setError(null)
     } catch (e) {
+      if (currentId !== fetchIdRef.current) return
       setError((e as Error).message)
     } finally {
-      setLoading(false)
+      if (currentId === fetchIdRef.current) setLoading(false)
     }
   }, [viewAs])
 

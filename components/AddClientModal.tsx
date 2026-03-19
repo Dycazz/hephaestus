@@ -100,7 +100,7 @@ export function AddClientModal({
 
   // Load services from DB
   useEffect(() => {
-    fetch('/api/services')
+    fetch('/api/services', { cache: 'no-store' })
       .then(r => r.ok ? r.json() : null)
       .then(json => {
         if (!json?.services?.length) return
