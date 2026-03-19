@@ -8,6 +8,9 @@
  *   checkout.session.completed       → activate subscription on new purchase
  *   customer.subscription.updated    → sync status + period end (handles upgrades/downgrades)
  *   customer.subscription.deleted    → revert plan to 'trial', clear subscription fields
+ *
+ * Note: invoice payment via Stripe Payment Links is not used — invoices are
+ * marked paid manually (cash / check / other) by the dispatcher.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -48,26 +51,6 @@ export async function POST(request: NextRequest) {
       // ── New checkout completed ───────────────────────────────────────────
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
-
-        // ── Invoice payment via Payment Link ─────────────────────────────
-        if (session.mode === 'payment') {
-          const invoiceId = session.metadata?.invoice_id
-          if (invoiceId) {
-            await supabase
-              .from('invoices')
-              .update({
-                status:         'paid',
-                paid_at:        new Date().toISOString(),
-                payment_method: 'stripe',
-                updated_at:     new Date().toISOString(),
-              })
-              .eq('id', invoiceId)
-              .neq('status', 'paid')  // idempotent
-
-            console.log(`[Stripe Webhook] Invoice ${invoiceId} paid via Stripe`)
-          }
-          break
-        }
 
         if (session.mode !== 'subscription') break
 

@@ -5,8 +5,8 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import {
-  ArrowLeft, FileText, Send, Check, Loader2, ExternalLink,
-  Printer, XCircle, Copy, CheckCheck, Trash2, AlertTriangle,
+  ArrowLeft, FileText, Send, Check, Loader2,
+  Printer, XCircle, Trash2, AlertTriangle,
 } from 'lucide-react'
 import { useOrg } from '@/context/OrgContext'
 import type { Invoice, InvoiceStatus } from '@/types'

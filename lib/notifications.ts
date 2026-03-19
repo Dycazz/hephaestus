@@ -75,7 +75,6 @@ export async function sendInvoiceEmail(params: {
   invoiceNumber: string
   totalCents: number
   dueDate: string          // "YYYY-MM-DD"
-  paymentLinkUrl: string | null
   pdfSignedUrl: string | null
   businessName: string
 }): Promise<void> {
@@ -139,11 +138,6 @@ export async function sendInvoiceEmail(params: {
           <span style="color: #059669; font-size: 20px; font-weight: 700;">${formattedTotal}</span>
         </div>
       </div>
-
-      ${params.paymentLinkUrl ? `
-      <a href="${params.paymentLinkUrl}" style="display: block; background: #d97706; color: #fff; text-align: center; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-decoration: none; margin-bottom: 16px;">
-        Pay Now
-      </a>` : ''}
 
       ${params.pdfSignedUrl ? `
       <a href="${params.pdfSignedUrl}" style="display: block; border: 1px solid #e5e7eb; color: #374151; text-align: center; padding: 12px; border-radius: 8px; font-size: 14px; text-decoration: none; margin-bottom: 24px;">
