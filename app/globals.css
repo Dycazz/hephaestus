@@ -211,10 +211,10 @@ body::after {
 }
 
 .btn-gunmetal-hover:hover {
-  box-shadow: inset 0 -3px 0 0 var(--gunmetal), 0 8px 20px -4px rgba(0,0,0,0.4) !important;
+  box-shadow: inset 0 -3px 0 0 var(--gunmetal), 0 0 20px -2px var(--gunmetal) !important;
   transform: translateY(-2px) !important;
-  background-color: var(--gunmetal-20) !important;
-  border-color: var(--gunmetal-40) !important;
+  background-color: #3b454e !important;
+  border-color: #4a5562 !important;
 }
 
 /* ── Glassmorphism Utilities ──────────────────────────────────────────────── */
