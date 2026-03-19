@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
  * Converts a DB appointment row (snake_case, timestamptz) to the
  * frontend Appointment shape (camelCase, scheduledDate/scheduledTime strings).
  */
-function mapDbAppointment(row: Record<string, unknown>): Appointment {
+export function mapDbAppointment(row: Record<string, unknown>): Appointment {
   const scheduledAt = new Date(row.scheduled_at as string)
 
   const apptDay = new Date(scheduledAt)

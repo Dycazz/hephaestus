@@ -62,7 +62,6 @@ export async function GET(request: NextRequest) {
     `)
     .not('status', 'eq', 'cancelled')
     .order('scheduled_at', { ascending: true })
-    .order('created_at', { referencedTable: 'sms_messages', ascending: true })
 
   if (orgFilter) {
     query = query.eq('org_id', orgFilter)
@@ -197,7 +196,12 @@ export async function POST(request: NextRequest) {
       auto_reminder: d.autoReminder,
       price_cents: d.priceCents ?? null,
     })
-    .select()
+    .select(`
+      *,
+      clients ( id, name, phone, address ),
+      technicians ( id, name, initials, color ),
+      sms_messages ( id, direction, body, message_type, created_at )
+    `)
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
