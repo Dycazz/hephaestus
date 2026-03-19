@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { X, Plus, Pencil, Trash2, User, Check, Loader2, Mail, Copy, CheckCheck, UserPlus, Users, Clock } from 'lucide-react'
+import Link from 'next/link'
 import { TechnicianAvailabilityModal } from '@/components/TechnicianAvailabilityModal'
+import { useOrg } from '@/context/OrgContext'
+import { PLAN_LIMITS, type AllPlanKey } from '@/lib/plan-access'
 
 interface Technician {
   id: string
@@ -58,6 +61,8 @@ const BLANK: FormState = { name: '', color: 'blue', phone: '', commission: '' }
 type PanelTab = 'technicians' | 'invitations'
 
 export function TechnicianPanel({ onClose }: { onClose: () => void }) {
+  const { org } = useOrg()
+  const techLimit = org ? (PLAN_LIMITS[org.plan as AllPlanKey]?.techs ?? Infinity) : Infinity
   const [activeTab, setActiveTab] = useState<PanelTab>('technicians')
 
   // ── Availability modal ────────────────────────────────────────────────────
@@ -346,13 +351,33 @@ export function TechnicianPanel({ onClose }: { onClose: () => void }) {
             {/* Footer */}
             {editingId !== 'new' && (
               <div className="shrink-0 p-4 border-t border-[rgba(44,52,64,0.1)]">
-                <button
-                  onClick={startNew}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-text-primary text-sm font-bold bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] hover:bg-[rgba(44,52,64,0.15)] transition-all"
-                >
-                  <Plus className="w-4 h-4" />
-                  Add technician
-                </button>
+                {!loading && isFinite(techLimit) && technicians.length >= techLimit ? (
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-center">
+                    <p className="text-xs font-semibold text-amber-400 mb-1">
+                      Technician limit reached ({technicians.length}/{techLimit})
+                    </p>
+                    <p className="text-[11px] text-text-muted mb-2">
+                      Your {org?.plan} plan allows up to {techLimit} technician{techLimit !== 1 ? 's' : ''}.
+                    </p>
+                    <Link
+                      href="/settings#billing"
+                      className="text-xs font-bold text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors"
+                    >
+                      Upgrade to add more →
+                    </Link>
+                  </div>
+                ) : (
+                  <button
+                    onClick={startNew}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-text-primary text-sm font-bold bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] hover:bg-[rgba(44,52,64,0.15)] transition-all"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add technician
+                    {!loading && isFinite(techLimit) && (
+                      <span className="ml-1 text-xs font-normal text-text-muted">({technicians.length}/{techLimit})</span>
+                    )}
+                  </button>
+                )}
               </div>
             )}
           </>

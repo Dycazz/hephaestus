@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { checkLimit } from '@/lib/plan-access'
 
 export async function GET(_request: NextRequest) {
   const supabase = await createClient()
@@ -36,8 +37,14 @@ export async function POST(request: NextRequest) {
   const { data: profile } = await supabase.from('profiles').select('org_id').eq('id', user.id).single()
   if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
 
-  // ── Plan access check (TODO: re-enable when Stripe integration is live) ──
-  // ─────────────────────────────────────────────────────────────────────────
+  // ── Plan access check ──────────────────────────────────────────────────────
+  const techLimit = await checkLimit(profile.org_id, 'techs', supabase)
+  if (!techLimit.allowed) {
+    return NextResponse.json(
+      { error: `Technician limit reached (${techLimit.current}/${techLimit.limit} on your plan). Upgrade to add more.` },
+      { status: 403 }
+    )
+  }
 
   const d = parsed.data
   const initials = d.initials ?? d.name.split(' ').map((w: string) => w[0]).join('').toUpperCase().slice(0, 2)

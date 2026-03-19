@@ -8,6 +8,7 @@ interface Org {
   businessName: string
   slug: string
   plan: string
+  trialEndsAt: string | null
   reviewUrl: string | null
   smsPhoneNumber: string | null
   userRole: 'owner' | 'dispatcher' | 'viewer' | 'technician' | null
@@ -58,6 +59,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
           businessName: orgRow.business_name,
           slug: orgRow.slug,
           plan: orgRow.plan,
+          trialEndsAt: orgRow.trial_ends_at ?? null,
           reviewUrl: orgRow.review_url,
           smsPhoneNumber: orgRow.sms_phone_number,
           userRole: profile.role as 'owner' | 'dispatcher' | 'viewer' | 'technician',

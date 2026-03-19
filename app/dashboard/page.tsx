@@ -21,6 +21,7 @@ import { useTechnicians } from '@/hooks/useTechnicians'
 import { useOrg } from '@/context/OrgContext'
 import { formatDisplayDate, buildScheduledAt } from '@/lib/dateUtils'
 import { DashboardSkeleton } from '@/components/DashboardSkeleton'
+import { TrialBanner } from '@/components/TrialBanner'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -341,6 +342,8 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-bg">
+      <TrialBanner />
+
       {/* Admin impersonation banner */}
       {viewAs && (
         <div
