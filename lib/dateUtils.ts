@@ -62,6 +62,19 @@ export function buildScheduledAt(dateISO: string, timeStr: string): string {
 }
 
 /**
+ * Deterministically format local time as a DateTimePicker time-slot string.
+ * Must match the slot format produced by `DateTimePicker` / `TIME_SLOTS`.
+ * Example: 09:00 → "9:00 AM", 00:30 → "12:30 AM"
+ */
+export function formatTimeSlotFromDate(d: Date): string {
+  const h24 = d.getHours()
+  const period = h24 < 12 ? 'AM' : 'PM'
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12
+  const minutes = d.getMinutes()
+  return `${h12}:${String(minutes).padStart(2, '0')} ${period}`
+}
+
+/**
  * Get the Monday of the ISO week containing `date`.
  */
 export function getWeekStart(date: Date): Date {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Appointment } from '@/types'
-import { formatDisplayDate } from '@/lib/dateUtils'
+import { formatDisplayDate, formatTimeSlotFromDate } from '@/lib/dateUtils'
 import { createClient } from '@/lib/supabase/client'
 
 /**
@@ -22,11 +22,9 @@ function mapDbAppointment(row: Record<string, unknown>): Appointment {
   const isoDate = `${y}-${m}-${d}`
   const scheduledDate = formatDisplayDate(isoDate)
 
-  const scheduledTime = scheduledAt.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  })
+  // CalendarView matches time slots using strict string equality (e.g. "9:00 AM").
+  // Locale formatting can differ (e.g., whitespace), so use deterministic formatting.
+  const normalizedScheduledTime = formatTimeSlotFromDate(scheduledAt)
 
   const client = row.clients as Record<string, unknown> | null
   const tech = row.technicians as Record<string, unknown> | null
@@ -39,7 +37,7 @@ function mapDbAppointment(row: Record<string, unknown>): Appointment {
     service: row.service as string,
     serviceIcon: (row.service_icon ?? '') as string,
     serviceColor: (row.service_color ?? '') as string,
-    scheduledTime,
+    scheduledTime: normalizedScheduledTime,
     scheduledDate,
     scheduledAt: row.scheduled_at as string,  // keep full ISO for WeekView positioning
     technician: (tech?.name ?? 'Unassigned') as string,
