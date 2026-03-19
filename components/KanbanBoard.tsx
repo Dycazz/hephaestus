@@ -16,6 +16,7 @@ interface KanbanBoardProps {
   onScheduleFollowUp: (appointment: Appointment) => void
   onAssignTechnician: (appointmentId: string, technicianId: string, technicianName: string) => void
   readOnly?: boolean
+  hideCompleted?: boolean
 }
 
 interface ColumnProps {
@@ -114,6 +115,7 @@ export function KanbanBoard({
   onScheduleFollowUp,
   onAssignTechnician,
   readOnly = false,
+  hideCompleted = false,
 }: KanbanBoardProps) {
   const confirmed = appointments.filter(a => a.status === 'confirmed')
   const pending = appointments.filter(
@@ -186,8 +188,8 @@ export function KanbanBoard({
         />
       </div>
 
-      {completed.length > 0 && (
-        <div>
+      {!hideCompleted && completed.length > 0 && (
+        <div className="mt-8 transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
           <div className="mb-3 flex items-center gap-2">
             <Star className="h-4 w-4 text-orange-300" />
             <h3 className="text-sm font-semibold text-white/70">Completed Today</h3>
