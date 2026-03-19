@@ -180,6 +180,116 @@ export async function sendInvoiceEmail(params: {
   }
 }
 
+// ── Estimate email ──────────────────────────────────────────────────────────
+
+/**
+ * Send an estimate email to a client with a link to view and accept/decline online.
+ */
+export async function sendEstimateEmail(params: {
+  to: string
+  clientName: string
+  estimateNumber: string
+  totalCents: number
+  expiryDate: string | null   // "YYYY-MM-DD" or null
+  viewUrl: string             // public estimate view URL
+  businessName: string
+}): Promise<void> {
+  let apiKey: string | undefined
+  let fromEmail: string | undefined
+  try {
+    const cfCtx = (globalThis as Record<symbol, unknown>)[
+      Symbol.for('__cloudflare-context__')
+    ] as { env?: Record<string, string | undefined> } | undefined
+    apiKey = cfCtx?.env?.RESEND_API_KEY ?? process.env.RESEND_API_KEY
+    fromEmail = cfCtx?.env?.RESEND_FROM_EMAIL ?? process.env.RESEND_FROM_EMAIL
+  } catch {
+    apiKey = process.env.RESEND_API_KEY
+    fromEmail = process.env.RESEND_FROM_EMAIL
+  }
+
+  if (!apiKey) {
+    console.warn('[Estimate Email] RESEND_API_KEY not configured — skipping email for estimate', params.estimateNumber)
+    return
+  }
+
+  const from = fromEmail ?? 'noreply@hephaestus.work'
+
+  const formattedTotal = '$' + (params.totalCents / 100).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+
+  const formattedExpiry = params.expiryDate
+    ? new Date(params.expiryDate + 'T12:00:00').toLocaleDateString('en-US', {
+        year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : null
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9fafb; margin: 0; padding: 32px 16px;">
+  <div style="max-width: 520px; margin: 0 auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <div style="background: #1c1917; padding: 24px 28px;">
+      <h1 style="color: #fff; font-size: 20px; font-weight: 700; margin: 0;">${params.businessName}</h1>
+      <p style="color: #a8a29e; font-size: 14px; margin: 4px 0 0;">Estimate ${params.estimateNumber}</p>
+    </div>
+    <div style="padding: 28px;">
+      <p style="color: #374151; font-size: 15px; margin: 0 0 20px;">Hi ${params.clientName},</p>
+      <p style="color: #374151; font-size: 15px; margin: 0 0 20px;">
+        We've prepared an estimate for you. Please review the details and let us know if you'd like to proceed.
+      </p>
+      <div style="background: #f9fafb; border-radius: 8px; padding: 16px 20px; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: #6b7280; font-size: 14px;">Estimate</span>
+          <span style="color: #111827; font-size: 14px; font-weight: 600;">${params.estimateNumber}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+          <span style="color: #6b7280; font-size: 14px;">Total</span>
+          <span style="color: #111827; font-size: 16px; font-weight: 700;">${formattedTotal}</span>
+        </div>
+        ${formattedExpiry ? `
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #6b7280; font-size: 14px;">Valid until</span>
+          <span style="color: #111827; font-size: 14px; font-weight: 600;">${formattedExpiry}</span>
+        </div>` : ''}
+      </div>
+
+      <a href="${params.viewUrl}" style="display: block; background: #d97706; color: #fff; text-align: center; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 15px; text-decoration: none; margin-bottom: 16px;">
+        View &amp; Accept Estimate
+      </a>
+
+      <p style="color: #9ca3af; font-size: 12px; margin: 0;">If you have any questions, please reply to this email.</p>
+    </div>
+  </div>
+</body>
+</html>`
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: params.to,
+        subject: `Estimate ${params.estimateNumber} from ${params.businessName} — ${formattedTotal}`,
+        html,
+      }),
+    })
+
+    if (!res.ok) {
+      const body = await res.text()
+      console.error('[Estimate Email] Resend API error:', res.status, body)
+    }
+  } catch (err) {
+    console.error('[Estimate Email] Failed to send:', err)
+  }
+}
+
 /**
  * Send a push notification to a technician when they are assigned a new appointment.
  */

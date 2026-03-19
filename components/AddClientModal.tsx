@@ -240,7 +240,7 @@ export function AddClientModal({
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Jane Smith"
-                className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.name ? 'border-red-400/50' : 'border-white/10'}`}
+                className={`w-full bg-[rgba(44,52,64,0.1)] border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.name ? 'border-red-400/50' : 'border-[rgba(44,52,64,0.3)]'}`}
               />
               {errors.name && <p className="text-xs text-red-400 mt-0.5">{errors.name}</p>}
             </div>
@@ -250,7 +250,7 @@ export function AddClientModal({
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="(555) 000-0000"
-                className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.phone ? 'border-red-400/50' : 'border-white/10'}`}
+                className={`w-full bg-[rgba(44,52,64,0.1)] border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.phone ? 'border-red-400/50' : 'border-[rgba(44,52,64,0.3)]'}`}
               />
               {errors.phone && <p className="text-xs text-red-400 mt-0.5">{errors.phone}</p>}
             </div>
@@ -267,7 +267,7 @@ export function AddClientModal({
                   value={service?.name ?? ''}
                   onChange={e => handleServiceChange(e.target.value)}
                   disabled={servicesLoading}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                  className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                 >
                   {services.map(s => (
                     <option key={s.name} value={s.name} className="bg-surface">{s.icon} {s.name}</option>
@@ -283,7 +283,7 @@ export function AddClientModal({
                 <select
                   value={technician?.id ?? ''}
                   onChange={e => setTechnicianState(technicians.find(t => t.id === e.target.value) ?? null)}
-                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
+                  className="w-full bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
                 >
                   {technicians.map(t => (
                     <option key={t.id} value={t.id} className="bg-surface">{t.name}</option>
@@ -309,7 +309,7 @@ export function AddClientModal({
                   setPriceCents(val !== '' ? Math.round(parseFloat(val) * 100) : null)
                 }}
                 placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'e.g. 150.00'}
-                className="w-44 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
+                className="w-44 bg-[rgba(44,52,64,0.1)] border border-[rgba(44,52,64,0.3)] rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
               />
             </div>
             <p className="text-[10px] text-text-muted mt-1">Leave blank to use the service&apos;s default price</p>
@@ -341,8 +341,8 @@ export function AddClientModal({
                   onClick={() => setDurationMinutes(d.value)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
                     durationMinutes === d.value
-                      ? 'bg-accent/80 text-black border-accent'
-                      : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/40'
+                      ? 'bg-accent/80 text-black border-accent shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]'
+                      : 'bg-[rgba(44,52,64,0.1)] text-text-secondary border-[rgba(44,52,64,0.3)] hover:border-accent/40 btn-gunmetal-hover'
                   }`}
                 >
                   {d.label}
@@ -371,8 +371,8 @@ export function AddClientModal({
                       onClick={() => setRecurrenceRule(opt.value)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
                         recurrenceRule === opt.value
-                          ? 'bg-accent/80 text-black border-accent'
-                          : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/40'
+                          ? 'bg-accent/80 text-black border-accent shadow-[inset_0_-2px_0_0_rgba(0,0,0,0.2)]'
+                          : 'bg-[rgba(44,52,64,0.1)] text-text-secondary border-[rgba(44,52,64,0.3)] hover:border-accent/40 btn-gunmetal-hover'
                       }`}
                     >
                       {opt.label}
@@ -413,7 +413,7 @@ export function AddClientModal({
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="123 Main St"
-              className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.address ? 'border-red-400/50' : 'border-white/10'}`}
+              className={`w-full bg-[rgba(44,52,64,0.1)] border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.address ? 'border-red-400/50' : 'border-[rgba(44,52,64,0.3)]'}`}
             />
             {errors.address && <p className="text-xs text-red-400 mt-0.5">{errors.address}</p>}
           </div>
@@ -483,13 +483,13 @@ export function AddClientModal({
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 border border-white/10 text-text-secondary text-sm font-medium rounded-xl hover:bg-white/5 transition-colors"
+              className="flex-1 py-2.5 border border-[rgba(44,52,64,0.3)] text-text-secondary text-sm font-medium rounded-xl hover:bg-[rgba(44,52,64,0.2)] transition-colors btn-gunmetal-hover"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-grow py-2.5 bg-accent hover:bg-accent/90 text-black text-sm font-bold rounded-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-0.5"
+              className="flex-grow py-2.5 bg-accent hover:bg-accent/90 text-black text-sm font-bold rounded-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-0.5 shadow-[inset_0_-3px_0_0_rgba(0,0,0,0.2)]"
             >
               {recurrenceRule !== 'none' && recurringCount > 1
                 ? `Add ${recurringCount} Appointments`
