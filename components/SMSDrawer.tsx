@@ -129,7 +129,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
           )}
 
           {canSendReview && (
-            <div className="rounded-xl border border-border bg-surface-elevated/50 p-3">
+            <div className="rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-3 btn-gunmetal-hover">
               <p className="mb-2 text-xs font-medium text-text-muted">Send review request</p>
               <button
                 onClick={() => onMarkComplete(appointment.id)}
