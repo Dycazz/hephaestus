@@ -19,12 +19,12 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
 
   return (
     <>
-      <div className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm transition-opacity" onClick={onClose} />
+      <div className="fixed inset-0 z-40 bg-[rgba(15,17,21,0.4)] backdrop-blur-sm transition-opacity" onClick={onClose} />
 
       <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-md flex-col glass-panel shadow-2xl transition-transform">
         <div className="flex items-start justify-between border-b border-border px-4 py-4 bg-surface-elevated/30">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg border border-border bg-surface-elevated p-2 text-orange-400">
+            <div className="rounded-lg border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] p-2 text-orange-400">
               <MessageSquare className="h-4 w-4" />
             </div>
             <div>
@@ -56,7 +56,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
                 <div
                   className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm backdrop-blur-md ${
                     msg.from === 'customer'
-                      ? 'rounded-tr-sm border border-white/10 bg-white/5 text-text-primary'
+                      ? 'rounded-tr-sm border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-primary'
                       : msg.type === 'review_request'
                       ? 'rounded-tl-sm border border-orange-500/20 bg-orange-500/15 text-text-primary'
                       : 'rounded-tl-sm bg-accent/10 border border-accent/20 text-text-primary'
@@ -71,7 +71,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
                   {msg.type === 'reschedule_link' ? (
                     <div>
                       <p className="text-sm">No problem! Here&apos;s a link to pick a new time:</p>
-                      <span className="mt-1 inline-block rounded bg-surface-elevated border border-border px-2 py-0.5 text-xs font-mono underline text-accent">
+                      <span className="mt-1 inline-block rounded bg-[rgba(44,52,64,0.15)] border border-[rgba(44,52,64,0.3)] px-2 py-0.5 text-xs font-mono underline text-accent">
                         reschedule link
                       </span>
                     </div>
@@ -141,7 +141,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
           )}
 
           {appointment.status === 'completed' && appointment.reviewRequestSent && (
-            <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-elevated/50 p-3">
+            <div className="flex items-center gap-3 rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-3">
               <Star className="h-4 w-4 text-orange-400" />
               <div>
                 <p className="text-xs font-medium text-text-primary/80">Review request sent</p>

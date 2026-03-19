@@ -62,7 +62,7 @@ function Column({
     <div className="flex flex-col gap-3">
       <div className={`flex items-center justify-between rounded-xl border p-3 glass-panel border-l-4 ${accentBorder} shadow-lg shadow-black/5`}>
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/5 border border-white/10 shadow-inner">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[rgba(44,52,64,0.2)] border border-[rgba(44,52,64,0.3)] shadow-inner">
             {icon}
           </div>
           <div>
@@ -74,8 +74,8 @@ function Column({
       </div>
 
       {appointments.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-white/10 bg-white/5 p-10 text-center backdrop-blur-sm">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-text-muted">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-10 text-center backdrop-blur-sm">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(44,52,64,0.2)] border border-[rgba(44,52,64,0.3)] text-text-muted">
             {icon}
           </div>
           <div className="space-y-1">
@@ -193,7 +193,7 @@ export function KanbanBoard({
           <div className="mb-3 flex items-center gap-2">
             <Star className="h-4 w-4 text-accent" />
             <h3 className="text-sm font-semibold text-text-primary/70">Completed Today</h3>
-            <span className="rounded-full bg-white/5 border border-white/10 px-2 py-0.5 text-xs text-text-secondary">
+            <span className="rounded-full bg-[rgba(44,52,64,0.2)] border border-[rgba(44,52,64,0.3)] px-2 py-0.5 text-xs text-text-secondary">
               {completed.length}
             </span>
           </div>

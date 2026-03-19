@@ -20,7 +20,7 @@ interface AppointmentCardProps {
 
 const statusConfig = {
   scheduled: {
-    badge: 'bg-white/5 text-text-secondary border-white/10',
+    badge: 'bg-[rgba(44,52,64,0.15)] text-text-secondary border-[rgba(44,52,64,0.3)]',
     label: 'Not sent',
     dot: 'bg-text-muted',
   },
@@ -50,7 +50,7 @@ const statusConfig = {
     dot: 'bg-blue-500',
   },
   cancelled: {
-    badge: 'bg-white/5 text-text-muted border-white/10',
+    badge: 'bg-[rgba(44,52,64,0.15)] text-text-muted border-[rgba(44,52,64,0.3)]',
     label: 'Cancelled',
     dot: 'bg-text-muted',
   },
@@ -93,7 +93,7 @@ export function AppointmentCard({
 
   return (
     <div
-      className="rounded-xl transition-all duration-300 overflow-hidden glass-card border border-white/5 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 group"
+      className="rounded-xl transition-all duration-300 overflow-hidden glass-card border border-[rgba(44,52,64,0.2)] hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 group"
     >
       {/* Top accent bar */}
       <div
@@ -154,7 +154,7 @@ export function AppointmentCard({
               {canAssign && !readOnly && (
                 <button
                   onClick={() => setShowTechPicker(v => !v)}
-                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-text-secondary hover:text-text-primary transition-all duration-150"
+                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary transition-all duration-150"
                 >
                   {isUnassigned ? (
                     <>
@@ -171,7 +171,7 @@ export function AppointmentCard({
             {/* Technician picker dropdown */}
             {showTechPicker && (
               <div
-                className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border border-white/10 shadow-2xl py-1 glass-morphism backdrop-blur-xl"
+                className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border border-[rgba(44,52,64,0.3)] shadow-2xl py-1 glass-morphism backdrop-blur-xl"
               >
                 <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   Assign technician
@@ -188,7 +188,7 @@ export function AppointmentCard({
                       }}
                       className="w-full text-left px-3 py-1.5 text-xs text-slate-300 transition-colors flex items-center gap-2"
                       style={{ background: 'transparent' }}
-                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.07)' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = 'rgba(44,52,64,0.2)' }}
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <span
@@ -243,7 +243,7 @@ export function AppointmentCard({
 
         {/* No-reminder badge */}
         {!appointment.autoReminder && (
-          <div className="mb-3 px-2.5 py-2 rounded-lg border border-white/5 bg-white/5 text-xs text-text-muted font-medium flex items-center gap-1.5"
+          <div className="mb-3 px-2.5 py-2 rounded-lg border border-[rgba(44,52,64,0.2)] bg-[rgba(44,52,64,0.1)] text-xs text-text-muted font-medium flex items-center gap-1.5"
           >
             <BellOff className="w-3.5 h-3.5" />
             No auto-reminder
@@ -262,7 +262,7 @@ export function AppointmentCard({
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border border-white/10 bg-white/5 text-text-secondary hover:text-text-primary hover:bg-white/10"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary hover:bg-[rgba(44,52,64,0.25)]"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
