@@ -250,7 +250,7 @@ export default function LandingPage() {
             <Link
               href="/signup"
               className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-all"
-              style={{ background: '#2563eb' }}
+              style={{ background: '#f59e0b' }}
             >
               Get started
             </Link>
@@ -299,7 +299,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/signup"
-                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all bg-blue-600 hover:bg-blue-700"
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all bg-amber-500 hover:bg-amber-600"
               >
                 Get started for free
                 <ArrowRight className="w-4 h-4" />
@@ -331,7 +331,7 @@ export default function LandingPage() {
                     <div
                       key={label}
                       className="px-4 py-1.5 rounded-md text-[11px] font-medium transition-all"
-                      style={i === 0 ? { background: '#2563eb', color: 'white' } : { color: '#a1a1aa' }}
+                      style={i === 0 ? { background: '#f59e0b', color: 'black' } : { color: '#a1a1aa' }}
                     >
                       {label}
                     </div>
@@ -361,7 +361,7 @@ export default function LandingPage() {
                         className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-900 shadow-sm"
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : (i === 1 ? '#eab308' : '#3b82f6') }} />
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : (i === 1 ? '#eab308' : '#f59e0b') }} />
                           <p className="text-xs font-medium text-zinc-200 truncate">{job.name}</p>
                         </div>
                         <div className="flex items-center justify-between mt-3">
@@ -499,7 +499,7 @@ export default function LandingPage() {
                   {tier.name}
                 </span>
                 {tier.highlight && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
                     Popular
                   </span>
                 )}
@@ -517,7 +517,7 @@ export default function LandingPage() {
               <ul className="space-y-3 mb-8 flex-1">
                 {tier.features.map(f => (
                   <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-300">
-                    <Check className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
+                    <Check className="w-4 h-4 mt-0.5 shrink-0 text-amber-500" />
                     {f}
                   </li>
                 ))}
@@ -527,7 +527,7 @@ export default function LandingPage() {
                 href={tier.href}
                 className={`block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   tier.highlight 
-                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    ? 'bg-amber-500 text-black hover:bg-amber-600' 
                     : 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
                 }`}
               >
@@ -663,7 +663,7 @@ export default function LandingPage() {
           </p>
           <Link
             href="/signup"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-white transition-colors bg-blue-600 hover:bg-blue-700"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-black transition-colors bg-amber-500 hover:bg-amber-600"
           >
             Start your free trial
             <ArrowRight className="w-4 h-4" />
@@ -685,7 +685,7 @@ export default function LandingPage() {
             <a href="mailto:service.hephaestus.work@gmail.com" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Contact Support</a>
             <a href="#pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Pricing</a>
             <Link href="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Sign in</Link>
-            <Link href="/signup" className="text-sm font-medium text-blue-500 hover:text-blue-400 transition-colors">Get started</Link>
+            <Link href="/signup" className="text-sm font-medium text-amber-500 hover:text-amber-400 transition-colors">Get started</Link>
           </div>
         </div>
       </footer>
