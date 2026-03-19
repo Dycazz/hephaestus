@@ -35,6 +35,16 @@ export const PLAN_LIMITS: Record<AllPlanKey, { jobs: number; techs: number; sms:
   gifted:     { jobs: Infinity, techs: Infinity,  sms: Infinity },
 }
 
+// ── Feature flags ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns true if the org's plan includes the invoicing feature.
+ * Invoicing requires a paid plan (starter, pro, enterprise, or gifted).
+ */
+export function planIncludesInvoicing(plan: AllPlanKey): boolean {
+  return plan !== 'trial'
+}
+
 // ── Core access check ──────────────────────────────────────────────────────
 
 /**

@@ -213,17 +213,17 @@ export function AddClientModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="glass-morphism rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-t-2xl shrink-0">
+        <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 backdrop-blur-md p-5 border-b border-white/5 shrink-0">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-bold text-lg">New Appointment</p>
-              <p className="text-sm text-blue-100">Add a client to the schedule</p>
+              <p className="font-bold text-lg text-text-primary">New Appointment</p>
+              <p className="text-sm text-text-secondary/70">Add a client to the schedule</p>
             </div>
-            <button onClick={onClose} className="text-white/70 hover:text-white transition-colors">
+            <button onClick={onClose} className="text-text-muted hover:text-text-primary transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -235,58 +235,58 @@ export function AddClientModal({
           {/* Name + Phone */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Customer Name *</label>
+              <label className="text-xs font-semibold text-text-secondary mb-1 block">Customer Name *</label>
               <input
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Jane Smith"
-                className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-400' : 'border-slate-300'}`}
+                className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.name ? 'border-red-400/50' : 'border-white/10'}`}
               />
-              {errors.name && <p className="text-xs text-red-500 mt-0.5">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-red-400 mt-0.5">{errors.name}</p>}
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Phone *</label>
+              <label className="text-xs font-semibold text-text-secondary mb-1 block">Phone *</label>
               <input
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="(555) 000-0000"
-                className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-400' : 'border-slate-300'}`}
+                className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.phone ? 'border-red-400/50' : 'border-white/10'}`}
               />
-              {errors.phone && <p className="text-xs text-red-500 mt-0.5">{errors.phone}</p>}
+              {errors.phone && <p className="text-xs text-red-400 mt-0.5">{errors.phone}</p>}
             </div>
           </div>
 
           {/* Service + Technician */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Service</label>
+              <label className="text-xs font-semibold text-text-secondary mb-1 block">Service</label>
               {!servicesLoading && services.length === 0 ? (
-                <p className="text-xs text-slate-400 pt-2">No services — add via Settings</p>
+                <p className="text-xs text-text-muted pt-2">No services — add via Settings</p>
               ) : (
                 <select
                   value={service?.name ?? ''}
                   onChange={e => handleServiceChange(e.target.value)}
                   disabled={servicesLoading}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                  className="w-full bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                 >
                   {services.map(s => (
-                    <option key={s.name} value={s.name}>{s.icon} {s.name}</option>
+                    <option key={s.name} value={s.name} className="text-slate-900 bg-white">{s.icon} {s.name}</option>
                   ))}
                 </select>
               )}
             </div>
             <div>
-              <label className="text-xs font-semibold text-slate-600 mb-1 block">Technician</label>
+              <label className="text-xs font-semibold text-text-secondary mb-1 block">Technician</label>
               {technicians.length === 0 ? (
-                <p className="text-xs text-slate-400 pt-2">No technicians — add via Team</p>
+                <p className="text-xs text-text-muted pt-2">No technicians — add via Team</p>
               ) : (
                 <select
                   value={technician?.id ?? ''}
                   onChange={e => setTechnicianState(technicians.find(t => t.id === e.target.value) ?? null)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
                 >
                   {technicians.map(t => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
+                    <option key={t.id} value={t.id} className="text-slate-900 bg-white">{t.name}</option>
                   ))}
                 </select>
               )}
@@ -295,11 +295,11 @@ export function AddClientModal({
 
           {/* Job Price */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">
-              Job Price <span className="font-normal text-slate-400">(optional)</span>
+            <label className="text-xs font-semibold text-text-secondary mb-1 block">
+              Job Price <span className="font-normal text-text-muted">(optional)</span>
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-slate-500 text-sm font-medium">$</span>
+              <span className="text-text-muted text-sm font-medium">$</span>
               <input
                 type="text"
                 inputMode="decimal"
@@ -309,17 +309,17 @@ export function AddClientModal({
                   setPriceCents(val !== '' ? Math.round(parseFloat(val) * 100) : null)
                 }}
                 placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'e.g. 150.00'}
-                className="w-44 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-44 bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
               />
             </div>
-            <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the service&apos;s default price</p>
+            <p className="text-[10px] text-text-muted mt-1">Leave blank to use the service&apos;s default price</p>
           </div>
 
           {/* Date & Time */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">Date & Time</label>
-            {errors.time && <p className="text-xs text-red-500 mb-1.5">{errors.time}</p>}
-            <div className="border border-slate-200 rounded-xl p-3 bg-slate-50/50">
+            <label className="text-xs font-semibold text-text-secondary mb-2 block">Date & Time</label>
+            {errors.time && <p className="text-xs text-red-400 mb-1.5">{errors.time}</p>}
+            <div className="bg-white/5 border border-white/10 rounded-xl p-3">
               <DateTimePicker
                 date={dateISO}
                 time={time}
@@ -333,7 +333,7 @@ export function AddClientModal({
 
           {/* Duration */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">Duration</label>
+            <label className="text-xs font-semibold text-text-secondary mb-2 block">Duration</label>
             <div className="flex gap-1.5 flex-wrap">
               {DURATIONS.map(d => (
                 <button
@@ -341,8 +341,8 @@ export function AddClientModal({
                   onClick={() => setDurationMinutes(d.value)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                     durationMinutes === d.value
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                      ? 'bg-accent text-black border-accent'
+                      : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/50'
                   }`}
                 >
                   {d.label}
@@ -355,7 +355,7 @@ export function AddClientModal({
           <div>
             <button
               onClick={() => setShowRecurrence(v => !v)}
-              className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-text-muted hover:text-text-secondary transition-colors"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Repeat?
@@ -363,7 +363,7 @@ export function AddClientModal({
             </button>
 
             {showRecurrence && (
-              <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded-xl space-y-3">
                 <div className="flex gap-1.5 flex-wrap">
                   {RECURRENCE_OPTIONS.map(opt => (
                     <button
@@ -371,8 +371,8 @@ export function AddClientModal({
                       onClick={() => setRecurrenceRule(opt.value)}
                       className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
                         recurrenceRule === opt.value
-                          ? 'bg-blue-600 text-white border-blue-600'
-                          : 'bg-white text-slate-600 border-slate-300 hover:border-blue-400'
+                          ? 'bg-accent text-black border-accent'
+                          : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/50'
                       }`}
                     >
                       {opt.label}
@@ -382,10 +382,10 @@ export function AddClientModal({
 
                 {recurrenceRule !== 'none' && (
                   <div>
-                    <label className="text-xs font-semibold text-slate-500 mb-1.5 block">
-                      Repeat until <span className="font-normal text-slate-400">(leave blank for 1 year)</span>
+                    <label className="text-xs font-semibold text-text-muted mb-1.5 block">
+                      Repeat until <span className="font-normal text-text-muted/60">(leave blank for 1 year)</span>
                     </label>
-                    <div className="border border-slate-200 rounded-xl p-3 bg-white">
+                    <div className="border border-white/10 rounded-xl p-3 bg-white/5">
                       <DateTimePicker
                         date={recurrenceEndDate}
                         time={null}
@@ -396,7 +396,7 @@ export function AddClientModal({
                       />
                     </div>
                     {recurringCount > 1 && (
-                      <p className="mt-2 text-xs text-blue-600 font-semibold">
+                      <p className="mt-2 text-xs text-accent font-semibold">
                         Creates {recurringCount} appointments total
                       </p>
                     )}
@@ -408,24 +408,24 @@ export function AddClientModal({
 
           {/* Address */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-1 block">Address *</label>
+            <label className="text-xs font-semibold text-text-secondary mb-1 block">Address *</label>
             <input
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="123 Main St"
-              className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.address ? 'border-red-400' : 'border-slate-300'}`}
+              className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.address ? 'border-red-400/50' : 'border-white/10'}`}
             />
-            {errors.address && <p className="text-xs text-red-500 mt-0.5">{errors.address}</p>}
+            {errors.address && <p className="text-xs text-red-400 mt-0.5">{errors.address}</p>}
           </div>
 
           {/* Prep Checklist */}
           <div>
-            <label className="text-xs font-semibold text-slate-600 mb-2 block">📋 Prep Checklist</label>
+            <label className="text-xs font-semibold text-text-secondary mb-2 block">📋 Prep Checklist</label>
             <div className="space-y-1.5 mb-2">
               {checklist.map((item, i) => (
-                <div key={i} className="flex items-center gap-2 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5">
-                  <span className="text-xs text-amber-800 flex-1">{item}</span>
-                  <button onClick={() => removeChecklistItem(i)} className="text-amber-400 hover:text-red-500 transition-colors">
+                <div key={i} className="flex items-center gap-2 bg-accent/5 border border-accent/10 rounded-lg px-3 py-1.5">
+                  <span className="text-xs text-text-primary/90 flex-1">{item}</span>
+                  <button onClick={() => removeChecklistItem(i)} className="text-accent/40 hover:text-red-400 transition-colors">
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -437,11 +437,11 @@ export function AddClientModal({
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addChecklistItem()}
                 placeholder="Add a custom prep item…"
-                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
               />
               <button
                 onClick={addChecklistItem}
-                className="px-3 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                className="px-3 py-2 bg-accent/80 hover:bg-accent text-black rounded-lg transition-colors"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -449,15 +449,15 @@ export function AddClientModal({
           </div>
 
           {/* Auto-reminder toggle */}
-          <div className="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-slate-50/50">
+          <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5">
             <div className="flex items-center gap-2.5">
               {autoReminder
-                ? <Bell className="w-4 h-4 text-blue-500" />
-                : <BellOff className="w-4 h-4 text-slate-400" />
+                ? <Bell className="w-4 h-4 text-accent" />
+                : <BellOff className="w-4 h-4 text-text-muted" />
               }
               <div>
-                <p className="text-xs font-semibold text-slate-700">Auto-reminders</p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-xs font-semibold text-text-secondary">Auto-reminders</p>
+                <p className="text-[11px] text-text-muted">
                   {autoReminder ? 'SMS reminders enabled for this appointment' : 'No automatic reminders will be sent'}
                 </p>
               </div>
@@ -466,7 +466,7 @@ export function AddClientModal({
               type="button"
               onClick={() => setAutoReminder(v => !v)}
               className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
-                autoReminder ? 'bg-blue-600' : 'bg-slate-300'
+                autoReminder ? 'bg-accent' : 'bg-white/10'
               }`}
               role="switch"
               aria-checked={autoReminder}
@@ -483,13 +483,13 @@ export function AddClientModal({
           <div className="flex gap-3 pt-1">
             <button
               onClick={onClose}
-              className="flex-1 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors"
+              className="flex-1 py-2.5 border border-white/10 text-text-secondary text-sm font-medium rounded-xl hover:bg-white/5 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-grow py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-colors"
+              className="flex-grow py-2.5 bg-accent hover:bg-accent/90 text-black text-sm font-bold rounded-xl shadow-lg shadow-accent/20 transition-all hover:-translate-y-0.5"
             >
               {recurrenceRule !== 'none' && recurringCount > 1
                 ? `Add ${recurringCount} Appointments`

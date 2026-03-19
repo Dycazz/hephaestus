@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, LogOut, Users, Settings, DollarSign, Eye } from 'lucide-react'
+import { PlusCircle, LogOut, Users, Settings, DollarSign, Eye, FileText } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useOrg } from '@/context/OrgContext'
@@ -31,7 +31,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur">
+    <header className="sticky top-0 z-40 glass shadow-sm">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         <div className="flex items-center gap-3">
           <Image src="/logo.png" alt="hephaestus.work" width={32} height={32} className="object-contain" priority />
@@ -59,7 +59,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
             <>
               <button
                 onClick={onManageTeam}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-text-secondary transition hover:bg-surface-elevated hover:text-text-primary"
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-text-secondary transition hover:bg-white/10 hover:text-text-primary border border-transparent hover:border-white/10"
               >
                 <Users className="h-3.5 w-3.5" />
                 Team
@@ -83,6 +83,17 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
                 <DollarSign className="h-3.5 w-3.5" />
                 Accounting
               </Link>
+
+              {org.plan !== 'trial' && (
+                <Link
+                  href="/invoices"
+                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                  style={{ color: '#d97706', background: 'rgba(217,119,6,0.1)', border: '1px solid rgba(217,119,6,0.2)' }}
+                >
+                  <FileText className="h-3.5 w-3.5" />
+                  Invoices
+                </Link>
+              )}
             </>
           )}
 
