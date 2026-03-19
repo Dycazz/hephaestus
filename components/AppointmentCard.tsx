@@ -93,8 +93,7 @@ export function AppointmentCard({
 
   return (
     <div
-      className="rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden"
-      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.08)' }}
+      className="rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-surface border border-border"
     >
       {/* Top accent bar */}
       <div
@@ -117,13 +116,13 @@ export function AppointmentCard({
           <div className="flex items-center gap-2">
             <span className="text-2xl">{appointment.serviceIcon}</span>
             <div>
-              <p className="font-semibold text-white text-sm leading-tight">
+              <p className="font-semibold text-text-primary text-sm leading-tight">
                 {appointment.customerName}
               </p>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <p className="text-xs text-slate-400">{appointment.service}</p>
+                <p className="text-xs text-text-secondary/70">{appointment.service}</p>
                 {appointment.priceCents != null && (
-                  <span className="text-[10px] font-semibold text-emerald-400">
+                  <span className="text-[10px] font-semibold text-emerald-500/80">
                     {appointment.priceCents === 0 ? 'Free' : `$${(appointment.priceCents / 100).toFixed(2)}`}
                   </span>
                 )}
@@ -138,8 +137,8 @@ export function AppointmentCard({
 
         {/* Details */}
         <div className="space-y-1.5 mb-3">
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
+            <Clock className="w-3.5 h-3.5 text-text-muted shrink-0" />
             <span className="font-medium">
               {appointment.scheduledDate} at {appointment.scheduledTime}
             </span>
@@ -147,28 +146,15 @@ export function AppointmentCard({
 
           {/* Technician row with inline picker */}
           <div className="relative" ref={pickerRef}>
-            <div className="flex items-center gap-2 text-xs text-slate-300">
-              <User className="w-3.5 h-3.5 text-slate-500 shrink-0" />
-              <span className={isUnassigned ? 'text-slate-500 italic' : ''}>
+            <div className="flex items-center gap-2 text-xs text-text-secondary">
+              <User className="w-3.5 h-3.5 text-text-muted shrink-0" />
+              <span className={isUnassigned ? 'text-text-muted italic' : ''}>
                 {appointment.technician}
               </span>
               {canAssign && !readOnly && (
                 <button
                   onClick={() => setShowTechPicker(v => !v)}
-                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border transition-all duration-150"
-                  style={
-                    isUnassigned
-                      ? { background: 'rgba(217,119,6,0.15)', borderColor: 'rgba(217,119,6,0.35)', color: '#d97706' }
-                      : { background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#64748b' }
-                  }
-                  onMouseEnter={e => {
-                    const btn = e.currentTarget as HTMLButtonElement
-                    btn.style.opacity = '0.75'
-                  }}
-                  onMouseLeave={e => {
-                    const btn = e.currentTarget as HTMLButtonElement
-                    btn.style.opacity = '1'
-                  }}
+                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-border bg-surface-elevated text-text-secondary hover:text-text-primary transition-all duration-150"
                 >
                   {isUnassigned ? (
                     <>

@@ -13,18 +13,45 @@
   --text-secondary:   #9494a0;
   --text-muted:       #3a3a48;
 
-  /* legacy aliases used by components */
-  --background:       #0f1115;
-  --foreground:       #f0ece3;
+  /* Grid and Glows */
+  --bg-glow-1: radial-gradient(1100px 700px at 12% -10%, rgba(217, 119, 6, 0.18), transparent 62%);
+  --bg-glow-2: radial-gradient(900px 600px at 88% 18%, rgba(217, 119, 6, 0.12), transparent 60%);
+  --bg-grid: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+.light {
+  --bg:               #f8fafc;
+  --surface:          #ffffff;
+  --surface-elevated: #f1f5f9;
+  --border:           rgba(0, 0, 0, 0.06);
+  --border-strong:    rgba(0, 0, 0, 0.1);
+  --accent:           #d97706;
+  --accent-dim:       rgba(217, 119, 6, 0.08);
+  --accent-glow:      rgba(217, 119, 6, 0.15);
+  --text-primary:     #0f172a;
+  --text-secondary:   #475569;
+  --text-muted:       #94a3b8;
+
+  /* legacy aliases */
+  --background:       #f8fafc;
+  --foreground:       #0f172a;
+
+  /* Grid and Glows overrides */
+  --bg-glow-1: radial-gradient(1100px 700px at 12% -10%, rgba(217, 119, 6, 0.08), transparent 62%);
+  --bg-glow-2: radial-gradient(1100px 700px at 88% 18%, rgba(217, 119, 6, 0.05), transparent 60%);
+  --bg-grid: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
 }
 
 body {
   background-color: var(--bg);
   background-image:
-    radial-gradient(1100px 700px at 12% -10%, rgba(217, 119, 6, 0.18), transparent 62%),
-    radial-gradient(900px 600px at 88% 18%, rgba(217, 119, 6, 0.12), transparent 60%),
-    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    var(--bg-glow-1),
+    var(--bg-glow-2),
+    var(--bg-grid);
   background-size: auto, auto, 80px 80px, 80px 80px;
   background-repeat: no-repeat;
   background-attachment: fixed;

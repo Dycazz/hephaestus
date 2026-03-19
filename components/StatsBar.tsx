@@ -25,20 +25,20 @@ export function StatsBar({ appointments }: StatsBarProps) {
   ]
 
   return (
-    <div className="border-b border-white/10 bg-black/80">
+    <div className="border-b border-border bg-surface/50 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 py-2.5">
         <div className="flex flex-wrap items-center gap-1">
           {stats.map((stat, i) => {
             const Icon = stat.icon
             return (
               <div key={stat.label} className="flex items-center">
-                {i > 0 && <div className="mx-3 h-3 w-px bg-white/10" />}
+                {i > 0 && <div className="mx-3 h-3 w-px bg-border" />}
                 <div className="flex items-center gap-1.5 rounded-lg px-2 py-1.5">
                   <Icon className={`h-3 w-3 ${stat.color}`} />
                   <span className={`font-display text-base font-bold tabular-nums ${stat.color}`}>
                     {stat.value}
                   </span>
-                  <span className="text-xs font-medium text-white/40">{stat.label}</span>
+                  <span className="text-xs font-medium text-text-secondary/60">{stat.label}</span>
                 </div>
               </div>
             )

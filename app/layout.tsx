@@ -32,6 +32,8 @@ function getCfEnv(): Record<string, string | undefined> {
   }
 }
 
+import { ThemeProvider } from "@/components/ThemeProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -51,12 +53,19 @@ export default function RootLayout({
   )};`;
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${syne.variable} ${instrumentSans.variable} antialiased`}
       >
-        <script dangerouslySetInnerHTML={{ __html: envScript }} />
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <script dangerouslySetInnerHTML={{ __html: envScript }} />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

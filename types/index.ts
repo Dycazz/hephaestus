@@ -114,6 +114,57 @@ export interface BookingAvailability {
   is_active: boolean
 }
 
+// ── Invoices ──────────────────────────────────────────────────────────────────
+
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+export type InvoicePaymentMethod = 'stripe' | 'cash' | 'check' | 'other'
+
+export interface InvoiceLineItem {
+  id: string
+  invoice_id: string
+  appointment_id: string | null
+  description: string
+  quantity: number
+  unit_price_cents: number
+  total_cents: number
+  created_at: string
+  // joined
+  appointment?: {
+    id: string
+    service: string
+    scheduled_at: string
+  }
+}
+
+export interface Invoice {
+  id: string
+  org_id: string
+  client_id: string
+  status: InvoiceStatus
+  invoice_number: string
+  issued_date: string   // "YYYY-MM-DD"
+  due_date: string      // "YYYY-MM-DD"
+  notes: string | null
+  subtotal_cents: number
+  tax_cents: number
+  total_cents: number
+  paid_at: string | null
+  payment_method: InvoicePaymentMethod | null
+  stripe_payment_link_url: string | null
+  pdf_storage_path: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  client?: {
+    id: string
+    name: string
+    email: string | null
+    phone: string
+    address: string
+  }
+  line_items?: InvoiceLineItem[]
+}
+
 export interface BookingOverride {
   id: string
   booking_link_id: string

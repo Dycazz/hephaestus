@@ -1,0 +1,15 @@
+{
+  "customerName": "Test Customer",
+  "customerPhone": "555-0100",
+  "address": "123 Test St",
+  "service": "Test Service",
+  "serviceIcon": "🔧",
+  "serviceColor": "blue",
+  "technicianName": "Unassigned",
+  "scheduledAt": "2026-03-20T10:00:00Z",
+  "prepChecklist": [],
+  "durationMinutes": 60,
+  "recurrenceRule": "none",
+  "autoReminder": true,
+  "priceCents": 1000
+}

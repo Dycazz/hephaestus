@@ -64,13 +64,13 @@ function addDays(iso: string, days: number): string {
 // ─── Styling maps ─────────────────────────────────────────────────────────────
 
 const statusBlock: Record<string, { bg: string; border: string; text: string; badge: string; badgeText: string }> = {
-  scheduled:     { bg: 'bg-white/5',       border: 'border-white/15',   text: 'text-white/70',   badge: 'bg-white/10 text-white/60',        badgeText: 'Not sent'    },
-  reminder_sent: { bg: 'bg-amber-500/15',  border: 'border-amber-500',  text: 'text-amber-100',  badge: 'bg-amber-500/20 text-amber-200',  badgeText: 'Pending'     },
-  confirmed:     { bg: 'bg-orange-500/20', border: 'border-orange-500', text: 'text-orange-100', badge: 'bg-orange-500/25 text-orange-200', badgeText: 'Confirmed'   },
-  rescheduling:  { bg: 'bg-orange-500/15', border: 'border-orange-400', text: 'text-orange-100', badge: 'bg-orange-500/20 text-orange-200', badgeText: 'Rescheduling'},
-  at_risk:       { bg: 'bg-red-500/15',    border: 'border-red-500',    text: 'text-red-100',    badge: 'bg-red-500/20 text-red-200',      badgeText: 'At risk'     },
-  completed:     { bg: 'bg-white/10',      border: 'border-white/20',   text: 'text-white/80',   badge: 'bg-white/10 text-white/70',        badgeText: 'Done'        },
-  cancelled:     { bg: 'bg-white/5',       border: 'border-white/10',   text: 'text-white/40',   badge: 'bg-white/5 text-white/40',         badgeText: 'Cancelled'   },
+  scheduled:     { bg: 'bg-surface-elevated', border: 'border-border',      text: 'text-text-secondary',  badge: 'bg-surface/50 text-text-muted',    badgeText: 'Not sent'    },
+  reminder_sent: { bg: 'bg-amber-500/15',     border: 'border-amber-500',   text: 'text-text-primary',    badge: 'bg-amber-500/20 text-text-primary', badgeText: 'Pending'     },
+  confirmed:     { bg: 'bg-orange-500/20',    border: 'border-orange-500',  text: 'text-text-primary',    badge: 'bg-orange-500/25 text-text-primary', badgeText: 'Confirmed'   },
+  rescheduling:  { bg: 'bg-orange-500/15',    border: 'border-orange-400',  text: 'text-text-primary',    badge: 'bg-orange-500/20 text-text-primary', badgeText: 'Rescheduling'},
+  at_risk:       { bg: 'bg-red-500/15',       border: 'border-red-500',     text: 'text-text-primary',    badge: 'bg-red-500/20 text-text-primary',   badgeText: 'At risk'     },
+  completed:     { bg: 'bg-surface-elevated', border: 'border-border',      text: 'text-text-secondary',  badge: 'bg-surface/50 text-text-muted',    badgeText: 'Done'        },
+  cancelled:     { bg: 'bg-surface',          border: 'border-border',      text: 'text-text-muted',      badge: 'bg-surface/30 text-text-muted',    badgeText: 'Cancelled'   },
 }
 
 const colorBg: Record<string, string> = {
@@ -113,29 +113,20 @@ export function CalendarView({
 
   if (technicians.length === 0) {
     return (
-      <div
-        className="rounded-2xl flex items-center justify-center py-20"
-        style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
-      >
-        <p className="text-sm text-slate-600">No technicians yet. Add team members using the Team button above.</p>
+      <div className="rounded-2xl flex items-center justify-center py-20 bg-surface border border-border">
+        <p className="text-sm text-text-muted">No technicians yet. Add team members using the Team button above.</p>
       </div>
     )
   }
 
   return (
-    <div
-      className="rounded-2xl overflow-hidden shadow-xl"
-      style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}
-    >
+    <div className="rounded-2xl overflow-hidden shadow-xl bg-surface border border-border">
       {/* Header bar */}
-      <div
-        className="flex items-center justify-between px-5 py-3.5 border-b"
-        style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}
-      >
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-surface-elevated/30">
         <div className="flex items-center gap-2.5">
-          <Clock className="w-4 h-4 text-orange-300/80" />
-          <h2 className="text-sm font-semibold text-white/90">Technician Schedule</h2>
-          <span className="text-xs rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-orange-200">
+          <Clock className="w-4 h-4 text-orange-400/80" />
+          <h2 className="text-sm font-semibold text-text-primary/90">Technician Schedule</h2>
+          <span className="text-xs rounded-full border border-orange-500/30 bg-orange-500/15 px-2 py-0.5 text-orange-400">
             {dayAppts.length} job{dayAppts.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -146,7 +137,7 @@ export function CalendarView({
           <button
             onClick={() => onCalendarDateChange(addDays(calendarDate, -1))}
             disabled={calendarDate <= todayISO}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             title="Previous day"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -156,21 +147,21 @@ export function CalendarView({
           {calendarDate !== todayISO && (
             <button
               onClick={() => onCalendarDateChange(todayISO)}
-              className="rounded-lg border border-orange-500/30 px-2 py-1 text-xs font-medium text-orange-200 transition-all hover:bg-orange-500/10"
+              className="rounded-lg border border-orange-500/30 px-2 py-1 text-xs font-medium text-orange-400 transition-all hover:bg-orange-500/10"
             >
               Today
             </button>
           )}
 
           {/* Current date label */}
-          <span className="px-3 py-1 text-sm font-semibold text-white/90 min-w-[90px] text-center">
+          <span className="px-3 py-1 text-sm font-semibold text-text-primary min-w-[90px] text-center">
             {formatHeaderDate(calendarDate)}
           </span>
 
           {/* Next day */}
           <button
             onClick={() => onCalendarDateChange(addDays(calendarDate, 1))}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/10 transition-all"
+            className="p-1.5 rounded-lg text-text-secondary hover:text-text-primary hover:bg-surface-elevated transition-all"
             title="Next day"
           >
             <ChevronRight className="w-4 h-4" />
@@ -184,28 +175,25 @@ export function CalendarView({
 
           {/* Technician column headers */}
           <div
-            className="grid border-b sticky top-0 z-10"
+            className="grid border-b sticky top-0 z-10 border-border bg-surface"
             style={{
               gridTemplateColumns: `88px repeat(${technicians.length}, 1fr)`,
-              borderColor: 'rgba(255,255,255,0.07)',
-              background: '#1a1d26',
             }}
           >
-            <div className="px-3 py-3 border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }} />
+            <div className="px-3 py-3 border-r border-border" />
             {technicians.map(tech => {
               const count = techJobCount(tech.name)
               return (
                 <div
                   key={tech.id}
-                  className="px-3 py-3 border-l flex items-center gap-2.5"
-                  style={{ borderColor: 'rgba(255,255,255,0.06)' }}
+                  className="px-3 py-3 border-l border-border flex items-center gap-2.5"
                 >
                   <div className={`w-7 h-7 rounded-full ${colorBg[tech.color] ?? 'bg-slate-500'} flex items-center justify-center shrink-0 shadow-md`}>
                     <span className="text-[10px] font-bold text-white">{tech.initials}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-white/85 truncate">{tech.name}</p>
-                    <p className="text-[10px] text-slate-600">
+                    <p className="text-xs font-semibold text-text-primary/85 truncate">{tech.name}</p>
+                    <p className="text-[10px] text-text-muted">
                       {count === 0 ? 'No jobs' : `${count} job${count > 1 ? 's' : ''}`}
                     </p>
                   </div>
@@ -218,15 +206,15 @@ export function CalendarView({
           {timeSlots.map((time, idx) => (
             <div
               key={time}
-              className="grid border-b"
+              className="grid border-b border-border/50"
               style={{
                 gridTemplateColumns: `88px repeat(${technicians.length}, 1fr)`,
-                borderColor: 'rgba(255,255,255,0.04)',
-                background: idx % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.015)',
+                background: idx % 2 === 0 ? 'transparent' : 'var(--surface-elevated)',
+                opacity: idx % 2 === 0 ? 1 : 0.3,
               }}
             >
-              <div className="px-3 py-2 flex items-start justify-end border-r" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
-                <span className="text-[11px] font-medium text-slate-600 mt-1">{time}</span>
+              <div className="px-3 py-2 flex items-start justify-end border-r border-border">
+                <span className="text-[11px] font-medium text-text-muted mt-1">{time}</span>
               </div>
 
               {technicians.map(tech => {
@@ -234,7 +222,7 @@ export function CalendarView({
                 const style = appt ? statusBlock[appt.status] : null
 
                 return (
-                  <div key={tech.id} className="border-l p-1.5 min-h-[64px]" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                  <div key={tech.id} className="border-l border-border/50 p-1.5 min-h-[64px]">
                     {appt && style ? (
                       <button
                         onClick={() => onSelectAppointment(appt.id)}
@@ -244,24 +232,23 @@ export function CalendarView({
                           {appt.serviceIcon} {appt.customerName}
                         </p>
                         <p className="text-[10px] opacity-50 truncate mt-0.5">{appt.service} · {appt.address}</p>
-                        <span className={`mt-1.5 inline-flex text-[9px] font-semibold px-1.5 py-0.5 rounded-full border border-white/10 ${style.badge}`}>
+                        <span className={`mt-1.5 inline-flex text-[9px] font-semibold px-1.5 py-0.5 rounded-full border border-black/5 ${style.badge}`}>
                           {style.badgeText}
                         </span>
                       </button>
                     ) : !readOnly ? (
                       <button
                         onClick={() => onAddAtSlot(tech.id, tech.name, time, calendarDate)}
-                        className="w-full h-full min-h-[52px] rounded-lg border border-dashed flex flex-col items-center justify-center gap-0.5 transition-all duration-150 group"
-                        style={{ borderColor: 'rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.1)' }}
+                        className="w-full h-full min-h-[52px] rounded-lg border border-dashed border-border/20 flex flex-col items-center justify-center gap-0.5 transition-all duration-150 group text-text-muted/30"
                         onMouseEnter={e => {
-                          e.currentTarget.style.borderColor = 'rgba(59,130,246,0.4)'
-                          e.currentTarget.style.background = 'rgba(59,130,246,0.06)'
-                          e.currentTarget.style.color = 'rgba(147,197,253,0.7)'
+                          e.currentTarget.style.borderColor = 'var(--accent)'
+                          e.currentTarget.style.background = 'var(--accent-dim)'
+                          e.currentTarget.style.color = 'var(--accent)'
                         }}
                         onMouseLeave={e => {
-                          e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-                          e.currentTarget.style.background = 'transparent'
-                          e.currentTarget.style.color = 'rgba(255,255,255,0.1)'
+                          e.currentTarget.style.borderColor = ''
+                          e.currentTarget.style.background = ''
+                          e.currentTarget.style.color = ''
                         }}
                       >
                         <Plus className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
@@ -282,8 +269,8 @@ export function CalendarView({
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 flex-wrap px-5 py-3 border-t" style={{ borderColor: 'rgba(255,255,255,0.06)', background: 'rgba(255,255,255,0.02)' }}>
-        <span className="text-[10px] font-semibold text-slate-600 uppercase tracking-wider">Legend</span>
+      <div className="flex items-center gap-4 flex-wrap px-5 py-3 border-t border-border bg-surface-elevated/50">
+        <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">Legend</span>
         {[
           { color: 'bg-green-500',  label: 'Confirmed' },
           { color: 'bg-amber-500',  label: 'Pending' },
@@ -293,7 +280,7 @@ export function CalendarView({
         ].map(({ color, label }) => (
           <div key={label} className="flex items-center gap-1.5">
             <div className={`w-2 h-2 rounded-full ${color} opacity-80`} />
-            <span className="text-[10px] text-slate-600">{label}</span>
+            <span className="text-[10px] text-text-muted">{label}</span>
           </div>
         ))}
       </div>

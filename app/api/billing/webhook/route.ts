@@ -48,6 +48,27 @@ export async function POST(request: NextRequest) {
       // ── New checkout completed ───────────────────────────────────────────
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
+
+        // ── Invoice payment via Payment Link ─────────────────────────────
+        if (session.mode === 'payment') {
+          const invoiceId = session.metadata?.invoice_id
+          if (invoiceId) {
+            await supabase
+              .from('invoices')
+              .update({
+                status:         'paid',
+                paid_at:        new Date().toISOString(),
+                payment_method: 'stripe',
+                updated_at:     new Date().toISOString(),
+              })
+              .eq('id', invoiceId)
+              .neq('status', 'paid')  // idempotent
+
+            console.log(`[Stripe Webhook] Invoice ${invoiceId} paid via Stripe`)
+          }
+          break
+        }
+
         if (session.mode !== 'subscription') break
 
         const orgId = session.metadata?.org_id

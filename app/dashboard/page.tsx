@@ -340,14 +340,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{
-        background: '#0f1115',
-        backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }}
-    >
+    <div className="min-h-screen bg-bg">
       {/* Admin impersonation banner */}
       {viewAs && (
         <div
@@ -375,10 +368,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* View toggle */}
         <div className="flex items-center gap-2 mb-5">
-          <div
-            className="flex items-center gap-0.5 rounded-xl p-1"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
-          >
+          <div className="flex items-center gap-0.5 rounded-xl p-1 bg-surface-elevated border border-border">
             {([
               { id: 'board',    label: 'Board',    Icon: LayoutGrid },
               { id: 'completed', label: 'Completed', Icon: CheckCircle },
@@ -388,16 +378,11 @@ export default function Dashboard() {
               <button
                 key={id}
                 onClick={() => setView(id)}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150"
-                style={
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all duration-150 ${
                   view === id
-                    ? {
-                        background: 'linear-gradient(135deg, rgba(249,115,22,0.2), rgba(234,88,12,0.15))',
-                        color: '#e65c00',
-                        boxShadow: '0 2px 8px rgba(249,115,22,0.15)',
-                      }
-                    : { color: '#3a3a48' }
-                }
+                    ? 'bg-accent/10 text-accent shadow-sm'
+                    : 'text-text-secondary hover:text-text-primary'
+                }`}
               >
                 <Icon className="w-3.5 h-3.5" />
                 {label}
@@ -424,8 +409,8 @@ export default function Dashboard() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-white">Completed Jobs</h2>
-                <p className="text-sm text-white/50">Keep track of finished work and follow-ups</p>
+                <h2 className="text-xl font-bold text-text-primary">Completed Jobs</h2>
+                <p className="text-sm text-text-secondary">Keep track of finished work and follow-ups</p>
               </div>
             </div>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -452,8 +437,8 @@ export default function Dashboard() {
                 <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
                   <CheckCircle className="w-8 h-8 text-white/20" />
                 </div>
-                <h3 className="text-lg font-semibold text-white/70">No completed jobs yet</h3>
-                <p className="text-sm text-white/40 max-w-xs mx-auto">Jobs will appear here once they are marked as finished.</p>
+                <h3 className="text-lg font-semibold text-text-primary/70">No completed jobs yet</h3>
+                <p className="text-sm text-text-secondary/60 max-w-xs mx-auto">Jobs will appear here once they are marked as finished.</p>
               </div>
             )}
           </div>
