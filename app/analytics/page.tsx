@@ -369,6 +369,43 @@ export default function AccountingPage() {
             <StatCard icon={Minus}      label="Net Profit"      value={fmt(netProfitCents)}           sub="After expenses, commission & tax" color={netProfitCents >= 0 ? 'blue' : 'red'} />
             <StatCard icon={Percent}    label="Tax Owed"        value={fmt(data.taxOwedCents)}        sub={`${data.taxRatePercent}% rate`} color="purple" />
           </div>
+
+          {/* ── P&L Breakdown ────────────────────────────────────────────── */}
+          <div className="mt-4 rounded-2xl px-5 py-4" style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 mb-3">P&amp;L Breakdown</p>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Gross Revenue</span>
+                <span className="text-green-400 font-semibold">{fmt(data.totalRevenueCents)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">− Expenses</span>
+                <span className="text-amber-400 font-semibold">−{fmt(totalExpensesCents)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">
+                  − Commission Paid
+                  {totalCommissionCents === 0 && (
+                    <span className="ml-1.5 text-slate-600">(set % on technicians in Settings)</span>
+                  )}
+                </span>
+                <span className="text-amber-400 font-semibold">−{fmt(totalCommissionCents)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">
+                  − Tax Owed
+                  {data.taxOwedCents === 0 && (
+                    <span className="ml-1.5 text-slate-600">(set rate below in Settings)</span>
+                  )}
+                </span>
+                <span className="text-amber-400 font-semibold">−{fmt(data.taxOwedCents)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs font-bold pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
+                <span className="text-white">Net Profit</span>
+                <span className={netProfitCents >= 0 ? 'text-blue-300' : 'text-red-400'}>{fmt(netProfitCents)}</span>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* ── Technician Revenue ─────────────────────────────────────────── */}
