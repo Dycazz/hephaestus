@@ -116,7 +116,7 @@ export function AddClientModal({
         setServices(loaded)
         setService(loaded[0])
         setChecklist(loaded[0].prepTemplates)
-        setPriceCents(loaded[0].price_cents > 0 ? loaded[0].price_cents : null)
+        setPriceCents(null)
       })
       .catch(() => {})
       .finally(() => setServicesLoading(false))
@@ -164,7 +164,7 @@ export function AddClientModal({
     const svc = services.find(s => s.name === svcName) ?? services[0] ?? null
     setService(svc)
     setChecklist(svc?.prepTemplates ?? [])
-    setPriceCents(svc && svc.price_cents > 0 ? svc.price_cents : null)
+    setPriceCents(null)
   }
 
   const addChecklistItem = () => {
@@ -207,7 +207,7 @@ export function AddClientModal({
       recurrenceRule,
       recurrenceEndDate: recurrenceRule !== 'none' ? (recurrenceEndDate ?? undefined) : undefined,
       autoReminder,
-      priceCents,
+      priceCents: priceCents ?? service.price_cents,
     }
     onAdd(newAppt)
   }
@@ -240,7 +240,7 @@ export function AddClientModal({
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Jane Smith"
-                className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-400' : 'border-slate-300'}`}
+                className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.name ? 'border-red-400' : 'border-slate-300'}`}
               />
               {errors.name && <p className="text-xs text-red-500 mt-0.5">{errors.name}</p>}
             </div>
@@ -250,7 +250,7 @@ export function AddClientModal({
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="(555) 000-0000"
-                className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-400' : 'border-slate-300'}`}
+                className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.phone ? 'border-red-400' : 'border-slate-300'}`}
               />
               {errors.phone && <p className="text-xs text-red-500 mt-0.5">{errors.phone}</p>}
             </div>
@@ -267,7 +267,7 @@ export function AddClientModal({
                   value={service?.name ?? ''}
                   onChange={e => handleServiceChange(e.target.value)}
                   disabled={servicesLoading}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
                 >
                   {services.map(s => (
                     <option key={s.name} value={s.name}>{s.icon} {s.name}</option>
@@ -283,7 +283,7 @@ export function AddClientModal({
                 <select
                   value={technician?.id ?? ''}
                   onChange={e => setTechnicianState(technicians.find(t => t.id === e.target.value) ?? null)}
-                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {technicians.map(t => (
                     <option key={t.id} value={t.id}>{t.name}</option>
@@ -301,14 +301,15 @@ export function AddClientModal({
             <div className="flex items-center gap-2">
               <span className="text-slate-500 text-sm font-medium">$</span>
               <input
-                type="number"
-                min="0"
-                max="999999"
-                step="0.01"
-                value={priceCents !== null ? (priceCents / 100).toFixed(2) : ''}
-                onChange={e => setPriceCents(e.target.value !== '' ? Math.round(parseFloat(e.target.value) * 100) : null)}
+                type="text"
+                inputMode="decimal"
+                value={priceCents !== null ? (priceCents / 100).toString() : ''}
+                onChange={e => {
+                  const val = e.target.value.replace(/[^0-9.]/g, '')
+                  setPriceCents(val !== '' ? Math.round(parseFloat(val) * 100) : null)
+                }}
                 placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'e.g. 150.00'}
-                className="w-44 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-44 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the service&apos;s default price</p>
@@ -412,7 +413,7 @@ export function AddClientModal({
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="123 Main St"
-              className={`w-full border rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 ${errors.address ? 'border-red-400' : 'border-slate-300'}`}
+              className={`w-full border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 ${errors.address ? 'border-red-400' : 'border-slate-300'}`}
             />
             {errors.address && <p className="text-xs text-red-500 mt-0.5">{errors.address}</p>}
           </div>
@@ -436,7 +437,7 @@ export function AddClientModal({
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addChecklistItem()}
                 placeholder="Add a custom prep item…"
-                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                className="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500"
               />
               <button
                 onClick={addChecklistItem}
