@@ -56,6 +56,13 @@ function formatDateTime(iso: string) {
   return new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true })
 }
 
+function trialRemaining(iso: string) {
+  const diffDays = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000)
+  if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? '' : 's'} left`
+  if (diffDays === 0) return 'Ends today'
+  return `Expired (${Math.abs(diffDays)}d ago)`
+}
+
 export default function OrgDetailPage() {
   const { id } = useParams<{ id: string }>()
   const router = useRouter()
@@ -196,7 +203,7 @@ export default function OrgDetailPage() {
             <div className="grid grid-cols-3 gap-4">
               {[
                 { label: 'Plan', value: <span style={{ color: planColor }} className="font-bold capitalize">{org.plan}</span> },
-                { label: 'Trial ends', value: org.trial_ends_at ? formatDate(org.trial_ends_at) : '—' },
+                { label: 'Trial ends', value: org.trial_ends_at ? `${formatDate(org.trial_ends_at)} (${trialRemaining(org.trial_ends_at)})` : '—' },
                 { label: 'SMS Number', value: org.sms_phone_number ?? 'Not configured' },
                 { label: 'Review URL', value: org.review_url ? <a href={org.review_url} target="_blank" rel="noreferrer" className="text-orange-300 hover:underline truncate flex items-center gap-1"><ExternalLink className="w-3 h-3" />Configured</a> : '—' },
                 { label: 'Org ID', value: <span className="font-mono text-[11px] text-slate-500">{org.id}</span> },

@@ -25,6 +25,7 @@ const PLAN_STYLES: Record<string, { label: string; bg: string; text: string; bor
   starter:    { label: 'Starter',    bg: 'rgba(249,115,22,0.15)',  text: '#fdba74', border: 'rgba(249,115,22,0.3)' },
   pro:        { label: 'Pro',        bg: 'rgba(251,146,60,0.15)',  text: '#fb923c', border: 'rgba(251,146,60,0.3)' },
   enterprise: { label: 'Enterprise', bg: 'rgba(245,158,11,0.15)',  text: '#f59e0b', border: 'rgba(245,158,11,0.3)' },
+  gifted:     { label: 'Gifted',     bg: 'rgba(168,85,247,0.15)',  text: '#c084fc', border: 'rgba(168,85,247,0.3)' },
 }
 
 function PlanBadge({ plan }: { plan: string }) {
@@ -53,8 +54,15 @@ function shortDate(iso: string) {
   return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: '2-digit' })
 }
 
-const FILTERS = ['all', 'trial', 'expired', 'starter', 'pro', 'enterprise', 'suspended'] as const
+const FILTERS = ['all', 'trial', 'expired', 'starter', 'pro', 'enterprise', 'gifted', 'suspended'] as const
 type Filter = typeof FILTERS[number]
+
+function trialRemaining(iso: string) {
+  const diffDays = Math.ceil((new Date(iso).getTime() - Date.now()) / 86400000)
+  if (diffDays > 0) return `${diffDays} day${diffDays === 1 ? '' : 's'} left`
+  if (diffDays === 0) return 'Ends today'
+  return `Expired (${Math.abs(diffDays)}d ago)`
+}
 
 export default function AdminOrgsPage() {
   const router = useRouter()
@@ -303,12 +311,22 @@ export default function AdminOrgsPage() {
                     <option value="starter">Starter</option>
                     <option value="pro">Pro</option>
                     <option value="enterprise">Enterprise</option>
+                    <option value="gifted">Gifted</option>
                   </select>
                 </td>
 
                 {/* Trial ends */}
-                <td className="px-4 py-3 text-xs text-slate-400">
-                  {org.trial_ends_at ? shortDate(org.trial_ends_at) : <span className="text-slate-600">—</span>}
+                <td className="px-4 py-3 text-xs">
+                  {org.trial_ends_at ? (
+                    <div className="flex flex-col">
+                      <span className="text-slate-300">{shortDate(org.trial_ends_at)}</span>
+                      {org.plan === 'trial' && (
+                        <span className={`mt-0.5 ${new Date(org.trial_ends_at) < new Date() ? 'text-red-400 font-semibold' : 'text-amber-400'}`}>
+                          {trialRemaining(org.trial_ends_at)}
+                        </span>
+                      )}
+                    </div>
+                  ) : <span className="text-slate-600">—</span>}
                 </td>
 
                 {/* Members */}
