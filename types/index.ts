@@ -173,3 +173,142 @@ export interface BookingOverride {
   start_time: string | null
   end_time: string | null
 }
+
+// ── Tax Rates ─────────────────────────────────────────────────────────────────
+
+export interface TaxRate {
+  id: string
+  org_id: string
+  name: string
+  rate_percent: number   // e.g. 8.250
+  is_default: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface InvoiceTax {
+  id: string
+  invoice_id: string
+  tax_rate_id: string | null
+  name: string          // snapshot at time of invoice
+  rate_percent: number  // snapshot
+  tax_cents: number
+}
+
+// ── Estimates ─────────────────────────────────────────────────────────────────
+
+export type EstimateStatus =
+  | 'draft'
+  | 'sent'
+  | 'viewed'
+  | 'accepted'
+  | 'declined'
+  | 'expired'
+  | 'invoiced'
+
+export interface EstimateLineItem {
+  id: string
+  estimate_id: string
+  appointment_id: string | null
+  description: string
+  quantity: number
+  unit_price_cents: number
+  total_cents: number
+  tax_exempt: boolean
+  sort_order: number
+  created_at: string
+}
+
+export interface EstimateTax {
+  id: string
+  estimate_id: string
+  tax_rate_id: string | null
+  name: string
+  rate_percent: number
+  tax_cents: number
+}
+
+export interface Estimate {
+  id: string
+  org_id: string
+  client_id: string
+  status: EstimateStatus
+  estimate_number: string
+  title: string | null
+  issued_date: string    // "YYYY-MM-DD"
+  expiry_date: string | null
+  notes: string | null
+  subtotal_cents: number
+  tax_cents: number
+  total_cents: number
+  viewed_at: string | null
+  accepted_at: string | null
+  declined_at: string | null
+  invoice_id: string | null
+  public_token: string | null
+  created_at: string
+  updated_at: string
+  // joined
+  client?: {
+    id: string
+    name: string
+    email: string | null
+    phone: string
+    address: string
+  }
+  line_items?: EstimateLineItem[]
+  taxes?: EstimateTax[]
+}
+
+// ── Job Costing ───────────────────────────────────────────────────────────────
+
+export type CostCategory =
+  | 'labor'
+  | 'material'
+  | 'equipment'
+  | 'subcontractor'
+  | 'overhead'
+
+export interface JobCostItem {
+  id: string
+  org_id: string
+  appointment_id: string
+  category: CostCategory
+  description: string
+  quantity: number
+  unit_cost_cents: number
+  total_cost_cents: number
+  technician_id: string | null
+  hours: number | null
+  created_at: string
+  updated_at: string
+  // joined
+  technician?: {
+    id: string
+    name: string
+    hourly_rate_cents: number | null
+  }
+}
+
+export interface JobProfitability {
+  revenue_cents: number
+  cost_cents: number
+  gross_profit_cents: number
+  margin_percent: number
+}
+
+// ── QuickBooks Online ─────────────────────────────────────────────────────────
+
+export interface QBOConnection {
+  id: string
+  org_id: string
+  realm_id: string
+  access_token: string
+  refresh_token: string
+  token_expires_at: string
+  scope: string | null
+  company_name: string | null
+  connected_at: string
+  last_synced_at: string | null
+  updated_at: string
+}

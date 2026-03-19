@@ -1,23 +1,19 @@
 /**
- * GET  /api/invoices  — List invoices for the current org
- * POST /api/invoices  — Create a new draft invoice
+ * GET  /api/estimates  — List estimates for the current org
+ * POST /api/estimates  — Create a new draft estimate
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { getOrgPlanAccess } from '@/lib/plan-access'
+import { generateEstimateToken } from '@/lib/estimate-token'
 
 export const dynamic = 'force-dynamic'
 
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-/** Format a sequential number as INV-001, INV-042, etc. */
-function formatInvoiceNumber(n: number): string {
-  return `INV-${String(n).padStart(3, '0')}`
+function formatEstimateNumber(n: number): string {
+  return `EST-${String(n).padStart(3, '0')}`
 }
-
-// ── Schemas ────────────────────────────────────────────────────────────────────
 
 const LineItemSchema = z.object({
   appointment_id:   z.string().uuid().nullable().optional(),
@@ -25,12 +21,14 @@ const LineItemSchema = z.object({
   quantity:         z.number().int().min(1).default(1),
   unit_price_cents: z.number().int().min(0),
   tax_exempt:       z.boolean().optional().default(false),
+  sort_order:       z.number().int().optional().default(0),
 })
 
-const CreateInvoiceSchema = z.object({
+const CreateEstimateSchema = z.object({
   client_id:    z.string().uuid(),
+  title:        z.string().nullable().optional(),
   issued_date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  due_date:     z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  expiry_date:  z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   notes:        z.string().nullable().optional(),
   line_items:   z.array(LineItemSchema).min(1),
   tax_rate_ids: z.array(z.string().uuid()).optional().default([]),
@@ -48,11 +46,11 @@ export async function GET(request: NextRequest) {
   const clientIdFilter = searchParams.get('client_id')
 
   let query = supabase
-    .from('invoices')
+    .from('estimates')
     .select(`
       *,
       clients ( id, name, email, phone, address ),
-      invoice_line_items ( id, appointment_id, description, quantity, unit_price_cents, total_cents )
+      estimate_line_items ( id, description, quantity, unit_price_cents, total_cents, sort_order, tax_exempt )
     `)
     .order('created_at', { ascending: false })
 
@@ -62,7 +60,7 @@ export async function GET(request: NextRequest) {
   const { data, error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ invoices: data })
+  return NextResponse.json({ estimates: data })
 }
 
 // ── POST ───────────────────────────────────────────────────────────────────────
@@ -73,7 +71,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json().catch(() => null)
-  const parsed = CreateInvoiceSchema.safeParse(body)
+  const parsed = CreateEstimateSchema.safeParse(body)
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.issues[0]?.message ?? 'Invalid input' },
@@ -87,47 +85,44 @@ export async function POST(request: NextRequest) {
     .eq('id', user.id)
     .single()
 
-  if (!profile?.org_id) return NextResponse.json({ error: 'Profile / Org not found' }, { status: 404 })
+  if (!profile?.org_id) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
   if (!['owner', 'dispatcher'].includes(profile.role)) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
   const orgId = profile.org_id
 
-  // Plan gate: invoicing requires a paid plan
+  // Plan gate: estimates require a paid plan
   const planAccess = await getOrgPlanAccess(orgId, supabase)
   if (planAccess.suspended) {
     return NextResponse.json({ error: 'Your account has been suspended.' }, { status: 403 })
   }
   if (planAccess.plan === 'trial') {
     return NextResponse.json(
-      { error: 'Invoicing requires a paid plan. Upgrade to Starter or above.', upgradeRequired: true },
+      { error: 'Estimates require a paid plan.', upgradeRequired: true },
       { status: 403 }
     )
   }
 
   const d = parsed.data
 
-  // Fetch org and atomically increment invoice number
-  const serviceClient = await createClient(true)  // service role for the increment
-
+  // Atomically increment estimate number using service role
+  const serviceClient = await createClient(true)
   const { data: org } = await serviceClient
     .from('organizations')
-    .select('next_invoice_number')
+    .select('next_estimate_number')
     .eq('id', orgId)
     .single()
 
   if (!org) return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
 
-  const invoiceNumber = formatInvoiceNumber(org.next_invoice_number)
-
-  // Increment the counter atomically
+  const estimateNumber = formatEstimateNumber(org.next_estimate_number)
   await serviceClient
     .from('organizations')
-    .update({ next_invoice_number: org.next_invoice_number + 1 })
+    .update({ next_estimate_number: org.next_estimate_number + 1 })
     .eq('id', orgId)
 
-  // Fetch selected tax rates (if any)
+  // Fetch selected tax rates
   let taxRates: { id: string; name: string; rate_percent: number }[] = []
   if (d.tax_rate_ids.length > 0) {
     const { data: rates } = await supabase
@@ -137,7 +132,7 @@ export async function POST(request: NextRequest) {
     taxRates = rates ?? []
   }
 
-  // Compute subtotal from non-tax-exempt line items only for tax calc
+  // Compute totals
   const subtotal_cents = d.line_items.reduce(
     (sum, li) => sum + li.quantity * li.unit_price_cents,
     0
@@ -146,7 +141,6 @@ export async function POST(request: NextRequest) {
     .filter(li => !li.tax_exempt)
     .reduce((sum, li) => sum + li.quantity * li.unit_price_cents, 0)
 
-  // Compute per-rate tax amounts
   const taxBreakdown = taxRates.map(r => ({
     tax_rate_id: r.id,
     name: r.name,
@@ -156,53 +150,63 @@ export async function POST(request: NextRequest) {
   const tax_cents = taxBreakdown.reduce((s, t) => s + t.tax_cents, 0)
   const total_cents = subtotal_cents + tax_cents
 
-  // Insert invoice
-  const { data: invoice, error: invoiceError } = await supabase
-    .from('invoices')
+  // Generate HMAC public token
+  // We need the estimate ID first — generate a temporary UUID for token
+  const estimateId = crypto.randomUUID()
+  const publicToken = await generateEstimateToken(estimateId)
+
+  // Insert estimate with explicit ID
+  const { data: estimate, error: estimateError } = await supabase
+    .from('estimates')
     .insert({
-      org_id:         orgId,
-      client_id:      d.client_id,
-      invoice_number: invoiceNumber,
-      issued_date:    d.issued_date,
-      due_date:       d.due_date,
-      notes:          d.notes ?? null,
+      id:              estimateId,
+      org_id:          orgId,
+      client_id:       d.client_id,
+      estimate_number: estimateNumber,
+      title:           d.title ?? null,
+      issued_date:     d.issued_date,
+      expiry_date:     d.expiry_date ?? null,
+      notes:           d.notes ?? null,
       subtotal_cents,
       tax_cents,
       total_cents,
+      public_token:    publicToken,
     })
     .select()
     .single()
 
-  if (invoiceError) return NextResponse.json({ error: invoiceError.message }, { status: 500 })
+  if (estimateError) return NextResponse.json({ error: estimateError.message }, { status: 500 })
 
   // Insert line items
-  const lineItemRows = d.line_items.map(li => ({
-    invoice_id:       invoice.id,
+  const lineItemRows = d.line_items.map((li, i) => ({
+    estimate_id:      estimate.id,
     appointment_id:   li.appointment_id ?? null,
     description:      li.description,
     quantity:         li.quantity,
     unit_price_cents: li.unit_price_cents,
     total_cents:      li.quantity * li.unit_price_cents,
     tax_exempt:       li.tax_exempt,
+    sort_order:       li.sort_order ?? i,
   }))
 
   const { error: liError } = await supabase
-    .from('invoice_line_items')
+    .from('estimate_line_items')
     .insert(lineItemRows)
 
   if (liError) return NextResponse.json({ error: liError.message }, { status: 500 })
 
-  // Insert invoice_taxes rows (snapshots)
+  // Insert estimate_taxes rows
   if (taxBreakdown.length > 0) {
-    const taxRows = taxBreakdown.map(t => ({
-      invoice_id:   invoice.id,
-      tax_rate_id:  t.tax_rate_id,
-      name:         t.name,
-      rate_percent: t.rate_percent,
-      tax_cents:    t.tax_cents,
-    }))
-    await supabase.from('invoice_taxes').insert(taxRows)
+    await supabase.from('estimate_taxes').insert(
+      taxBreakdown.map(t => ({
+        estimate_id:  estimate.id,
+        tax_rate_id:  t.tax_rate_id,
+        name:         t.name,
+        rate_percent: t.rate_percent,
+        tax_cents:    t.tax_cents,
+      }))
+    )
   }
 
-  return NextResponse.json({ invoice }, { status: 201 })
+  return NextResponse.json({ estimate }, { status: 201 })
 }
