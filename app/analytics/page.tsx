@@ -34,13 +34,17 @@ interface AnalyticsData {
   byServiceRevenue: { service: string; completed: number; revenueCents: number }[]
 }
 
+type Recurrence = 'none' | 'weekly' | 'monthly' | 'annually'
+
 interface Expense {
   id: string
+  baseId?: string   // set on projected recurring instances; use this for deletion
   name: string
   amount_cents: number
   category: 'supplies' | 'labor' | 'overhead' | 'other'
   expense_date: string
   notes?: string
+  recurrence: Recurrence
 }
 
 type DateRange = 'month' | 'year' | 'custom'
@@ -169,13 +173,14 @@ export default function AccountingPage() {
   const [taxSaving, setTaxSaving]   = useState(false)
 
   // Add expense form
-  const [showExpForm,  setShowExpForm]  = useState(false)
-  const [expName,      setExpName]      = useState('')
-  const [expAmount,    setExpAmount]    = useState('')
-  const [expCategory,  setExpCategory]  = useState<Expense['category']>('other')
-  const [expDate,      setExpDate]      = useState(toDateStr(now))
-  const [expNotes,     setExpNotes]     = useState('')
-  const [expSubmitting, setExpSubmitting] = useState(false)
+  const [showExpForm,    setShowExpForm]    = useState(false)
+  const [expName,        setExpName]        = useState('')
+  const [expAmount,      setExpAmount]      = useState('')
+  const [expCategory,    setExpCategory]    = useState<Expense['category']>('other')
+  const [expDate,        setExpDate]        = useState(toDateStr(now))
+  const [expNotes,       setExpNotes]       = useState('')
+  const [expRecurrence,  setExpRecurrence]  = useState<Recurrence>('none')
+  const [expSubmitting,  setExpSubmitting]  = useState(false)
 
   // ── Date range helpers ──────────────────────────────────────────────────
   const getFromTo = useCallback(() => {
@@ -220,8 +225,9 @@ export default function AccountingPage() {
   useEffect(() => { fetchAnalytics(); fetchExpenses() }, [fetchAnalytics, fetchExpenses])
 
   // ── Derived accounting figures ──────────────────────────────────────────
-  const totalExpensesCents = expenses.reduce((s, e) => s + e.amount_cents, 0)
-  const netProfitCents     = (data?.totalRevenueCents ?? 0) - totalExpensesCents
+  const totalExpensesCents   = expenses.reduce((s, e) => s + e.amount_cents, 0)
+  const totalCommissionCents = data?.byTechnicianRevenue.reduce((s, t) => s + t.commissionCents, 0) ?? 0
+  const netProfitCents       = (data?.totalRevenueCents ?? 0) - totalExpensesCents - totalCommissionCents - (data?.taxOwedCents ?? 0)
 
   // ── Tax rate save ───────────────────────────────────────────────────────
   async function saveTaxRate() {
@@ -248,18 +254,22 @@ export default function AccountingPage() {
         category: expCategory,
         expense_date: expDate,
         notes: expNotes.trim() || undefined,
+        recurrence: expRecurrence,
       }),
     })
     setExpSubmitting(false)
     if (res.ok) {
       setShowExpForm(false); setExpName(''); setExpAmount(''); setExpNotes('')
-      setExpCategory('other'); setExpDate(toDateStr(now))
+      setExpCategory('other'); setExpDate(toDateStr(now)); setExpRecurrence('none')
       fetchExpenses()
     }
   }
 
   // ── Delete expense ──────────────────────────────────────────────────────
-  async function deleteExpense(id: string) {
+  // For recurring instances, baseId is the master record ID.
+  // Deleting it removes all future occurrences.
+  async function deleteExpense(expense: Expense) {
+    const id = expense.baseId ?? expense.id
     await fetch(`/api/expenses/${id}`, { method: 'DELETE' })
     fetchExpenses()
   }
@@ -356,7 +366,7 @@ export default function AccountingPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={DollarSign} label="Gross Revenue"   value={fmt(data.totalRevenueCents)}  sub="Completed jobs"     color="green"  />
             <StatCard icon={Receipt}    label="Total Expenses"  value={fmt(totalExpensesCents)}       sub="Logged expenses"    color="amber"  />
-            <StatCard icon={Minus}      label="Net Profit"      value={fmt(netProfitCents)}           sub="Revenue – expenses" color={netProfitCents >= 0 ? 'blue' : 'red'} />
+            <StatCard icon={Minus}      label="Net Profit"      value={fmt(netProfitCents)}           sub="After expenses, commission & tax" color={netProfitCents >= 0 ? 'blue' : 'red'} />
             <StatCard icon={Percent}    label="Tax Owed"        value={fmt(data.taxOwedCents)}        sub={`${data.taxRatePercent}% rate`} color="purple" />
           </div>
         </section>
@@ -484,10 +494,30 @@ export default function AccountingPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-[10px] text-slate-500 mb-1">Date</label>
+                    <label className="block text-[10px] text-slate-500 mb-1">Start Date</label>
                     <input type="date" value={expDate} onChange={e => setExpDate(e.target.value)}
                       className="w-full rounded-lg px-3 py-2 text-xs text-white border"
                       style={{ background: '#111318', borderColor: 'rgba(255,255,255,0.12)' }} />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-[10px] text-slate-500 mb-1">Repeats</label>
+                    <div className="flex gap-2">
+                      {(['none', 'weekly', 'monthly', 'annually'] as Recurrence[]).map(r => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => setExpRecurrence(r)}
+                          className="flex-1 py-1.5 rounded-lg text-[11px] font-semibold transition-all"
+                          style={{
+                            background: expRecurrence === r ? 'rgba(34,197,94,0.18)' : 'rgba(255,255,255,0.05)',
+                            color:      expRecurrence === r ? '#4ade80'              : '#475569',
+                            border:     `1px solid ${expRecurrence === r ? 'rgba(34,197,94,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                          }}
+                        >
+                          {r === 'none' ? 'One-time' : r.charAt(0).toUpperCase() + r.slice(1)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div>
@@ -517,11 +547,23 @@ export default function AccountingPage() {
                 {expenses.map(e => (
                   <div key={e.id} className="flex items-center gap-3 py-2 px-3 rounded-xl group hover:bg-white/[0.03] transition-colors">
                     <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-white/80 truncate">{e.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="text-xs font-medium text-white/80 truncate">{e.name}</p>
+                        {e.recurrence && e.recurrence !== 'none' && (
+                          <span className="shrink-0 text-[9px] font-semibold px-1.5 py-0.5 rounded-full"
+                            style={{ background: 'rgba(34,197,94,0.12)', color: '#4ade80', border: '1px solid rgba(34,197,94,0.2)' }}>
+                            ⟳ {e.recurrence}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-600">{CATEGORY_LABELS[e.category]} · {e.expense_date}</p>
                     </div>
                     <span className="text-xs font-semibold text-amber-400 shrink-0">{fmt(e.amount_cents)}</span>
-                    <button onClick={() => deleteExpense(e.id)} className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 shrink-0">
+                    <button
+                      onClick={() => deleteExpense(e)}
+                      title={e.baseId ? 'Delete recurring expense (removes all occurrences)' : 'Delete expense'}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 shrink-0"
+                    >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
