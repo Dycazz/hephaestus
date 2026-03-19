@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
   const { data: appointments, error: apptQueryError } = await supabase
     .from('appointments')
     .select(`
-      id, status, service, scheduled_at, created_at, completed_at, price_cents,
+      id, status, service, scheduled_at, created_at, updated_at, completed_at, price_cents,
       technicians ( id, name, commission_percent )
     `)
     .eq('org_id', orgId)
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
   // ── Revenue-filtered appointments (completed, within date range) ──────────
   const revenueAppts = appts.filter(a => {
     if (a.status !== 'completed') return false
-    const dateToCheck = (a as unknown as { completed_at: string | null }).completed_at ?? a.scheduled_at
+    const dateToCheck = (a as unknown as { completed_at: string | null }).completed_at ?? (a as unknown as { updated_at: string | null }).updated_at ?? a.scheduled_at
     return inWindow(dateToCheck, revenueFrom, revenueTo)
   })
 
