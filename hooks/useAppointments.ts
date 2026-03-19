@@ -112,6 +112,12 @@ export function useAppointments(viewAs?: string | null) {
     return () => { supabase.removeChannel(channel) }
   }, [fetchAppointments])
 
+  // Polling fallback: re-sync every 30 seconds in case Realtime misses an event
+  useEffect(() => {
+    const id = setInterval(() => { fetchAppointments() }, 30_000)
+    return () => clearInterval(id)
+  }, [fetchAppointments])
+
   const updateAppointment = useCallback(async (id: string, updates: Record<string, unknown>) => {
     // Optimistic update — convert camelCase back to the API shape
     setAppointments(prev => prev.map(a => {

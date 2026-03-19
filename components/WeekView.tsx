@@ -79,7 +79,7 @@ export function WeekView({ appointments, onSelectAppointment, onAddAtSlot, readO
     const map: Record<string, Appointment[]> = {}
     for (const iso of weekDays) map[iso] = []
     for (const a of appointments) {
-      if (!a.scheduledAt || a.status === 'cancelled') continue
+      if (!a.scheduledAt || a.status === 'cancelled' || a.status === 'completed') continue
       const day = toISODate(new Date(a.scheduledAt))
       if (map[day]) map[day].push(a)
     }

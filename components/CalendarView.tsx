@@ -102,7 +102,7 @@ export function CalendarView({
 
   // Filter appointments for the currently shown date
   const dayAppts = appointments.filter(
-    a => a.scheduledDate === displayDate && a.status !== 'cancelled'
+    a => a.scheduledDate === displayDate && a.status !== 'cancelled' && a.status !== 'completed'
   )
 
   const getAppt = (techName: string, time: string) =>
