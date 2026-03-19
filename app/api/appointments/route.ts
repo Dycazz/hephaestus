@@ -84,6 +84,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const { searchParams } = new URL(request.url)
+  const viewAs = searchParams.get('view_as')
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -99,19 +102,31 @@ export async function POST(request: NextRequest) {
 
   const d = parsed.data
 
-  // Get current user's org
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('org_id')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile) return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+  // Determine which org context to use (own or impersonated)
+  let orgId: string
+  if (viewAs) {
+    // Only admins can use view_as — check is_admin flag
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.is_admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    orgId = viewAs
+  } else {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('org_id')
+      .eq('id', user.id)
+      .single()
+    if (!profile?.org_id) return NextResponse.json({ error: 'Profile / Org not found' }, { status: 404 })
+    orgId = profile.org_id
+  }
 
   // ── Plan access check ────────────────────────────────────────────────────
   let planAccess: Awaited<ReturnType<typeof getOrgPlanAccess>>
   try {
-    planAccess = await getOrgPlanAccess(profile.org_id, supabase)
+    planAccess = await getOrgPlanAccess(orgId, supabase)
   } catch {
     return NextResponse.json({ error: 'Unable to verify account status. Please try again.' }, { status: 503 })
   }
@@ -119,7 +134,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Your account has been suspended. Please contact support.' }, { status: 403 })
   }
 
-  const jobLimit = await checkLimit(profile.org_id, 'jobs', supabase)
+  const jobLimit = await checkLimit(orgId, 'jobs', supabase)
   if (!jobLimit.allowed) {
     const isExpired = !planAccess.active
     return NextResponse.json(
@@ -142,7 +157,7 @@ export async function POST(request: NextRequest) {
     const { data: existing } = await supabase
       .from('clients')
       .select('id')
-      .eq('org_id', profile.org_id)
+      .eq('org_id', orgId)
       .eq('phone', d.customerPhone)
       .maybeSingle()
 
@@ -152,7 +167,7 @@ export async function POST(request: NextRequest) {
       const { data: newClient } = await supabase
         .from('clients')
         .insert({
-          org_id: profile.org_id,
+          org_id: orgId,
           name: d.customerName,
           phone: d.customerPhone,
           address: d.address,
@@ -166,7 +181,7 @@ export async function POST(request: NextRequest) {
   const { data: appt, error } = await supabase
     .from('appointments')
     .insert({
-      org_id: profile.org_id,
+      org_id: orgId,
       client_id: clientId,
       technician_id: d.technicianId ?? null,
       service: d.service,
@@ -204,7 +219,7 @@ export async function POST(request: NextRequest) {
       else if (d.recurrenceRule === 'monthly') { current = new Date(current); current.setMonth(current.getMonth() + 1) }
       if (current > endDate) break
       children.push({
-        org_id: profile.org_id, client_id: clientId,
+        org_id: orgId, client_id: clientId,
         technician_id: d.technicianId ?? null,
         service: d.service, service_icon: d.serviceIcon, service_color: d.serviceColor,
         scheduled_at: current.toISOString(), status: 'scheduled', address: d.address,

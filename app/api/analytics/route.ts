@@ -144,6 +144,17 @@ export async function GET(request: NextRequest) {
     totalRevenueCents += (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
   }
 
+  // ── Projected revenue (scheduled/pending/confirmed, within date range) ─────
+  const projectedAppts = appts.filter(a => {
+    if (!['scheduled', 'confirmed', 'reminder_sent', 'at_risk', 'rescheduling'].includes(a.status)) return false
+    return inWindow(a.scheduled_at, revenueFrom, revenueTo)
+  })
+
+  let projectedRevenueCents = 0
+  for (const a of projectedAppts) {
+    projectedRevenueCents += (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
+  }
+
   const taxOwedCents = Math.round(totalRevenueCents * taxRatePercent / 100)
 
   // ── Technician breakdown (all time for leaderboard) ───────────────────────
@@ -228,6 +239,7 @@ export async function GET(request: NextRequest) {
     // Revenue / accounting fields
     completedJobsInRange: revenueAppts.length,
     totalRevenueCents,
+    projectedRevenueCents,
     taxRatePercent,
     taxOwedCents,
     byTechnicianRevenue: Object.values(byTechRevenue)

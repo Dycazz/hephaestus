@@ -209,7 +209,8 @@ export default function Dashboard() {
         scheduledAtISO = baseDate.toISOString()
       }
 
-      const res = await fetch('/api/appointments', {
+      const url = viewAs ? `/api/appointments?view_as=${viewAs}` : '/api/appointments'
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -244,9 +245,11 @@ export default function Dashboard() {
           addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
         }
       } else {
-        // Fallback: show with temp id, will sync on next fetch
-        setAppointments(prev => [...prev, appt])
-        addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
+        const errorData = await res.json().catch(() => null)
+        addToast({
+          type: 'error',
+          message: errorData?.error ?? 'Failed to add appointment. Please try again.'
+        })
       }
 
       setAddClientOpen(false)

@@ -26,6 +26,7 @@ interface AnalyticsData {
   // Revenue
   completedJobsInRange: number
   totalRevenueCents: number
+  projectedRevenueCents: number
   taxRatePercent: number
   taxOwedCents: number
   byTechnicianRevenue: {
@@ -392,7 +393,7 @@ export default function AccountingPage() {
           )}
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={DollarSign} label="Gross Revenue"   value={fmt(data.totalRevenueCents)}  sub="Completed jobs"     color="green"  />
+            <StatCard icon={DollarSign} label="Gross Revenue"   value={fmt(data.totalRevenueCents)}  sub={`${fmt(data.projectedRevenueCents)} projected`} color="green"  />
             <StatCard icon={Receipt}    label="Total Expenses"  value={fmt(totalExpensesCents)}       sub="Logged expenses"    color="amber"  />
             <StatCard icon={Minus}      label="Net Profit"      value={fmt(netProfitCents)}           sub="After expenses, commission & tax" color={netProfitCents >= 0 ? 'blue' : 'red'} />
             <StatCard icon={Percent}    label="Tax Owed"        value={fmt(data.taxOwedCents)}        sub={`${data.taxRatePercent}% rate`} color="purple" />
@@ -403,8 +404,12 @@ export default function AccountingPage() {
             <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 mb-3">P&amp;L Breakdown</p>
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Gross Revenue</span>
+                <span className="text-slate-400">Gross Revenue (Actual)</span>
                 <span className="text-green-400 font-semibold">{fmt(data.totalRevenueCents)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-400">Projected (Scheduled)</span>
+                <span className="text-blue-400/80 font-medium">{fmt(data.projectedRevenueCents)}</span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-400">− Expenses</span>
