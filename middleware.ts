@@ -44,7 +44,7 @@ export async function middleware(request: NextRequest) {
     // Auth check failed — treat as unauthenticated
   }
 
-  const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/settings') || pathname.startsWith('/analytics')
+  const isProtected = pathname.startsWith('/dashboard') || pathname.startsWith('/settings') || pathname.startsWith('/analytics') || pathname.startsWith('/onboarding')
   const isAdminRoute = pathname.startsWith('/admin')
 
   const clearAuthCookies = (response: NextResponse) => {
@@ -87,7 +87,7 @@ export async function middleware(request: NextRequest) {
       // Fetch the user's org plan in a single query via their profile
       const { data: rows, error } = await supabase
         .from('profiles')
-        .select('organizations(plan, trial_ends_at, suspended_at, subscription_status, subscription_period_end)')
+        .select('role, organizations(plan, trial_ends_at, suspended_at, subscription_status, subscription_period_end, onboarding_completed_at)')
         .eq('id', user.id)
         .limit(1)
 
@@ -123,6 +123,17 @@ export async function middleware(request: NextRequest) {
         const loginUrl = new URL('/login', request.url)
         loginUrl.searchParams.set('reason', 'subscription')
         return clearAuthCookies(NextResponse.redirect(loginUrl))
+      }
+
+      // Onboarding gate: redirect new owners to the setup wizard
+      const role = (rows?.[0] as { role?: string } | undefined)?.role
+      const onboardingDone = !!(org.onboarding_completed_at)
+
+      if (!onboardingDone && role === 'owner' && (pathname === '/dashboard' || pathname === '/')) {
+        return NextResponse.redirect(new URL('/onboarding', request.url))
+      }
+      if (onboardingDone && pathname.startsWith('/onboarding')) {
+        return NextResponse.redirect(new URL('/dashboard', request.url))
       }
     } catch {
       const loginUrl = new URL('/login', request.url)

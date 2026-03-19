@@ -47,6 +47,7 @@ export async function PATCH(request: NextRequest) {
   if ('reviewUrl'           in body) updates.review_url            = body.reviewUrl           || null
   if ('smsPhoneNumber'      in body) updates.sms_phone_number      = body.smsPhoneNumber      || null
   if ('reminderHoursBefore' in body) updates.reminder_hours_before = Number(body.reminderHoursBefore) || 24
+  if (body.onboardingCompleted === true) updates.onboarding_completed_at = new Date().toISOString()
 
   const { data: org, error } = await supabase
     .from('organizations')
