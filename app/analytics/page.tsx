@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   DollarSign, TrendingUp, CheckCircle2, MessageSquare,
   Users, Wrench, ArrowLeft, Loader2, BarChart2,
-  Receipt, Minus, Percent, Trash2, Plus, RefreshCw,
+  Receipt, Minus, Percent, Trash2, Plus, RefreshCw, TrendingDown,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -830,7 +830,157 @@ export default function AccountingPage() {
           </div>
         </div>
 
+        {/* ══════════════════════════════════════════════════════════════════
+            JOB COSTING SECTION
+        ══════════════════════════════════════════════════════════════════ */}
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-600 mb-4">Job Costing</h2>
+          <JobCostingSection from={getFromTo().from} to={getFromTo().to} />
+        </section>
+
       </main>
+    </div>
+  )
+}
+
+// ── Job Costing Section ───────────────────────────────────────────────────────
+
+interface CostRow {
+  appointment_id: string
+  service: string
+  scheduled_at: string
+  customer_name: string
+  revenue_cents: number
+  cost_cents: number
+  gross_profit_cents: number
+  margin_percent: number
+}
+
+function JobCostingSection({ from, to }: { from: string; to: string }) {
+  const supabase = createClient()
+  const [rows, setRows] = useState<CostRow[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    async function load() {
+      setLoading(true)
+      // Fetch completed appointments in range with their cost data
+      const { data: appts } = await supabase
+        .from('appointments')
+        .select('id, service, scheduled_at, customer_name, price_cents')
+        .eq('status', 'completed')
+        .gte('scheduled_at', from + 'T00:00:00')
+        .lte('scheduled_at', to + 'T23:59:59')
+        .order('scheduled_at', { ascending: false })
+        .limit(50)
+
+      if (!appts || appts.length === 0) { setRows([]); setLoading(false); return }
+
+      // Fetch job cost totals per appointment
+      const { data: costs } = await supabase
+        .from('job_cost_items')
+        .select('appointment_id, total_cost_cents')
+        .in('appointment_id', appts.map(a => a.id))
+
+      const costByAppt: Record<string, number> = {}
+      for (const c of costs ?? []) {
+        costByAppt[c.appointment_id] = (costByAppt[c.appointment_id] ?? 0) + c.total_cost_cents
+      }
+
+      const result: CostRow[] = appts.map(a => {
+        const rev = a.price_cents ?? 0
+        const cost = costByAppt[a.id] ?? 0
+        const profit = rev - cost
+        const margin = rev > 0 ? Math.round((profit / rev) * 10000) / 100 : 0
+        return {
+          appointment_id: a.id,
+          service: a.service,
+          scheduled_at: a.scheduled_at,
+          customer_name: a.customer_name,
+          revenue_cents: rev,
+          cost_cents: cost,
+          gross_profit_cents: profit,
+          margin_percent: margin,
+        }
+      })
+
+      setRows(result)
+      setLoading(false)
+    }
+    load()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [from, to])
+
+  const totalRevenue = rows.reduce((s, r) => s + r.revenue_cents, 0)
+  const totalCost = rows.reduce((s, r) => s + r.cost_cents, 0)
+  const totalProfit = totalRevenue - totalCost
+  const avgMargin = rows.length > 0 && totalRevenue > 0
+    ? Math.round((totalProfit / totalRevenue) * 10000) / 100
+    : 0
+
+  return (
+    <div className="space-y-4">
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {[
+          { label: 'Total Revenue', value: fmt(totalRevenue), Icon: DollarSign, color: 'text-green-400' },
+          { label: 'Total Costs', value: fmt(totalCost), Icon: TrendingDown, color: 'text-red-400' },
+          { label: 'Gross Profit', value: fmt(totalProfit), Icon: TrendingUp, color: totalProfit >= 0 ? 'text-blue-400' : 'text-red-400' },
+          { label: 'Avg Margin', value: `${avgMargin}%`, Icon: Percent, color: avgMargin >= 40 ? 'text-green-400' : avgMargin >= 20 ? 'text-amber-400' : 'text-red-400' },
+        ].map(c => (
+          <div key={c.label} className="rounded-xl p-4" style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-xs text-slate-500 mb-1">{c.label}</p>
+            <p className={`text-xl font-bold ${c.color}`}>{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="rounded-2xl overflow-hidden" style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}>
+        {loading ? (
+          <div className="flex justify-center p-8"><Loader2 className="h-5 w-5 animate-spin text-slate-500" /></div>
+        ) : rows.length === 0 ? (
+          <p className="p-6 text-center text-sm text-slate-500">
+            No completed jobs with cost data in this period.
+            Add job costs from the appointment detail view.
+          </p>
+        ) : (
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b" style={{ borderColor: 'rgba(255,255,255,0.07)' }}>
+                {['Job', 'Date', 'Revenue', 'Cost', 'Profit', 'Margin'].map(h => (
+                  <th key={h} className={`px-4 py-3 font-semibold uppercase tracking-wider text-slate-600 ${h === 'Job' ? 'text-left' : 'text-right'}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map(r => (
+                <tr key={r.appointment_id} className="border-b" style={{ borderColor: 'rgba(255,255,255,0.04)' }}>
+                  <td className="px-4 py-3 text-white font-medium">
+                    {r.service}
+                    <span className="block text-[10px] text-slate-500">{r.customer_name}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right text-slate-400">
+                    {new Date(r.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </td>
+                  <td className="px-4 py-3 text-right text-green-400">{fmt(r.revenue_cents)}</td>
+                  <td className="px-4 py-3 text-right text-red-400">{r.cost_cents > 0 ? fmt(r.cost_cents) : <span className="text-slate-600">—</span>}</td>
+                  <td className={`px-4 py-3 text-right font-semibold ${r.gross_profit_cents >= 0 ? 'text-blue-400' : 'text-red-400'}`}>
+                    {r.cost_cents > 0 ? fmt(r.gross_profit_cents) : <span className="text-slate-600">—</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {r.cost_cents > 0 ? (
+                      <span className={`font-bold ${r.margin_percent >= 40 ? 'text-green-400' : r.margin_percent >= 20 ? 'text-amber-400' : 'text-red-400'}`}>
+                        {r.margin_percent}%
+                      </span>
+                    ) : <span className="text-slate-600">—</span>}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   )
 }

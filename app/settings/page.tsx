@@ -8,7 +8,7 @@ import {
   ArrowLeft, Settings2, Layers, CreditCard, Save, Loader2,
   Check, Plus, Trash2, Edit2, X, Star, ExternalLink,
   Zap, Shield, Building2, Gift, AlertTriangle, RefreshCw, Clock,
-  Globe, DollarSign, Copy, Calendar,
+  Globe, DollarSign, Copy, Calendar, Percent, Link2,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -1011,9 +1011,286 @@ function BookingPortalTab({ orgName, orgSlug }: { orgName: string; orgSlug: stri
   )
 }
 
+// ── Tax Rates Tab ──────────────────────────────────────────────────────────
+
+interface TaxRate {
+  id: string
+  name: string
+  rate_percent: number
+  is_default: boolean
+}
+
+function TaxRatesTab() {
+  const [rates, setRates] = useState<TaxRate[]>([])
+  const [loading, setLoading] = useState(true)
+  const [newName, setNewName] = useState('')
+  const [newRate, setNewRate] = useState('')
+  const [newDefault, setNewDefault] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/tax-rates')
+      .then(r => r.json())
+      .then(j => setRates(j.tax_rates ?? []))
+      .finally(() => setLoading(false))
+  }, [])
+
+  async function handleAdd() {
+    if (!newName.trim() || !newRate) { setError('Name and rate are required.'); return }
+    setSaving(true); setError(null)
+    const res = await fetch('/api/tax-rates', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: newName.trim(), rate_percent: parseFloat(newRate), is_default: newDefault }),
+    })
+    const json = await res.json()
+    setSaving(false)
+    if (!res.ok) { setError(json.error ?? 'Failed to add rate'); return }
+    setRates(prev => {
+      const updated = newDefault ? prev.map(r => ({ ...r, is_default: false })) : prev
+      return [...updated, json.tax_rate]
+    })
+    setNewName(''); setNewRate(''); setNewDefault(false)
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this tax rate?')) return
+    await fetch(`/api/tax-rates/${id}`, { method: 'DELETE' })
+    setRates(prev => prev.filter(r => r.id !== id))
+  }
+
+  async function toggleDefault(id: string, current: boolean) {
+    const res = await fetch(`/api/tax-rates/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ is_default: !current }),
+    })
+    if (res.ok) {
+      setRates(prev => prev.map(r => ({
+        ...r,
+        is_default: r.id === id ? !current : (current ? r.is_default : false),
+      })))
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <h3 className="text-sm font-semibold text-white mb-1">Tax Rates</h3>
+        <p className="text-xs text-slate-400 mb-4">Define reusable tax rates to apply when creating invoices and estimates.</p>
+
+        {loading ? (
+          <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin text-slate-500" /></div>
+        ) : (
+          <div className="space-y-2">
+            {rates.length === 0 && (
+              <p className="text-xs text-slate-500 py-2">No tax rates yet. Add one below.</p>
+            )}
+            {rates.map(r => (
+              <div key={r.id} className="flex items-center justify-between rounded-lg bg-white/[0.03] px-3 py-2.5 border border-white/5">
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-medium text-white">{r.name}</span>
+                  <span className="text-sm text-slate-400">{r.rate_percent}%</span>
+                  {r.is_default && (
+                    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-400">Default</span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleDefault(r.id, r.is_default)}
+                    className="text-xs text-slate-500 hover:text-amber-400 transition"
+                    title={r.is_default ? 'Remove default' : 'Set as default'}
+                  >
+                    <Star className={`h-3.5 w-3.5 ${r.is_default ? 'text-amber-400 fill-amber-400' : ''}`} />
+                  </button>
+                  <button onClick={() => handleDelete(r.id)} className="text-slate-600 hover:text-red-400 transition">
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Add form */}
+        <div className="mt-4 flex flex-wrap items-end gap-2 border-t border-white/5 pt-4">
+          <div className="flex-1 min-w-[140px]">
+            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Name</label>
+            <input
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              placeholder="e.g. CA State Tax"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-slate-600 outline-none focus:border-violet-500/50"
+            />
+          </div>
+          <div className="w-28">
+            <label className="mb-1 block text-[10px] font-semibold uppercase tracking-wider text-slate-500">Rate (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              step="0.001"
+              value={newRate}
+              onChange={e => setNewRate(e.target.value)}
+              placeholder="8.250"
+              className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-sm text-white placeholder:text-slate-600 outline-none focus:border-violet-500/50"
+            />
+          </div>
+          <div className="flex items-center gap-1.5 pb-1">
+            <input type="checkbox" id="tax-default" checked={newDefault} onChange={e => setNewDefault(e.target.checked)} className="rounded" />
+            <label htmlFor="tax-default" className="text-xs text-slate-400">Default</label>
+          </div>
+          <button
+            onClick={handleAdd}
+            disabled={saving}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500 transition disabled:opacity-50"
+          >
+            {saving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+            Add Rate
+          </button>
+        </div>
+        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+      </div>
+    </div>
+  )
+}
+
+// ── Integrations Tab (QBO) ─────────────────────────────────────────────────
+
+function IntegrationsTab({ plan }: { plan: string }) {
+  const [connection, setConnection] = useState<{ company_name: string | null; last_synced_at: string | null } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [syncing, setSyncing] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [disconnecting, setDisconnecting] = useState(false)
+  const [syncResult, setSyncResult] = useState<string | null>(null)
+
+  const qboEnabled = plan === 'pro' || plan === 'enterprise' || plan === 'gifted'
+
+  useEffect(() => {
+    if (!qboEnabled) { setLoading(false); return }
+    fetch('/api/settings/qbo-status')
+      .then(r => r.ok ? r.json() : null)
+      .then(j => { if (j?.connection) setConnection(j.connection) })
+      .finally(() => setLoading(false))
+  }, [qboEnabled])
+
+  async function handleConnect() {
+    const res = await fetch('/api/qbo/connect?url_only=1')
+    const json = await res.json()
+    if (json.url) window.location.href = json.url
+  }
+
+  async function handleSync() {
+    setSyncing(true); setSyncResult(null)
+    const res = await fetch('/api/qbo/sync', { method: 'POST' })
+    const json = await res.json()
+    setSyncing(false)
+    if (res.ok) setSyncResult(`Synced: ${json.clients_synced} clients, ${json.invoices_synced} invoices.`)
+    else setSyncResult(`Error: ${json.error ?? 'Sync failed'}`)
+  }
+
+  async function handleImport() {
+    setImporting(true); setSyncResult(null)
+    const res = await fetch('/api/qbo/import', { method: 'POST' })
+    const json = await res.json()
+    setImporting(false)
+    if (res.ok) setSyncResult(`Imported: ${json.created} new, ${json.updated} updated clients.`)
+    else setSyncResult(`Error: ${json.error ?? 'Import failed'}`)
+  }
+
+  async function handleDisconnect() {
+    if (!confirm('Disconnect QuickBooks Online? Sync will stop.')) return
+    setDisconnecting(true)
+    await fetch('/api/qbo/disconnect', { method: 'POST' })
+    setDisconnecting(false)
+    setConnection(null)
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl p-6" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="flex items-center gap-3 mb-1">
+          <div className="rounded-lg bg-green-600/10 p-2 border border-green-600/20">
+            <Link2 className="h-5 w-5 text-green-400" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white">QuickBooks Online</h3>
+            <p className="text-xs text-slate-400">Two-way sync of clients, invoices, and payments</p>
+          </div>
+        </div>
+
+        {!qboEnabled ? (
+          <div className="mt-4 rounded-lg bg-amber-500/5 border border-amber-500/20 px-4 py-3 text-sm text-amber-400">
+            QuickBooks sync requires the Pro plan or above.
+          </div>
+        ) : loading ? (
+          <div className="mt-4 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-slate-500" /></div>
+        ) : connection ? (
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-green-400" />
+              <span className="text-sm font-semibold text-green-400">Connected</span>
+              {connection.company_name && (
+                <span className="text-sm text-slate-300">— {connection.company_name}</span>
+              )}
+            </div>
+            {connection.last_synced_at && (
+              <p className="text-xs text-slate-500">Last synced: {new Date(connection.last_synced_at).toLocaleString()}</p>
+            )}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleSync}
+                disabled={syncing}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/[0.04] transition disabled:opacity-50"
+              >
+                {syncing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                Sync Now
+              </button>
+              <button
+                onClick={handleImport}
+                disabled={importing}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-2 text-sm font-semibold text-white hover:bg-white/[0.04] transition disabled:opacity-50"
+              >
+                {importing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                Import Customers
+              </button>
+              <button
+                onClick={handleDisconnect}
+                disabled={disconnecting}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-red-500/20 px-3 py-2 text-sm font-semibold text-red-500 hover:bg-red-500/10 transition disabled:opacity-50"
+              >
+                {disconnecting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                Disconnect
+              </button>
+            </div>
+            {syncResult && (
+              <p className={`text-xs ${syncResult.startsWith('Error') ? 'text-red-400' : 'text-green-400'}`}>{syncResult}</p>
+            )}
+          </div>
+        ) : (
+          <div className="mt-4">
+            <p className="mb-3 text-sm text-slate-400">
+              Connect your QuickBooks Online account to automatically sync clients, invoices, and payments.
+            </p>
+            <button
+              onClick={handleConnect}
+              className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-500 transition"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Connect QuickBooks
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Page ──────────────────────────────────────────────────────────────
 
-type Tab = 'general' | 'services' | 'plan' | 'booking'
+type Tab = 'general' | 'services' | 'plan' | 'booking' | 'tax' | 'integrations'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -1194,10 +1471,12 @@ export default function SettingsPage() {
   // ── Tabs ────────────────────────────────────────────────────────────────
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: 'general',  label: 'General',  icon: Settings2  },
-    { id: 'services', label: 'Services', icon: Layers     },
-    { id: 'plan',     label: 'Plan',     icon: CreditCard },
-    { id: 'booking',  label: 'Booking Portal', icon: Globe },
+    { id: 'general',      label: 'General',         icon: Settings2 },
+    { id: 'services',     label: 'Services',         icon: Layers    },
+    { id: 'plan',         label: 'Plan',             icon: CreditCard },
+    { id: 'booking',      label: 'Booking Portal',   icon: Globe     },
+    { id: 'tax',          label: 'Tax Rates',        icon: Percent   },
+    { id: 'integrations', label: 'Integrations',     icon: Link2     },
   ]
 
   // ── Render ───────────────────────────────────────────────────────────────
@@ -1504,6 +1783,16 @@ export default function SettingsPage() {
               {/* ── Booking Portal ── */}
               {activeTab === 'booking' && (
                 <BookingPortalTab orgName={org?.businessName ?? ''} orgSlug={org?.slug ?? ''} />
+              )}
+
+              {/* ── Tax Rates ── */}
+              {activeTab === 'tax' && (
+                <TaxRatesTab />
+              )}
+
+              {/* ── Integrations (QBO) ── */}
+              {activeTab === 'integrations' && (
+                <IntegrationsTab plan={org?.plan ?? 'trial'} />
               )}
 
             </main>

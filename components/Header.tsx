@@ -1,6 +1,6 @@
 'use client'
 
-import { PlusCircle, LogOut, Users, Settings, DollarSign, Eye, FileText } from 'lucide-react'
+import { PlusCircle, LogOut, Users, Settings, DollarSign, Eye, FileText, FileEdit } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useOrg } from '@/context/OrgContext'
@@ -92,6 +92,17 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
                 >
                   <FileText className="h-3.5 w-3.5" />
                   Invoices
+                </Link>
+              )}
+
+              {org.plan !== 'trial' && (
+                <Link
+                  href="/estimates"
+                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] transition hover:-translate-y-0.5"
+                  style={{ color: '#7c3aed', background: 'rgba(124,58,237,0.1)', border: '1px solid rgba(124,58,237,0.2)' }}
+                >
+                  <FileEdit className="h-3.5 w-3.5" />
+                  Estimates
                 </Link>
               )}
             </>

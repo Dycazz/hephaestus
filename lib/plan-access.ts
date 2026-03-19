@@ -45,6 +45,30 @@ export function planIncludesInvoicing(plan: AllPlanKey): boolean {
   return plan !== 'trial'
 }
 
+/**
+ * Returns true if the org's plan includes the estimates feature.
+ * Estimates require a paid plan (starter, pro, enterprise, or gifted).
+ */
+export function planIncludesEstimates(plan: AllPlanKey): boolean {
+  return plan !== 'trial'
+}
+
+/**
+ * Returns true if the org's plan includes the job costing feature.
+ * Job costing requires starter or above.
+ */
+export function planIncludesJobCosting(plan: AllPlanKey): boolean {
+  return plan !== 'trial'
+}
+
+/**
+ * Returns true if the org's plan includes QuickBooks Online sync.
+ * QBO sync requires pro or enterprise (or gifted).
+ */
+export function planIncludesQBO(plan: AllPlanKey): boolean {
+  return plan === 'pro' || plan === 'enterprise' || plan === 'gifted'
+}
+
 // ── Core access check ──────────────────────────────────────────────────────
 
 /**
