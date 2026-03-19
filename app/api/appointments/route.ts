@@ -196,12 +196,7 @@ export async function POST(request: NextRequest) {
       auto_reminder: d.autoReminder,
       price_cents: d.priceCents ?? null,
     })
-    .select(`
-      *,
-      clients ( id, name, phone, address ),
-      technicians ( id, name, initials, color ),
-      sms_messages ( id, direction, body, message_type, created_at )
-    `)
+    .select()
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

@@ -16,7 +16,7 @@ import { CalendarView } from '@/components/CalendarView'
 import { WeekView } from '@/components/WeekView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
 import { AppointmentCard } from '@/components/AppointmentCard'
-import { useAppointments, mapDbAppointment } from '@/hooks/useAppointments'
+import { useAppointments } from '@/hooks/useAppointments'
 import { useTechnicians } from '@/hooks/useTechnicians'
 import { useOrg } from '@/context/OrgContext'
 import { formatDisplayDate, buildScheduledAt } from '@/lib/dateUtils'
@@ -240,8 +240,8 @@ export default function Dashboard() {
           await refetchAppointments()
           addToast({ type: 'success', message: `${recurringCount} appointments added for ${appt.customerName}.` })
         } else {
-          // Single appointment: map DB response to frontend shape
-          setAppointments(prev => [...prev, mapDbAppointment(json.appointment)])
+          // Single appointment: optimistic add with real DB id
+          setAppointments(prev => [...prev, { ...appt, id: json.appointment.id }])
           addToast({ type: 'success', message: `${appt.customerName} added to the schedule.` })
         }
       } else {
