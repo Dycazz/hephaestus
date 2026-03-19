@@ -187,7 +187,7 @@ export async function GET(request: NextRequest) {
     if (key in dailyMap) dailyMap[key]++
   }
 
-  return NextResponse.json({
+  const payload = {
     // Existing analytics fields
     total,
     thisWeek,
@@ -211,5 +211,9 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.revenueCents - a.revenueCents),
     byServiceRevenue: Object.values(byServiceRevenue)
       .sort((a, b) => b.revenueCents - a.revenueCents),
+  }
+
+  return NextResponse.json(payload, {
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
   })
 }

@@ -133,7 +133,9 @@ export async function GET(request: NextRequest) {
   // Sort by expense_date descending
   results.sort((a, b) => b.expense_date.localeCompare(a.expense_date))
 
-  return NextResponse.json({ expenses: results })
+  return NextResponse.json({ expenses: results }, {
+    headers: { 'Cache-Control': 'no-store, no-cache, must-revalidate' },
+  })
 }
 
 export async function POST(request: NextRequest) {
