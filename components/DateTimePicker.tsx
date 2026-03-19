@@ -56,7 +56,7 @@ export interface DateTimePickerProps {
   technicianAvailability?: TechnicianAvailability[]
   minDate?: string                           // ISO, defaults to today
   dateOnly?: boolean                         // hide time panel (for recurrence end-date)
-  accentColor?: 'blue' | 'purple'
+  accentColor?: 'blue' | 'purple' | 'orange'
 }
 
 const MONTH_NAMES = [
