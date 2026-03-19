@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import {
   DollarSign, TrendingUp, CheckCircle2, MessageSquare,
   Users, Wrench, ArrowLeft, Loader2, BarChart2,
@@ -228,6 +229,20 @@ export default function AccountingPage() {
   useEffect(() => {
     const id = setInterval(() => { fetchAnalytics(); fetchExpenses() }, 30_000)
     return () => clearInterval(id)
+  }, [fetchAnalytics, fetchExpenses])
+
+  // ── Real-time: refetch immediately when any appointment changes ──────────
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('analytics-appointments')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
+        fetchAnalytics()
+        fetchExpenses()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [fetchAnalytics, fetchExpenses])
 
   // ── Derived accounting figures ──────────────────────────────────────────

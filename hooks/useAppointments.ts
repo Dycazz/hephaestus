@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Appointment } from '@/types'
 import { formatDisplayDate } from '@/lib/dateUtils'
+import { createClient } from '@/lib/supabase/client'
 
 /**
  * Converts a DB appointment row (snake_case, timestamptz) to the
@@ -93,6 +94,22 @@ export function useAppointments(viewAs?: string | null) {
 
   useEffect(() => {
     fetchAppointments()
+  }, [fetchAppointments])
+
+  // Real-time: refetch when appointments are inserted (booking portal) or updated (status changes)
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('appointments-realtime')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'appointments' }, () => {
+        fetchAppointments()
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'appointments' }, () => {
+        fetchAppointments()
+      })
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [fetchAppointments])
 
   const updateAppointment = useCallback(async (id: string, updates: Record<string, unknown>) => {
