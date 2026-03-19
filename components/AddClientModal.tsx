@@ -299,15 +299,16 @@ export function AddClientModal({
               Job Price <span className="font-normal text-slate-400">(optional)</span>
             </label>
             <div className="flex items-center gap-2">
-              <span className="text-slate-400 text-sm">$</span>
+              <span className="text-slate-500 text-sm font-medium">$</span>
               <input
                 type="number"
                 min="0"
+                max="999999"
                 step="0.01"
                 value={priceCents !== null ? (priceCents / 100).toFixed(2) : ''}
                 onChange={e => setPriceCents(e.target.value !== '' ? Math.round(parseFloat(e.target.value) * 100) : null)}
-                placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'Service default'}
-                className="w-32 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'e.g. 150.00'}
+                className="w-44 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the service&apos;s default price</p>

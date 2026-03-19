@@ -23,6 +23,7 @@ interface AnalyticsData {
   byTechnician: { name: string; total: number; completed: number }[]
   dailyTrend: { date: string; count: number }[]
   // Revenue
+  completedJobsInRange: number
   totalRevenueCents: number
   taxRatePercent: number
   taxOwedCents: number
@@ -337,6 +338,21 @@ export default function AccountingPage() {
         {/* ── Revenue Summary cards ──────────────────────────────────────── */}
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-slate-600 mb-4">Revenue Summary</h2>
+
+          {/* No-price warning: completed jobs exist but revenue = $0 */}
+          {data.completedJobsInRange > 0 && data.totalRevenueCents === 0 && (
+            <div className="mb-4 flex items-start gap-3 rounded-xl px-4 py-3 text-sm"
+              style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}>
+              <span className="text-amber-400 mt-0.5 shrink-0">⚠</span>
+              <p className="text-amber-300/80 text-xs leading-relaxed">
+                <span className="font-semibold text-amber-300">{data.completedJobsInRange} completed job{data.completedJobsInRange !== 1 ? 's' : ''} found</span>
+                {' '}but no revenue is being calculated. Make sure your services have prices set in{' '}
+                <a href="/settings" className="underline hover:text-amber-200 transition-colors">Settings → Services</a>,
+                or set a Job Price when creating appointments.
+              </p>
+            </div>
+          )}
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={DollarSign} label="Gross Revenue"   value={fmt(data.totalRevenueCents)}  sub="Completed jobs"     color="green"  />
             <StatCard icon={Receipt}    label="Total Expenses"  value={fmt(totalExpensesCents)}       sub="Logged expenses"    color="amber"  />

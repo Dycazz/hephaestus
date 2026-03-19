@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
   const revenueTo   = toParam   ? new Date(toParam)   : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
 
   // ── Fetch all appointments for this org ──────────────────────────────────
-  const { data: appointments } = await supabase
+  const { data: appointments, error: apptQueryError } = await supabase
     .from('appointments')
     .select(`
       id, status, service, scheduled_at, created_at, price_cents,
@@ -35,15 +35,22 @@ export async function GET(request: NextRequest) {
     .eq('org_id', orgId)
     .order('scheduled_at', { ascending: true })
 
+  if (apptQueryError) {
+    console.error('[Analytics] appointments query error:', JSON.stringify(apptQueryError))
+  }
+
   // ── Fetch services to map name → price_cents ─────────────────────────────
   const { data: services } = await supabase
     .from('services')
     .select('name, price_cents')
     .eq('org_id', orgId)
 
+  // Only include services that actually have a price set (> 0 cents)
   const servicePriceMap: Record<string, number> = {}
   for (const s of services ?? []) {
-    servicePriceMap[s.name] = s.price_cents
+    if (typeof s.price_cents === 'number' && s.price_cents > 0) {
+      servicePriceMap[s.name] = s.price_cents
+    }
   }
 
   // ── Fetch org for tax rate ────────────────────────────────────────────────
@@ -152,13 +159,19 @@ export async function GET(request: NextRequest) {
   }
 
   // ── Service revenue (date-range filtered) ─────────────────────────────────
+  // Only include services that have a configured price OR an explicit appointment price
   const byServiceRevenue: Record<string, { service: string; completed: number; revenueCents: number }> = {}
   for (const a of revenueAppts) {
+    const apptPrice = (a as unknown as { price_cents: number | null }).price_cents
+    const svcPrice  = servicePriceMap[a.service]
+    // Skip appointments with no pricing data (avoids polluting the list with unknown services)
+    if (apptPrice === null && svcPrice === undefined) continue
+    const price = apptPrice ?? svcPrice ?? 0
     if (!byServiceRevenue[a.service]) {
       byServiceRevenue[a.service] = { service: a.service, completed: 0, revenueCents: 0 }
     }
     byServiceRevenue[a.service].completed++
-    byServiceRevenue[a.service].revenueCents += (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
+    byServiceRevenue[a.service].revenueCents += price
   }
 
   // ── 30-day daily trend (job counts) ───────────────────────────────────────
@@ -190,6 +203,7 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.total - a.total),
     dailyTrend: Object.entries(dailyMap).map(([date, count]) => ({ date, count })),
     // Revenue / accounting fields
+    completedJobsInRange: revenueAppts.length,
     totalRevenueCents,
     taxRatePercent,
     taxOwedCents,
