@@ -61,6 +61,7 @@ function mapDbAppointment(row: Record<string, unknown>): Appointment {
     recurrenceEndDate: (row.recurrence_end_date as string) ?? undefined,
     parentAppointmentId: (row.parent_appointment_id as string) ?? undefined,
     autoReminder: (row.auto_reminder as boolean) ?? true,
+    priceCents: typeof row.price_cents === 'number' ? row.price_cents : null,
   }
 }
 

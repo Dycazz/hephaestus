@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
   const { data: appointments } = await supabase
     .from('appointments')
     .select(`
-      id, status, service, scheduled_at, created_at,
+      id, status, service, scheduled_at, created_at, price_cents,
       technicians ( id, name, commission_percent )
     `)
     .eq('org_id', orgId)
@@ -111,7 +111,7 @@ export async function GET(request: NextRequest) {
   // ── Total revenue ─────────────────────────────────────────────────────────
   let totalRevenueCents = 0
   for (const a of revenueAppts) {
-    totalRevenueCents += servicePriceMap[a.service] ?? 0
+    totalRevenueCents += (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
   }
 
   const taxOwedCents = Math.round(totalRevenueCents * taxRatePercent / 100)
@@ -145,7 +145,7 @@ export async function GET(request: NextRequest) {
         commissionCents: 0,
       }
     }
-    const price = servicePriceMap[a.service] ?? 0
+    const price = (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
     byTechRevenue[tech.id].completed++
     byTechRevenue[tech.id].revenueCents += price
     byTechRevenue[tech.id].commissionCents += Math.round(price * Number(tech.commission_percent ?? 0) / 100)
@@ -158,7 +158,7 @@ export async function GET(request: NextRequest) {
       byServiceRevenue[a.service] = { service: a.service, completed: 0, revenueCents: 0 }
     }
     byServiceRevenue[a.service].completed++
-    byServiceRevenue[a.service].revenueCents += servicePriceMap[a.service] ?? 0
+    byServiceRevenue[a.service].revenueCents += (a as unknown as { price_cents: number | null }).price_cents ?? servicePriceMap[a.service] ?? 0
   }
 
   // ── 30-day daily trend (job counts) ───────────────────────────────────────

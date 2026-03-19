@@ -41,17 +41,19 @@ export async function POST(request: NextRequest) {
     // Fetch service details if provided
     let serviceName = "General Service";
     let durationMinutes = link.slot_duration_minutes;
+    let servicePriceCents: number | null = null;
 
     if (validatedData.serviceId) {
       const { data: service } = await supabase
         .from("booking_services")
-        .select("name, duration_minutes")
+        .select("name, duration_minutes, price_cents")
         .eq("id", validatedData.serviceId)
         .single();
 
       if (service) {
         serviceName = service.name;
         durationMinutes = service.duration_minutes;
+        servicePriceCents = typeof service.price_cents === 'number' ? service.price_cents : null;
       }
     }
 
@@ -148,6 +150,7 @@ export async function POST(request: NextRequest) {
         prep_checklist: [],
         duration_minutes: durationMinutes,
         notes: validatedData.customerNotes || null,
+        price_cents: servicePriceCents,
       });
 
     if (apptError) {

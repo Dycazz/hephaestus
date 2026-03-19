@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { LayoutGrid, CalendarDays, CalendarRange, Eye } from 'lucide-react'
+import { LayoutGrid, CalendarDays, CalendarRange, Eye, CheckCircle } from 'lucide-react'
 import { Appointment, Toast, SMSMessage } from '@/types'
 import { Header } from '@/components/Header'
 import { StatsBar } from '@/components/StatsBar'
@@ -15,6 +15,7 @@ import { WaitlistRecommendationModal } from '@/components/WaitlistRecommendation
 import { CalendarView } from '@/components/CalendarView'
 import { WeekView } from '@/components/WeekView'
 import { TechnicianPanel } from '@/components/TechnicianPanel'
+import { AppointmentCard } from '@/components/AppointmentCard'
 import { useAppointments } from '@/hooks/useAppointments'
 import { useTechnicians } from '@/hooks/useTechnicians'
 import { useOrg } from '@/context/OrgContext'
@@ -53,7 +54,7 @@ export default function Dashboard() {
   const [addClientOpen, setAddClientOpen] = useState(false)
   const [rescheduleTarget, setRescheduleTarget] = useState<Appointment | null>(null)
   const [canceledApptForWaitlist, setCanceledApptForWaitlist] = useState<Appointment | null>(null)
-  const [view, setView] = useState<'board' | 'week' | 'calendar'>('board')
+  const [view, setView] = useState<'board' | 'week' | 'calendar' | 'completed'>('board')
   const [calendarDate, setCalendarDate] = useState<string>(() => {
     // Use local date, not UTC, so it always matches wall-clock "today"
     const now = new Date()
@@ -226,6 +227,7 @@ export default function Dashboard() {
           recurrenceRule: appt.recurrenceRule,
           recurrenceEndDate: appt.recurrenceEndDate,
           autoReminder: appt.autoReminder,
+          priceCents: appt.priceCents ?? null,
         }),
       })
 
@@ -376,6 +378,7 @@ export default function Dashboard() {
           >
             {([
               { id: 'board',    label: 'Board',    Icon: LayoutGrid },
+              { id: 'completed', label: 'Completed', Icon: CheckCircle },
               { id: 'week',     label: 'Week',     Icon: CalendarRange },
               { id: 'calendar', label: 'Calendar', Icon: CalendarDays },
             ] as const).map(({ id, label, Icon }) => (
@@ -412,7 +415,45 @@ export default function Dashboard() {
             onScheduleFollowUp={handleScheduleFollowUp}
             onAssignTechnician={handleAssignTechnician}
             readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
+            hideCompleted={true}
           />
+        ) : view === 'completed' ? (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-white">Completed Jobs</h2>
+                <p className="text-sm text-white/50">Keep track of finished work and follow-ups</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {appointments
+                .filter((a) => a.status === 'completed')
+                .map((appt) => (
+                  <AppointmentCard
+                    key={appt.id}
+                    appointment={appt}
+                    technicians={technicians}
+                    onSelect={setSelectedId}
+                    onSendReminder={handleSendReminder}
+                    onMarkComplete={handleMarkComplete}
+                    onCancel={handleCancel}
+                    onReschedule={handleOpenReschedule}
+                    onScheduleFollowUp={handleScheduleFollowUp}
+                    onAssignTechnician={handleAssignTechnician}
+                    readOnly={org?.userRole === 'viewer' || org?.userRole === 'technician'}
+                  />
+                ))}
+            </div>
+            {appointments.filter((a) => a.status === 'completed').length === 0 && (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="h-16 w-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                  <CheckCircle className="w-8 h-8 text-white/20" />
+                </div>
+                <h3 className="text-lg font-semibold text-white/70">No completed jobs yet</h3>
+                <p className="text-sm text-white/40 max-w-xs mx-auto">Jobs will appear here once they are marked as finished.</p>
+              </div>
+            )}
+          </div>
         ) : view === 'week' ? (
           <WeekView
             appointments={appointments}

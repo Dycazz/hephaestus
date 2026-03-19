@@ -120,7 +120,14 @@ export function AppointmentCard({
               <p className="font-semibold text-white text-sm leading-tight">
                 {appointment.customerName}
               </p>
-              <p className="text-xs text-slate-400">{appointment.service}</p>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <p className="text-xs text-slate-400">{appointment.service}</p>
+                {appointment.priceCents != null && (
+                  <span className="text-[10px] font-semibold text-emerald-400">
+                    {appointment.priceCents === 0 ? 'Free' : `$${(appointment.priceCents / 100).toFixed(2)}`}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-xs font-medium ${badge}`}>

@@ -49,6 +49,7 @@ export interface Appointment {
   recurrenceEndDate?: string     // ISO date "YYYY-MM-DD" (null = 1 year from start)
   parentAppointmentId?: string   // set on child occurrences of a recurring series
   autoReminder: boolean          // false = excluded from automated reminder workflows
+  priceCents?: number | null     // per-appointment price override (null = use service default)
 }
 
 export interface TechnicianAvailability {

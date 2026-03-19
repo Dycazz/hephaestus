@@ -45,6 +45,7 @@ interface ServiceOption {
   icon: string
   color: string
   prepTemplates: string[]
+  price_cents: number
 }
 
 export function AddClientModal({
@@ -81,6 +82,9 @@ export function AddClientModal({
   // ── Reminders ───────────────────────────────────────────────────────────────
   const [autoReminder, setAutoReminder] = useState(true)
 
+  // ── Job price ────────────────────────────────────────────────────────────────
+  const [priceCents, setPriceCents] = useState<number | null>(null)
+
   // ── Scheduling v2 ───────────────────────────────────────────────────────────
   const [durationMinutes, setDurationMinutes]     = useState(60)
   const [recurrenceRule, setRecurrenceRule]       = useState<RecurrenceRule>('none')
@@ -107,10 +111,12 @@ export function AddClientModal({
           prepTemplates: Array.isArray(s.prep_templates)
             ? s.prep_templates as string[]
             : JSON.parse((s.prep_templates as string | null) ?? '[]'),
+          price_cents: typeof s.price_cents === 'number' ? s.price_cents : 0,
         }))
         setServices(loaded)
         setService(loaded[0])
         setChecklist(loaded[0].prepTemplates)
+        setPriceCents(loaded[0].price_cents > 0 ? loaded[0].price_cents : null)
       })
       .catch(() => {})
       .finally(() => setServicesLoading(false))
@@ -158,6 +164,7 @@ export function AddClientModal({
     const svc = services.find(s => s.name === svcName) ?? services[0] ?? null
     setService(svc)
     setChecklist(svc?.prepTemplates ?? [])
+    setPriceCents(svc && svc.price_cents > 0 ? svc.price_cents : null)
   }
 
   const addChecklistItem = () => {
@@ -200,6 +207,7 @@ export function AddClientModal({
       recurrenceRule,
       recurrenceEndDate: recurrenceRule !== 'none' ? (recurrenceEndDate ?? undefined) : undefined,
       autoReminder,
+      priceCents,
     }
     onAdd(newAppt)
   }
@@ -283,6 +291,26 @@ export function AddClientModal({
                 </select>
               )}
             </div>
+          </div>
+
+          {/* Job Price */}
+          <div>
+            <label className="text-xs font-semibold text-slate-600 mb-1 block">
+              Job Price <span className="font-normal text-slate-400">(optional)</span>
+            </label>
+            <div className="flex items-center gap-2">
+              <span className="text-slate-400 text-sm">$</span>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                value={priceCents !== null ? (priceCents / 100).toFixed(2) : ''}
+                onChange={e => setPriceCents(e.target.value !== '' ? Math.round(parseFloat(e.target.value) * 100) : null)}
+                placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'Service default'}
+                className="w-32 border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the service&apos;s default price</p>
           </div>
 
           {/* Date & Time */}
