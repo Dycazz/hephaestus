@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import {
   DollarSign, TrendingUp, CheckCircle2, MessageSquare,
   Users, Wrench, ArrowLeft, Loader2, BarChart2,
-  Receipt, Minus, Percent, Trash2, Plus,
+  Receipt, Minus, Percent, Trash2, Plus, RefreshCw,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -224,6 +224,12 @@ export default function AccountingPage() {
 
   useEffect(() => { fetchAnalytics(); fetchExpenses() }, [fetchAnalytics, fetchExpenses])
 
+  // ── Auto-refresh every 30 seconds ───────────────────────────────────────
+  useEffect(() => {
+    const id = setInterval(() => { fetchAnalytics(); fetchExpenses() }, 30_000)
+    return () => clearInterval(id)
+  }, [fetchAnalytics, fetchExpenses])
+
   // ── Derived accounting figures ──────────────────────────────────────────
   const totalExpensesCents   = expenses.reduce((s, e) => s + e.amount_cents, 0)
   const totalCommissionCents = data?.byTechnicianRevenue.reduce((s, t) => s + t.commissionCents, 0) ?? 0
@@ -307,6 +313,13 @@ export default function AccountingPage() {
         <div className="flex items-center gap-2 ml-2">
           <DollarSign className="w-5 h-5 text-green-400" />
           <h1 className="text-white font-semibold text-lg">Accounting</h1>
+          <button
+            onClick={() => { fetchAnalytics(); fetchExpenses() }}
+            title="Refresh now"
+            className="ml-1 text-slate-600 hover:text-slate-300 transition-colors"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-green-400' : ''}`} />
+          </button>
         </div>
 
         {/* Date range selector */}
