@@ -152,6 +152,7 @@ export interface Invoice {
   payment_method: InvoicePaymentMethod | null
   stripe_payment_link_url: string | null
   pdf_storage_path: string | null
+  qbo_invoice_id: string | null
   created_at: string
   updated_at: string
   // joined
