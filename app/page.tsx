@@ -228,220 +228,165 @@ export default function LandingPage() {
           <div className="flex items-center gap-4">
             <a
               href="#pricing"
-              className="text-sm font-medium transition-colors hidden sm:block"
+              className="text-sm font-medium transition-colors hidden sm:block hover:text-white"
               style={{ color: '#9494a0' }}
             >
               Pricing
             </a>
+            <a
+              href="mailto:service.hephaestus.work@gmail.com"
+              className="text-sm font-medium transition-colors hidden sm:block hover:text-white"
+              style={{ color: '#9494a0' }}
+            >
+              Contact support
+            </a>
             <Link
               href="/login"
-              className="text-sm font-medium transition-colors px-3 py-1.5 rounded-lg"
+              className="text-sm font-medium transition-colors px-3 py-1.5 rounded-lg hover:text-white"
               style={{ color: '#9494a0' }}
             >
               Sign in
             </Link>
             <Link
               href="/signup"
-              className="animate-shimmer flex items-center gap-1.5 text-sm font-semibold text-black px-4 py-1.5 rounded-lg transition-all hover:bg-amber-500"
-              style={{ background: enterpriseColor, boxShadow: `0 2px 12px ${enterpriseColor}40` }}
+              className="flex items-center gap-1.5 text-sm font-semibold text-white px-4 py-2 rounded-lg transition-all"
+              style={{ background: '#2563eb' }}
             >
               Get started
-              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="max-w-6xl mx-auto px-6 pt-28 pb-20 relative">
-        {/* Forge radial glow */}
-        <div
-          aria-hidden
-          style={{
-            position: 'absolute',
-            left: '50%',
-            top: 0,
-            transform: 'translateX(-50%)',
-            width: '900px',
-            height: '520px',
-            background: 'radial-gradient(ellipse 700px 420px at 50% 0%, rgba(217,119,6,0.07) 0%, transparent 70%)',
-            pointerEvents: 'none',
-          }}
-        />
-
+      <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 relative">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="max-w-xl">
             {/* Badge */}
             <div
-              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-8 fade-up"
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold mb-8"
               style={{
-                background: 'rgba(217,119,6,0.1)',
-                border: '1px solid rgba(217,119,6,0.25)',
-                color: '#fb923c',
-                animationDelay: '0ms',
+                background: 'rgba(59, 130, 246, 0.1)',
+                border: '1px solid rgba(59, 130, 246, 0.2)',
+                color: '#60a5fa',
               }}
             >
-              <Sparkles className="w-3 h-3" />
+              <Users className="w-3.5 h-3.5" />
               Streamlined field service management
             </div>
 
             <h1
-              className="font-display font-extrabold tracking-tight mb-6 fade-up"
+              className="font-display font-extrabold tracking-tight mb-6"
               style={{
-                fontSize: 'clamp(2.8rem, 6vw, 4.5rem)',
-                lineHeight: 1.05,
-                letterSpacing: '-0.03em',
-                color: '#f0ece3',
-                animationDelay: '80ms',
+                fontSize: 'clamp(2.5rem, 5vw, 4rem)',
+                lineHeight: 1.1,
+                letterSpacing: '-0.02em',
+                color: '#ffffff',
               }}
             >
               Dispatch smarter.<br />
-              <span style={{ color: proColor }}>Never miss a job.</span>
+              <span style={{ color: '#9494a0' }}>Never miss a job.</span>
             </h1>
 
             <p
-              className="text-lg mb-10 leading-relaxed fade-up"
-              style={{ color: '#9494a0', maxWidth: '36rem', animationDelay: '160ms' }}
+              className="text-lg mb-10 leading-relaxed"
+              style={{ color: '#a1a1aa', maxWidth: '36rem' }}
             >
               The all-in-one dispatch platform for HVAC, plumbing, and electrical service crews. 
               Automate scheduling, eliminate paperwork, and grow your revenue with integrated tools.
             </p>
 
-            <div
-              className="flex flex-col sm:flex-row items-start gap-4 fade-up"
-              style={{ animationDelay: '240ms' }}
-            >
+            <div className="flex flex-col sm:flex-row items-start gap-4">
               <Link
                 href="/signup"
-                className="animate-shimmer flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-black transition-all hover:bg-amber-500"
-                style={{
-                  background: enterpriseColor,
-                  boxShadow: `0 4px 20px ${enterpriseColor}40`,
-                }}
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-semibold text-white transition-all bg-blue-600 hover:bg-blue-700"
               >
                 Get started for free
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/login"
-                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium transition-colors border border-white/5 hover:bg-white/5"
-                style={{ color: '#9494a0' }}
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl text-base font-medium transition-colors border border-zinc-800 hover:bg-zinc-800/50"
+                style={{ color: '#e4e4e7' }}
               >
                 Sign in to dashboard
               </Link>
             </div>
 
             <p
-              className="text-[11px] font-medium mt-6 fade-up uppercase tracking-widest"
-              style={{ color: '#3a3a48', animationDelay: '300ms' }}
+              className="text-[12px] font-medium mt-6 text-zinc-500"
             >
-              14-day free trial · no credit card · zero bloat
+              14-day free trial · No credit card required
             </p>
           </div>
 
           {/* Hero visual */}
-          <div className="relative fade-up animate-float" style={{ animationDelay: '200ms' }}>
-            {/* Forge Beams */}
-            <div className="absolute -inset-20 blur-[100px] pointer-events-none opacity-20">
-              <div className="absolute top-0 left-1/4 w-1/2 h-full bg-amber-600/20" style={{ animation: 'beamShift 8s infinite ease-in-out' }} />
-              <div className="absolute bottom-0 right-1/4 w-1/3 h-2/3 bg-orange-600/10" style={{ animation: 'beamShift 12s infinite ease-in-out reverse' }} />
-            </div>
-
+          <div className="relative">
             <div
-              className="rounded-3xl p-6 overflow-hidden relative"
-              style={{
-                background: 'rgba(15, 17, 21, 0.8)',
-                backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.02) 1px, transparent 1px)',
-                backgroundSize: '24px 24px',
-                border: '1px solid rgba(255,255,255,0.1)',
-                boxShadow: '0 25px 80px -20px rgba(0,0,0,0.6)',
-                backdropFilter: 'blur(12px)',
-              }}
+              className="rounded-2xl p-6 overflow-hidden relative border border-zinc-800 bg-zinc-900/50 shadow-2xl"
             >
-              {/* Forge Beams - multi-colored integrated activity */}
-              <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-                <div className="absolute top-[-20%] left-[10%] w-[40%] h-[140%] bg-gradient-to-b from-transparent via-blue-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '0s' }} />
-                <div className="absolute top-[-20%] left-[50%] w-[30%] h-[140%] bg-gradient-to-b from-transparent via-purple-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '-4s' }} />
-                <div className="absolute top-[-20%] left-[80%] w-[25%] h-[140%] bg-gradient-to-b from-transparent via-amber-500/10 to-transparent rotate-[-15deg] animate-beamShift" style={{ animationDelay: '-8s' }} />
-              </div>
-              {/* Header / Toggle bar */}
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 border border-white/10">
+                <div className="flex items-center gap-1.5 p-1 rounded-lg bg-zinc-800/50 border border-zinc-700/50">
                   {['Board', 'Week', 'Day'].map((label, i) => (
                     <div
                       key={label}
-                      className="px-4 py-1.5 rounded-lg text-[11px] font-bold transition-all"
-                      style={i === 0 ? { background: `${proColor}15`, color: proColor, border: `1px solid ${proColor}25` } : { color: '#3a3a48' }}
+                      className="px-4 py-1.5 rounded-md text-[11px] font-medium transition-all"
+                      style={i === 0 ? { background: '#2563eb', color: 'white' } : { color: '#a1a1aa' }}
                     >
                       {label}
                     </div>
                   ))}
                 </div>
                 <div className="flex items-center gap-3 opacity-50">
-                  <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10" />
-                  <div className="w-24 h-8 rounded-xl opacity-20" style={{ background: proColor, border: `1px solid ${proColor}` }} />
+                  <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700" />
+                  <div className="w-24 h-8 rounded-md bg-zinc-800 border border-zinc-700" />
                 </div>
               </div>
 
               {/* Kanban Columns */}
-              <div className="grid grid-cols-3 gap-6">
+              <div className="grid grid-cols-3 gap-4">
                 {[
                   { title: 'Confirmed', jobs: [{ name: 'Lopez HVAC', tech: 'Kira', time: '2:30 PM' }] },
                   { title: 'In Progress', jobs: [{ name: 'Harris Plumbing', tech: 'Jalen', time: '4:00 PM' }] },
                   { title: 'At Risk', jobs: [{ name: 'Swift Elec.', tech: 'Mo', time: '5:15 PM' }] },
                 ].map((col, i) => (
-                  <div key={col.title} className="space-y-4">
+                  <div key={col.title} className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[10px] font-bold uppercase tracking-widest text-[#3a3a48]">{col.title}</h4>
-                      <span className="text-[10px] text-white/10">{col.jobs.length}</span>
+                      <h4 className="text-[11px] font-semibold text-zinc-400">{col.title}</h4>
+                      <span className="text-[11px] text-zinc-600 font-medium">{col.jobs.length}</span>
                     </div>
                     {col.jobs.map(job => (
                       <div
                         key={job.name}
-                        className="p-4 rounded-2xl border transition-all hover:scale-[1.02] cursor-default"
-                        style={{
-                          background: 'rgba(255,255,255,0.03)',
-                          borderColor: i === 2 ? 'rgba(239,68,68,0.2)' : 'rgba(255,255,255,0.06)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                          animation: i === 1 ? 'pulse-glow 4s infinite' : undefined
-                        }}
+                        className="p-3.5 rounded-xl border border-zinc-800 bg-zinc-900 shadow-sm"
                       >
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : (i === 1 ? proColor : enterpriseColor) }} />
-                          <p className="text-xs font-bold text-white truncate">{job.name}</p>
+                          <div className="w-1.5 h-1.5 rounded-full" style={{ background: i === 2 ? '#ef4444' : (i === 1 ? '#eab308' : '#3b82f6') }} />
+                          <p className="text-xs font-medium text-zinc-200 truncate">{job.name}</p>
                         </div>
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center gap-2">
-                            <div className="w-5 h-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[8px] font-bold text-[#9494a0]">
+                            <div className="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[9px] font-medium text-zinc-400">
                               {job.tech.charAt(0)}
                             </div>
-                            <span className="text-[10px] text-[#3a3a48]">{job.tech}</span>
+                            <span className="text-[10px] text-zinc-400">{job.tech}</span>
                           </div>
-                          <span className="text-[10px] font-medium text-[#9494a0]">{job.time}</span>
+                          <span className="text-[10px] text-zinc-500">{job.time}</span>
                         </div>
                       </div>
                     ))}
                     {i < 2 && (
-                      <div className="h-24 rounded-2xl border border-dashed border-white/5 flex items-center justify-center opacity-30">
-                        <Plus className="w-4 h-4 text-white" />
+                      <div className="h-20 rounded-xl border border-dashed border-zinc-800 flex items-center justify-center opacity-50 bg-zinc-900/30">
+                        <Plus className="w-4 h-4 text-zinc-600" />
                       </div>
                     )}
                   </div>
                 ))}
               </div>
-
-              {/* Dashboard Glow */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(circle at 12% -10%, ${proColor}15, transparent 40%)`,
-                }}
-              />
             </div>
           </div>
         </div>
       </section>
-
 
       {/* ── Feature ticker strip ── */}
       <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }} className="py-4">
@@ -481,25 +426,21 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map((f, i) => {
             const Icon = f.icon
             return (
               <div
                 key={f.title}
-                className="p-5 rounded-xl fade-up hover-glow"
-                style={{
-                  background: '#14171d',
-                  border: '1px solid rgba(255,255,255,0.05)',
-                  borderLeft: `2px solid ${f.color}`,
-                  animationDelay: `${i * 60}ms`,
-                }}
+                className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/30 transition-shadow hover:bg-zinc-900/60"
               >
-                <div className="flex items-center gap-2.5 mb-3">
-                  <Icon className="w-4 h-4 shrink-0" style={{ color: f.color }} />
-                  <h3 className="text-sm font-semibold" style={{ color: '#f0ece3' }}>{f.title}</h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg flex items-center justify-center border border-zinc-800 bg-zinc-950">
+                    <Icon className="w-4 h-4 shrink-0" style={{ color: f.color }} />
+                  </div>
+                  <h3 className="text-sm font-semibold text-zinc-100">{f.title}</h3>
                 </div>
-                <p className="text-xs leading-relaxed" style={{ color: '#9494a0' }}>{f.description}</p>
+                <p className="text-sm leading-relaxed text-zinc-400">{f.description}</p>
               </div>
             )
           })}
@@ -547,67 +488,36 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 items-start">
           {TIERS.map(tier => (
             <div
               key={tier.name}
-              className="rounded-2xl p-6 flex flex-col relative hover-glow group"
-              style={{
-                background: tier.highlight
-                  ? 'linear-gradient(145deg, #15120d, #1c1409)'
-                  : '#14171d',
-                border: tier.highlight
-                  ? `1px solid rgba(217,119,6,0.35)`
-                  : '1px solid rgba(255,255,255,0.05)',
-                boxShadow: tier.highlight
-                  ? '0 8px 40px rgba(217,119,6,0.12)'
-                  : undefined,
-              }}
+              className="rounded-2xl p-8 flex flex-col relative border border-zinc-800 bg-zinc-900/30 transition-all hover:bg-zinc-900/50"
             >
-              {tier.highlight && (
-                <div
-                  className="inline-flex self-start items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold mb-4"
-                  style={{
-                    background: 'rgba(217,119,6,0.15)',
-                    color: '#d97706',
-                    border: '1px solid rgba(217,119,6,0.3)',
-                  }}
-                >
-                  Most popular
-                </div>
-              )}
-
-              <div className="flex items-center gap-2 mb-1">
-                <div
-                  className="w-6 h-6 rounded-md flex items-center justify-center"
-                  style={{ background: `${tier.color}15` }}
-                >
-                  <Zap className="w-3.5 h-3.5" style={{ color: tier.color }} />
-                </div>
-                <span
-                  className="font-display text-sm font-bold"
-                  style={{ color: '#f0ece3', letterSpacing: '-0.01em' }}
-                >
+              <div className="flex items-center gap-3 mb-2">
+                <span className="font-display text-lg font-bold text-zinc-100">
                   {tier.name}
                 </span>
+                {tier.highlight && (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                    Popular
+                  </span>
+                )}
               </div>
 
-              <p className="text-xs mb-5" style={{ color: '#9494a0' }}>{tier.description}</p>
+              <p className="text-sm mb-6 text-zinc-400 min-h-[40px]">{tier.description}</p>
 
-              <div className="flex items-baseline gap-1 mb-6">
-                <span
-                  className="font-display font-extrabold"
-                  style={{ fontSize: '2.25rem', color: '#f0ece3', letterSpacing: '-0.04em' }}
-                >
+              <div className="flex items-baseline gap-1 mb-8">
+                <span className="font-display font-extrabold text-3xl text-zinc-50 tracking-tight">
                   {tier.price}
                 </span>
-                <span className="text-sm" style={{ color: '#3a3a48' }}>{tier.period}</span>
+                <span className="text-sm text-zinc-500">{tier.period}</span>
               </div>
 
-              <ul className="space-y-2.5 mb-7 flex-1">
+              <ul className="space-y-3 mb-8 flex-1">
                 {tier.features.map(f => (
-                  <li key={f} className="flex items-start gap-2 text-xs" style={{ color: '#9494a0' }}>
-                    <Check className="w-3.5 h-3.5 mt-0.5 shrink-0" style={{ color: tier.color }} />
+                  <li key={f} className="flex items-start gap-2.5 text-sm text-zinc-300">
+                    <Check className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
                     {f}
                   </li>
                 ))}
@@ -615,20 +525,11 @@ export default function LandingPage() {
 
               <Link
                 href={tier.href}
-                className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all"
-                style={
-                  tier.highlight
-                    ? {
-                        background: tier.color,
-                        color: 'black',
-                        boxShadow: `0 4px 16px ${tier.color}40`,
-                      }
-                    : {
-                        background: `${tier.color}10`,
-                        color: tier.color,
-                        border: `1px solid ${tier.color}20`,
-                      }
-                }
+                className={`block w-full text-center py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  tier.highlight 
+                    ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                    : 'bg-zinc-800 text-zinc-200 hover:bg-zinc-700'
+                }`}
               >
                 {tier.cta}
               </Link>
@@ -752,30 +653,17 @@ export default function LandingPage() {
       </section>
 
       {/* ── CTA banner ── */}
-      <section
-        className="py-20"
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          background: 'linear-gradient(180deg, rgba(22,25,32,0) 0%, rgba(15,17,21,0.5) 100%)',
-        }}
-      >
-        <div className="max-w-2xl mx-auto px-6">
-          <h2
-            className="font-display font-bold mb-4"
-            style={{ fontSize: 'clamp(1.8rem, 3vw, 2.5rem)', color: '#f0ece3', letterSpacing: '-0.03em' }}
-          >
+      <section className="py-24 border-t border-zinc-800 bg-zinc-900/40">
+        <div className="max-w-2xl mx-auto px-6 text-center">
+          <h2 className="font-display font-bold mb-4 text-3xl tracking-tight text-white">
             Ready to run a tighter ship?
           </h2>
-          <p className="mb-8" style={{ color: '#9494a0' }}>
+          <p className="mb-8 text-base text-zinc-400">
             Join field service businesses using hephaestus.work to dispatch faster, reduce no-shows, and get more reviews.
           </p>
           <Link
             href="/signup"
-            className="animate-shimmer inline-flex items-center gap-2 px-10 py-4 rounded-xl text-base font-bold text-black transition-all hover:bg-amber-500"
-            style={{
-              background: proColor,
-              boxShadow: `0 4px 24px ${proColor}40`,
-            }}
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl text-sm font-semibold text-white transition-colors bg-blue-600 hover:bg-blue-700"
           >
             Start your free trial
             <ArrowRight className="w-4 h-4" />
@@ -784,19 +672,20 @@ export default function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: '#0f1115' }} className="py-8">
-        <div className="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <footer className="py-12 border-t border-zinc-800 bg-zinc-950">
+        <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="bg-white rounded-md overflow-hidden shrink-0" style={{ width: 20, height: 20 }}>
-              <Image src="/logo.png" alt="hephaestus.work" width={20} height={20} className="object-contain" />
+            <div className="bg-white rounded-md overflow-hidden shrink-0" style={{ width: 24, height: 24 }}>
+              <Image src="/logo.png" alt="hephaestus.work" width={24} height={24} className="object-contain" />
             </div>
-            <span className="font-display text-xs font-bold tracking-widest uppercase" style={{ color: '#3a3a48' }}>hephaestus.work</span>
+            <span className="font-display text-sm font-bold tracking-tight text-white">hephaestus.work</span>
           </div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.2em]" style={{ color: '#2a2a36' }}>Modern field service management</p>
-          <div className="flex items-center gap-5">
-            <a href="#pricing" className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Pricing</a>
-            <Link href="/login"  className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Sign in</Link>
-            <Link href="/signup" className="text-xs transition-colors" style={{ color: '#3a3a48' }}>Sign up</Link>
+          <p className="text-xs font-medium text-zinc-500">Modern field service management</p>
+          <div className="flex flex-wrap justify-center md:items-center gap-6">
+            <a href="mailto:service.hephaestus.work@gmail.com" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Contact Support</a>
+            <a href="#pricing" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Pricing</a>
+            <Link href="/login" className="text-sm font-medium text-zinc-400 hover:text-white transition-colors">Sign in</Link>
+            <Link href="/signup" className="text-sm font-medium text-blue-500 hover:text-blue-400 transition-colors">Get started</Link>
           </div>
         </div>
       </footer>
