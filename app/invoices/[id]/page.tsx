@@ -131,7 +131,6 @@ function InvoiceDetailContent() {
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
   const [showMarkPaid, setShowMarkPaid] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
@@ -220,13 +219,6 @@ function InvoiceDetailContent() {
     } finally {
       setSending(false)
     }
-  }
-
-  const copyPaymentLink = async () => {
-    if (!invoice?.stripe_payment_link_url) return
-    await navigator.clipboard.writeText(invoice.stripe_payment_link_url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
   }
 
   const handleDelete = async () => {
@@ -439,37 +431,6 @@ function InvoiceDetailContent() {
           <div className="mt-4 rounded-xl p-4" style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}>
             <p className="text-[9px] font-bold uppercase tracking-widest text-white/25 mb-2">Notes</p>
             <p className="text-sm text-white/60">{invoice.notes}</p>
-          </div>
-        )}
-
-        {/* Payment link */}
-        {invoice.stripe_payment_link_url && invoice.status !== 'paid' && (
-          <div
-            className="mt-4 rounded-xl p-4"
-            style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)' }}
-          >
-            <p className="text-[9px] font-bold uppercase tracking-widest text-amber-500/60 mb-2">Payment link</p>
-            <div className="flex items-center gap-2">
-              <p className="flex-1 truncate text-xs text-amber-400">{invoice.stripe_payment_link_url}</p>
-              <button
-                onClick={copyPaymentLink}
-                className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/10"
-                style={{ border: '1px solid rgba(217,119,6,0.3)' }}
-              >
-                {copied ? <CheckCheck className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                {copied ? 'Copied!' : 'Copy'}
-              </button>
-              <a
-                href={invoice.stripe_payment_link_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-amber-400 transition hover:bg-amber-500/10"
-                style={{ border: '1px solid rgba(217,119,6,0.3)' }}
-              >
-                <ExternalLink className="h-3 w-3" />
-                Open
-              </a>
-            </div>
           </div>
         )}
 
