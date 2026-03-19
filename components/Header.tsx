@@ -7,7 +7,7 @@ import { useOrg } from '@/context/OrgContext'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 
-import { ThemeToggle } from '@/components/ThemeToggle'
+
 
 interface HeaderProps {
   onAddClient: () => void
@@ -97,11 +97,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
             </>
           )}
 
-          <div className="mx-1 h-4 w-px bg-border" />
 
-          <ThemeToggle />
-
-          <div className="mx-1 h-4 w-px bg-border" />
 
           <Link
             href="/settings"

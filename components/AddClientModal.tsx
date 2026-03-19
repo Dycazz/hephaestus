@@ -215,7 +215,7 @@ export function AddClientModal({
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="glass-morphism rounded-2xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden">
-
+ 
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-600/20 to-orange-500/10 backdrop-blur-md p-5 border-b border-white/5 shrink-0">
           <div className="flex items-center justify-between">
@@ -228,10 +228,10 @@ export function AddClientModal({
             </button>
           </div>
         </div>
-
+ 
         {/* Scrollable body */}
         <div className="overflow-y-auto p-5 space-y-4">
-
+ 
           {/* Name + Phone */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -240,7 +240,7 @@ export function AddClientModal({
                 value={name}
                 onChange={e => setName(e.target.value)}
                 placeholder="Jane Smith"
-                className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.name ? 'border-red-400/50' : 'border-white/10'}`}
+                className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.name ? 'border-red-400/50' : 'border-white/10'}`}
               />
               {errors.name && <p className="text-xs text-red-400 mt-0.5">{errors.name}</p>}
             </div>
@@ -250,12 +250,12 @@ export function AddClientModal({
                 value={phone}
                 onChange={e => setPhone(e.target.value)}
                 placeholder="(555) 000-0000"
-                className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.phone ? 'border-red-400/50' : 'border-white/10'}`}
+                className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.phone ? 'border-red-400/50' : 'border-white/10'}`}
               />
               {errors.phone && <p className="text-xs text-red-400 mt-0.5">{errors.phone}</p>}
             </div>
           </div>
-
+ 
           {/* Service + Technician */}
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -267,10 +267,10 @@ export function AddClientModal({
                   value={service?.name ?? ''}
                   onChange={e => handleServiceChange(e.target.value)}
                   disabled={servicesLoading}
-                  className="w-full bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-60"
                 >
                   {services.map(s => (
-                    <option key={s.name} value={s.name} className="text-slate-900 bg-white">{s.icon} {s.name}</option>
+                    <option key={s.name} value={s.name} className="bg-surface">{s.icon} {s.name}</option>
                   ))}
                 </select>
               )}
@@ -283,16 +283,16 @@ export function AddClientModal({
                 <select
                   value={technician?.id ?? ''}
                   onChange={e => setTechnicianState(technicians.find(t => t.id === e.target.value) ?? null)}
-                  className="w-full bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
                 >
                   {technicians.map(t => (
-                    <option key={t.id} value={t.id} className="text-slate-900 bg-white">{t.name}</option>
+                    <option key={t.id} value={t.id} className="bg-surface">{t.name}</option>
                   ))}
                 </select>
               )}
             </div>
           </div>
-
+ 
           {/* Job Price */}
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-1 block">
@@ -309,17 +309,17 @@ export function AddClientModal({
                   setPriceCents(val !== '' ? Math.round(parseFloat(val) * 100) : null)
                 }}
                 placeholder={service?.price_cents ? (service.price_cents / 100).toFixed(2) : 'e.g. 150.00'}
-                className="w-44 bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
+                className="w-44 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
               />
             </div>
             <p className="text-[10px] text-text-muted mt-1">Leave blank to use the service&apos;s default price</p>
           </div>
-
+ 
           {/* Date & Time */}
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-2 block">Date & Time</label>
             {errors.time && <p className="text-xs text-red-400 mb-1.5">{errors.time}</p>}
-            <div className="bg-white/5 border border-white/10 rounded-xl p-3">
+            <div className="border border-white/5 rounded-xl p-3 bg-white/5 backdrop-blur-sm">
               <DateTimePicker
                 date={dateISO}
                 time={time}
@@ -330,7 +330,7 @@ export function AddClientModal({
               />
             </div>
           </div>
-
+ 
           {/* Duration */}
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-2 block">Duration</label>
@@ -339,10 +339,10 @@ export function AddClientModal({
                 <button
                   key={d.value}
                   onClick={() => setDurationMinutes(d.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
                     durationMinutes === d.value
-                      ? 'bg-accent text-black border-accent'
-                      : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/50'
+                      ? 'bg-accent/80 text-black border-accent'
+                      : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/40'
                   }`}
                 >
                   {d.label}
@@ -350,7 +350,7 @@ export function AddClientModal({
               ))}
             </div>
           </div>
-
+ 
           {/* Recurrence */}
           <div>
             <button
@@ -361,7 +361,7 @@ export function AddClientModal({
               Repeat?
               {showRecurrence ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
-
+ 
             {showRecurrence && (
               <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded-xl space-y-3">
                 <div className="flex gap-1.5 flex-wrap">
@@ -369,23 +369,23 @@ export function AddClientModal({
                     <button
                       key={opt.value}
                       onClick={() => setRecurrenceRule(opt.value)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all duration-200 ${
                         recurrenceRule === opt.value
-                          ? 'bg-accent text-black border-accent'
-                          : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/50'
+                          ? 'bg-accent/80 text-black border-accent'
+                          : 'bg-white/5 text-text-secondary border-white/10 hover:border-accent/40'
                       }`}
                     >
                       {opt.label}
                     </button>
                   ))}
                 </div>
-
+ 
                 {recurrenceRule !== 'none' && (
                   <div>
-                    <label className="text-xs font-semibold text-text-muted mb-1.5 block">
-                      Repeat until <span className="font-normal text-text-muted/60">(leave blank for 1 year)</span>
+                    <label className="text-xs font-semibold text-text-secondary mb-1.5 block">
+                      Repeat until <span className="font-normal text-text-muted">(leave blank for 1 year)</span>
                     </label>
-                    <div className="border border-white/10 rounded-xl p-3 bg-white/5">
+                    <div className="border border-white/5 rounded-xl p-3 bg-white/5">
                       <DateTimePicker
                         date={recurrenceEndDate}
                         time={null}
@@ -405,7 +405,7 @@ export function AddClientModal({
               </div>
             )}
           </div>
-
+ 
           {/* Address */}
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-1 block">Address *</label>
@@ -413,11 +413,11 @@ export function AddClientModal({
               value={address}
               onChange={e => setAddress(e.target.value)}
               placeholder="123 Main St"
-              className={`w-full bg-white border rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50 ${errors.address ? 'border-red-400/50' : 'border-white/10'}`}
+              className={`w-full bg-white/5 border rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50 ${errors.address ? 'border-red-400/50' : 'border-white/10'}`}
             />
             {errors.address && <p className="text-xs text-red-400 mt-0.5">{errors.address}</p>}
           </div>
-
+ 
           {/* Prep Checklist */}
           <div>
             <label className="text-xs font-semibold text-text-secondary mb-2 block">📋 Prep Checklist</label>
@@ -437,7 +437,7 @@ export function AddClientModal({
                 onChange={e => setNewItem(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && addChecklistItem()}
                 placeholder="Add a custom prep item…"
-                className="flex-1 bg-white border border-white/10 rounded-lg px-3 py-2 text-sm text-slate-900 outline-none focus:ring-2 focus:ring-accent/50"
+                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-text-primary outline-none focus:ring-2 focus:ring-accent/50"
               />
               <button
                 onClick={addChecklistItem}
@@ -447,7 +447,7 @@ export function AddClientModal({
               </button>
             </div>
           </div>
-
+ 
           {/* Auto-reminder toggle */}
           <div className="flex items-center justify-between p-3 rounded-xl border border-white/5 bg-white/5">
             <div className="flex items-center gap-2.5">
@@ -478,7 +478,7 @@ export function AddClientModal({
               />
             </button>
           </div>
-
+ 
           {/* Actions */}
           <div className="flex gap-3 pt-1">
             <button

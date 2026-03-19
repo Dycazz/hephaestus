@@ -20,39 +20,39 @@ interface AppointmentCardProps {
 
 const statusConfig = {
   scheduled: {
-    badge: 'bg-slate-800/80 text-slate-400 border-slate-700',
+    badge: 'bg-white/5 text-text-secondary border-white/10',
     label: 'Not sent',
-    dot: 'bg-slate-500',
+    dot: 'bg-text-muted',
   },
   reminder_sent: {
-    badge: 'bg-amber-900/40 text-amber-400 border-amber-800/60',
+    badge: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
     label: 'Awaiting reply',
-    dot: 'bg-amber-400',
+    dot: 'bg-orange-500',
   },
   confirmed: {
-    badge: 'bg-emerald-900/40 text-emerald-400 border-emerald-800/60',
+    badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
     label: 'Confirmed',
     dot: 'bg-emerald-500',
   },
   rescheduling: {
-    badge: 'bg-purple-900/40 text-purple-400 border-purple-800/60',
+    badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
     label: 'Rescheduling',
     dot: 'bg-purple-400',
   },
   at_risk: {
-    badge: 'bg-red-900/40 text-red-400 border-red-800/60',
+    badge: 'bg-red-500/10 text-red-400 border-red-500/20',
     label: 'No response',
     dot: 'bg-red-500',
   },
   completed: {
-    badge: 'bg-indigo-900/40 text-indigo-400 border-indigo-800/60',
+    badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
     label: 'Completed',
-    dot: 'bg-indigo-400',
+    dot: 'bg-blue-500',
   },
   cancelled: {
-    badge: 'bg-slate-800/60 text-slate-600 border-slate-700/60',
+    badge: 'bg-white/5 text-text-muted border-white/10',
     label: 'Cancelled',
-    dot: 'bg-slate-600',
+    dot: 'bg-text-muted',
   },
 }
 
@@ -93,7 +93,7 @@ export function AppointmentCard({
 
   return (
     <div
-      className="rounded-xl hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 overflow-hidden bg-surface border border-border"
+      className="rounded-xl transition-all duration-300 overflow-hidden glass-card border border-white/5 hover:border-accent/30 hover:shadow-xl hover:shadow-accent/5 hover:-translate-y-0.5 group"
     >
       {/* Top accent bar */}
       <div
@@ -154,7 +154,7 @@ export function AppointmentCard({
               {canAssign && !readOnly && (
                 <button
                   onClick={() => setShowTechPicker(v => !v)}
-                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-border bg-surface-elevated text-text-secondary hover:text-text-primary transition-all duration-150"
+                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-text-secondary hover:text-text-primary transition-all duration-150"
                 >
                   {isUnassigned ? (
                     <>
@@ -171,8 +171,7 @@ export function AppointmentCard({
             {/* Technician picker dropdown */}
             {showTechPicker && (
               <div
-                className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border shadow-2xl py-1"
-                style={{ background: '#1e2130', borderColor: 'rgba(255,255,255,0.14)' }}
+                className="absolute left-0 top-6 z-20 min-w-[170px] rounded-xl border border-white/10 shadow-2xl py-1 glass-morphism backdrop-blur-xl"
               >
                 <p className="px-3 pt-1 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
                   Assign technician
@@ -193,8 +192,7 @@ export function AppointmentCard({
                       onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = 'transparent' }}
                     >
                       <span
-                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0"
-                        style={{ background: 'rgba(217,119,6,0.2)', color: '#d97706' }}
+                        className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 bg-accent/20 text-accent"
                       >
                         {tech.initials || tech.name.charAt(0)}
                       </span>
@@ -209,16 +207,15 @@ export function AppointmentCard({
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-xs text-slate-300">
-            <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+          <div className="flex items-center gap-2 text-xs text-text-secondary">
+            <MapPin className="w-3.5 h-3.5 text-text-muted shrink-0" />
             <span className="truncate">{appointment.address}</span>
           </div>
         </div>
 
         {/* Prep Checklist */}
         {appointment.prepChecklist.length > 0 && (
-          <div className="mb-3 p-2.5 rounded-lg border"
-            style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
+          <div className="mb-3 p-2.5 rounded-lg border border-accent/20 bg-accent/5 backdrop-blur-sm"
           >
             <p className="text-xs font-semibold text-amber-400 mb-1.5">Prep checklist</p>
             <ul className="space-y-1">
@@ -238,8 +235,7 @@ export function AppointmentCard({
 
         {/* At-risk note */}
         {appointment.status === 'at_risk' && appointment.notes && (
-          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-red-400 font-medium"
-            style={{ background: 'rgba(220,38,38,0.12)', borderColor: 'rgba(185,28,28,0.4)' }}
+          <div className="mb-3 px-2.5 py-2 rounded-lg border border-red-500/20 bg-red-500/5 text-xs text-red-400 font-medium"
           >
             {appointment.notes}
           </div>
@@ -247,8 +243,7 @@ export function AppointmentCard({
 
         {/* No-reminder badge */}
         {!appointment.autoReminder && (
-          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-slate-400 font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(100,116,139,0.1)', borderColor: 'rgba(100,116,139,0.25)' }}
+          <div className="mb-3 px-2.5 py-2 rounded-lg border border-white/5 bg-white/5 text-xs text-text-muted font-medium flex items-center gap-1.5"
           >
             <BellOff className="w-3.5 h-3.5" />
             No auto-reminder
@@ -257,8 +252,7 @@ export function AppointmentCard({
 
         {/* Review sent badge */}
         {appointment.reviewRequestSent && (
-          <div className="mb-3 px-2.5 py-2 rounded-lg border text-xs text-amber-400 font-medium flex items-center gap-1.5"
-            style={{ background: 'rgba(217,119,6,0.12)', borderColor: 'rgba(180,83,9,0.4)' }}
+          <div className="mb-3 px-2.5 py-2 rounded-lg border border-accent/20 bg-accent/5 text-xs text-accent font-medium flex items-center gap-1.5"
           >
             <Star className="w-3.5 h-3.5" />
             Review request sent
@@ -268,13 +262,12 @@ export function AppointmentCard({
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border"
-            style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border border-white/10 bg-white/5 text-text-secondary hover:text-text-primary hover:bg-white/10"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
             {appointment.smsThread.length > 0 && (
-              <span className="ml-0.5 bg-slate-600/80 text-blue-200 text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+              <span className="ml-0.5 bg-accent/20 text-accent text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                 {appointment.smsThread.length}
               </span>
             )}
