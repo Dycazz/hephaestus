@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import {
   DollarSign, TrendingUp, CheckCircle2, MessageSquare,
   Users, Wrench, ArrowLeft, Loader2, BarChart2,
-  Receipt, Minus, Percent, Trash2, Plus, RefreshCw, TrendingDown,
+  Percent, RefreshCw,
 } from 'lucide-react'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -36,27 +36,7 @@ interface AnalyticsData {
   byServiceRevenue: { service: string; completed: number; revenueCents: number }[]
 }
 
-type Recurrence = 'none' | 'weekly' | 'monthly' | 'annually'
-
-interface Expense {
-  id: string
-  baseId?: string   // set on projected recurring instances; use this for deletion
-  name: string
-  amount_cents: number
-  category: 'supplies' | 'labor' | 'overhead' | 'other'
-  expense_date: string
-  notes?: string
-  recurrence: Recurrence
-}
-
 type DateRange = 'month' | 'year' | 'custom'
-
-const CATEGORY_LABELS: Record<string, string> = {
-  supplies: 'Supplies',
-  labor:    'Labor',
-  overhead: 'Overhead',
-  other:    'Other',
-}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -160,29 +140,11 @@ export default function AccountingPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Expenses
-  const [expenses, setExpenses] = useState<Expense[]>([])
-  const [expLoading, setExpLoading] = useState(false)
-
   // Date range
   const [range, setRange] = useState<DateRange>('month')
   const now = new Date()
   const [customFrom, setCustomFrom] = useState(toDateStr(new Date(now.getFullYear(), now.getMonth(), 1)))
   const [customTo,   setCustomTo]   = useState(toDateStr(now))
-
-  // Tax rate editing
-  const [taxInput, setTaxInput]     = useState('')
-  const [taxSaving, setTaxSaving]   = useState(false)
-
-  // Add expense form
-  const [showExpForm,    setShowExpForm]    = useState(false)
-  const [expName,        setExpName]        = useState('')
-  const [expAmount,      setExpAmount]      = useState('')
-  const [expCategory,    setExpCategory]    = useState<Expense['category']>('other')
-  const [expDate,        setExpDate]        = useState(toDateStr(now))
-  const [expNotes,       setExpNotes]       = useState('')
-  const [expRecurrence,  setExpRecurrence]  = useState<Recurrence>('none')
-  const [expSubmitting,  setExpSubmitting]  = useState(false)
 
   // ── Date range helpers ──────────────────────────────────────────────────
   const getFromTo = useCallback(() => {
@@ -208,29 +170,18 @@ export default function AccountingPage() {
     setLoading(true)
     fetch(`/api/analytics?from=${from}&to=${to}&t=${Date.now()}`, { cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error('Failed to load data'); return r.json() })
-      .then(d => { setData(d); setTaxInput(String(d.taxRatePercent)) })
+      .then(d => setData(d))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [getFromTo])
 
-  // ── Fetch expenses ──────────────────────────────────────────────────────
-  const fetchExpenses = useCallback(() => {
-    const { from, to } = getFromTo()
-    setExpLoading(true)
-    fetch(`/api/expenses?from=${from}&to=${to}&t=${Date.now()}`, { cache: 'no-store' })
-      .then(r => r.json())
-      .then(d => setExpenses(d.expenses ?? []))
-      .catch(() => {})
-      .finally(() => setExpLoading(false))
-  }, [getFromTo])
-
-  useEffect(() => { fetchAnalytics(); fetchExpenses() }, [fetchAnalytics, fetchExpenses])
+  useEffect(() => { fetchAnalytics() }, [fetchAnalytics])
 
   // ── Auto-refresh every 30 seconds ───────────────────────────────────────
   useEffect(() => {
-    const id = setInterval(() => { fetchAnalytics(); fetchExpenses() }, 30_000)
+    const id = setInterval(() => { fetchAnalytics() }, 30_000)
     return () => clearInterval(id)
-  }, [fetchAnalytics, fetchExpenses])
+  }, [fetchAnalytics])
 
   // ── Real-time: refetch immediately when any appointment changes ──────────
   useEffect(() => {
@@ -239,62 +190,11 @@ export default function AccountingPage() {
       .channel('analytics-appointments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'appointments' }, () => {
         fetchAnalytics()
-        fetchExpenses()
       })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
-  }, [fetchAnalytics, fetchExpenses])
-
-  // ── Derived accounting figures ──────────────────────────────────────────
-  const totalExpensesCents   = expenses.reduce((s, e) => s + e.amount_cents, 0)
-  const totalCommissionCents = data?.byTechnicianRevenue.reduce((s, t) => s + t.commissionCents, 0) ?? 0
-  const netProfitCents       = (data?.totalRevenueCents ?? 0) - totalExpensesCents - totalCommissionCents - (data?.taxOwedCents ?? 0)
-
-  // ── Tax rate save ───────────────────────────────────────────────────────
-  async function saveTaxRate() {
-    setTaxSaving(true)
-    await fetch('/api/accounting/settings', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ taxRatePercent: parseFloat(taxInput || '0') }),
-    })
-    setTaxSaving(false)
-    fetchAnalytics()
-  }
-
-  // ── Add expense ─────────────────────────────────────────────────────────
-  async function submitExpense() {
-    if (!expName.trim() || !expAmount) return
-    setExpSubmitting(true)
-    const res = await fetch('/api/expenses', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: expName.trim(),
-        amount_cents: Math.round(parseFloat(expAmount) * 100),
-        category: expCategory,
-        expense_date: expDate,
-        notes: expNotes.trim() || undefined,
-        recurrence: expRecurrence,
-      }),
-    })
-    setExpSubmitting(false)
-    if (res.ok) {
-      setShowExpForm(false); setExpName(''); setExpAmount(''); setExpNotes('')
-      setExpCategory('other'); setExpDate(toDateStr(now)); setExpRecurrence('none')
-      fetchExpenses()
-    }
-  }
-
-  // ── Delete expense ──────────────────────────────────────────────────────
-  // For recurring instances, baseId is the master record ID.
-  // Deleting it removes all future occurrences.
-  async function deleteExpense(expense: Expense) {
-    const id = expense.baseId ?? expense.id
-    await fetch(`/api/expenses/${id}`, { method: 'DELETE' })
-    fetchExpenses()
-  }
+  }, [fetchAnalytics])
 
   // ── Loading / error states ──────────────────────────────────────────────
   if (loading && !data) {
@@ -330,7 +230,7 @@ export default function AccountingPage() {
           <DollarSign className="w-5 h-5 text-green-400" />
           <h1 className="text-white font-semibold text-lg">Accounting</h1>
           <button
-            onClick={() => { fetchAnalytics(); fetchExpenses() }}
+            onClick={() => { fetchAnalytics() }}
             title="Refresh now"
             className="ml-1 text-slate-600 hover:text-slate-300 transition-colors"
           >
@@ -392,52 +292,9 @@ export default function AccountingPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard icon={DollarSign} label="Gross Revenue"   value={fmt(data.totalRevenueCents)}  sub={`${fmt(data.projectedRevenueCents)} projected`} color="green"  />
-            <StatCard icon={Receipt}    label="Total Expenses"  value={fmt(totalExpensesCents)}       sub="Logged expenses"    color="amber"  />
-            <StatCard icon={Minus}      label="Net Profit"      value={fmt(netProfitCents)}           sub="After expenses, commission & tax" color={netProfitCents >= 0 ? 'blue' : 'red'} />
-            <StatCard icon={Percent}    label="Tax Owed"        value={fmt(data.taxOwedCents)}        sub={`${data.taxRatePercent}% rate`} color="purple" />
-          </div>
-
-          {/* ── P&L Breakdown ────────────────────────────────────────────── */}
-          <div className="mt-4 rounded-2xl px-5 py-4" style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-slate-600 mb-3">P&amp;L Breakdown</p>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Gross Revenue (Actual)</span>
-                <span className="text-green-400 font-semibold">{fmt(data.totalRevenueCents)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">Projected (Scheduled)</span>
-                <span className="text-blue-400/80 font-medium">{fmt(data.projectedRevenueCents)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">− Expenses</span>
-                <span className="text-amber-400 font-semibold">−{fmt(totalExpensesCents)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">
-                  − Commission Paid
-                  {totalCommissionCents === 0 && (
-                    <span className="ml-1.5 text-slate-600">(set % on technicians in Settings)</span>
-                  )}
-                </span>
-                <span className="text-amber-400 font-semibold">−{fmt(totalCommissionCents)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">
-                  − Tax Owed
-                  {data.taxOwedCents === 0 && (
-                    <span className="ml-1.5 text-slate-600">(set rate below in Settings)</span>
-                  )}
-                </span>
-                <span className="text-amber-400 font-semibold">−{fmt(data.taxOwedCents)}</span>
-              </div>
-              <div className="flex items-center justify-between text-xs font-bold pt-2 border-t" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
-                <span className="text-white">Net Profit</span>
-                <span className={netProfitCents >= 0 ? 'text-blue-300' : 'text-red-400'}>{fmt(netProfitCents)}</span>
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            <StatCard icon={DollarSign} label="Gross Revenue" value={fmt(data.totalRevenueCents)} sub={`${fmt(data.projectedRevenueCents)} projected`} color="green" />
+            <StatCard icon={Percent}    label="Tax Owed"      value={fmt(data.taxOwedCents)}      sub={`${data.taxRatePercent}% rate`}                color="purple" />
           </div>
         </section>
 

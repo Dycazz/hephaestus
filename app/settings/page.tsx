@@ -302,7 +302,11 @@ function PlanTab({ org, role }: { org: OrgData; role: string }) {
       })
       const json = await res.json()
       if (!res.ok) { setBillingError(json.error ?? 'Failed to start checkout'); return }
-      if (json.url) window.location.href = json.url
+      if (json.url) {
+        window.location.href = json.url
+      } else {
+        setBillingError('Checkout URL was not returned. Please try again.')
+      }
     } catch {
       setBillingError('Something went wrong. Please try again.')
     } finally {
