@@ -59,7 +59,7 @@ export function Header({ onAddClient, onManageTeam }: HeaderProps) {
             <>
               <button
                 onClick={onManageTeam}
-                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-text-secondary transition hover:bg-[rgba(44,52,64,0.25)] hover:text-text-primary border border-transparent hover:border-[rgba(44,52,64,0.4)]"
+                className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-text-secondary transition hover:bg-[rgba(44,52,64,0.25)] hover:text-text-primary border border-transparent hover:border-[rgba(44,52,64,0.4)] btn-gunmetal-hover"
               >
                 <Users className="h-3.5 w-3.5" />
                 Team

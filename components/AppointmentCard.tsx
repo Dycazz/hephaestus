@@ -154,7 +154,7 @@ export function AppointmentCard({
               {canAssign && !readOnly && (
                 <button
                   onClick={() => setShowTechPicker(v => !v)}
-                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary transition-all duration-150"
+                  className="flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary transition-all duration-150 btn-gunmetal-hover"
                 >
                   {isUnassigned ? (
                     <>
@@ -262,7 +262,7 @@ export function AppointmentCard({
         <div className="flex gap-1.5 flex-wrap">
           <button
             onClick={() => onSelect(appointment.id)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary hover:bg-[rgba(44,52,64,0.25)]"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-all duration-150 border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.15)] text-text-secondary hover:text-text-primary hover:bg-[rgba(44,52,64,0.25)] btn-gunmetal-hover"
           >
             <MessageSquare className="w-3.5 h-3.5" />
             SMS Thread
