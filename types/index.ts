@@ -117,7 +117,7 @@ export interface BookingAvailability {
 // ── Invoices ──────────────────────────────────────────────────────────────────
 
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
-export type InvoicePaymentMethod = 'stripe' | 'cash' | 'check' | 'other'
+export type InvoicePaymentMethod = 'cash' | 'check' | 'other'
 
 export interface InvoiceLineItem {
   id: string
@@ -150,7 +150,6 @@ export interface Invoice {
   total_cents: number
   paid_at: string | null
   payment_method: InvoicePaymentMethod | null
-  stripe_payment_link_url: string | null
   pdf_storage_path: string | null
   qbo_invoice_id: string | null
   created_at: string

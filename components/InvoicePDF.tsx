@@ -300,14 +300,6 @@ export function InvoicePDF({ invoice, businessName }: Props) {
           </View>
         </View>
 
-        {/* Payment link */}
-        {invoice.stripe_payment_link_url && (
-          <View style={styles.paymentSection}>
-            <Text style={styles.paymentTitle}>Pay online:</Text>
-            <Text style={styles.paymentLink}>{invoice.stripe_payment_link_url}</Text>
-          </View>
-        )}
-
         {/* Notes */}
         {invoice.notes && (
           <View style={styles.notesSection}>
