@@ -55,6 +55,25 @@ export async function GET(request: NextRequest) {
     }
   }
 
+  // Also pull booking portal service prices as fallback — covers appointments
+  // created manually for services that only have portal pricing configured.
+  const { data: bLink } = await supabase
+    .from('booking_links')
+    .select('id')
+    .eq('org_id', orgId)
+    .maybeSingle()
+  if (bLink) {
+    const { data: bSvc } = await supabase
+      .from('booking_services')
+      .select('name, price_cents')
+      .eq('booking_link_id', bLink.id)
+    for (const s of bSvc ?? []) {
+      if (typeof s.price_cents === 'number' && s.price_cents > 0 && !servicePriceMap[s.name]) {
+        servicePriceMap[s.name] = s.price_cents
+      }
+    }
+  }
+
   // ── Fetch org for tax rate ────────────────────────────────────────────────
   const { data: org } = await supabase
     .from('organizations')

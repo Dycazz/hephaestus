@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-
-export const dynamic = 'force-dynamic'
 import { notifyTechnicianAssigned } from '@/lib/notifications'
 import { sendSMS } from '@/lib/sms'
 import { checkLimit, getOrgPlanAccess } from '@/lib/plan-access'
+
+export const dynamic = 'force-dynamic'
 
 const CreateAppointmentSchema = z.object({
   clientId: z.string().uuid().optional(),
