@@ -146,7 +146,19 @@ export async function POST(request: NextRequest) {
   // Use service role to bypass RLS on insert (profile doesn't exist yet)
   const supabaseAdmin = await createClient(true)
 
-  const slug = slugify(businessName)
+  const baseSlug = slugify(businessName)
+  const { data: existingSlugs } = await supabaseAdmin
+    .from('organizations')
+    .select('slug')
+    .like('slug', `${baseSlug}%`)
+  const slugSet = new Set((existingSlugs ?? []).map(o => o.slug))
+  let slug = baseSlug
+  let attempt = 1
+  while (slugSet.has(slug)) {
+    attempt++
+    slug = `${baseSlug}-${attempt}`
+  }
+
   const { data: org, error: orgError } = await supabaseAdmin
     .from('organizations')
     .insert({
