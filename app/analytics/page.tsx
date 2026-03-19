@@ -205,7 +205,7 @@ export default function AccountingPage() {
   const fetchAnalytics = useCallback(() => {
     const { from, to } = getFromTo()
     setLoading(true)
-    fetch(`/api/analytics?from=${from}&to=${to}&t=${Date.now()}`)
+    fetch(`/api/analytics?from=${from}&to=${to}&t=${Date.now()}`, { cache: 'no-store' })
       .then(r => { if (!r.ok) throw new Error('Failed to load data'); return r.json() })
       .then(d => { setData(d); setTaxInput(String(d.taxRatePercent)) })
       .catch(e => setError(e.message))
@@ -216,7 +216,7 @@ export default function AccountingPage() {
   const fetchExpenses = useCallback(() => {
     const { from, to } = getFromTo()
     setExpLoading(true)
-    fetch(`/api/expenses?from=${from}&to=${to}&t=${Date.now()}`)
+    fetch(`/api/expenses?from=${from}&to=${to}&t=${Date.now()}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(d => setExpenses(d.expenses ?? []))
       .catch(() => {})

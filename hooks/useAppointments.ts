@@ -80,7 +80,7 @@ export function useAppointments(viewAs?: string | null) {
   const fetchAppointments = useCallback(async () => {
     try {
       const url = viewAs ? `/api/appointments?view_as=${viewAs}` : '/api/appointments'
-      const res = await fetch(url)
+      const res = await fetch(url, { cache: 'no-store' })
       if (!res.ok) throw new Error('Failed to load appointments')
       const json = await res.json()
       setAppointments((json.appointments as Record<string, unknown>[]).map(mapDbAppointment))

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -22,8 +24,8 @@ export async function GET(request: NextRequest) {
   const toParam   = searchParams.get('to')
 
   const now = new Date()
-  const revenueFrom = fromParam ? new Date(fromParam) : new Date(now.getFullYear(), now.getMonth(), 1)
-  const revenueTo   = toParam   ? new Date(toParam)   : new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+  const revenueFrom = fromParam ? new Date(fromParam + 'T00:00:00.000Z') : new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1))
+  const revenueTo   = toParam   ? new Date(toParam   + 'T23:59:59.999Z') : new Date(Date.UTC(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999))
 
   // ── Fetch all appointments for this org ──────────────────────────────────
   const { data: appointments, error: apptQueryError } = await supabase
