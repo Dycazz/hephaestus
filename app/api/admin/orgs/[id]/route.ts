@@ -8,6 +8,8 @@ const PatchSchema = z.object({
   plan: z.enum(PLANS).optional(),
   trial_ends_at: z.string().datetime().nullable().optional(),
   suspended_at: z.string().datetime().nullable().optional(),
+  features: z.record(z.string(), z.any()).optional(),
+  max_members: z.number().int().min(1).optional(),
 })
 
 async function assertAdmin() {
@@ -100,10 +102,12 @@ export async function PATCH(
     return NextResponse.json({ error: parsed.error.issues[0]?.message }, { status: 400 })
   }
 
-  const updates: Record<string, string | null> = {}
+  const updates: Record<string, any> = {}
   if (parsed.data.plan !== undefined) updates.plan = parsed.data.plan
   if ('trial_ends_at' in parsed.data) updates.trial_ends_at = parsed.data.trial_ends_at ?? null
   if ('suspended_at' in parsed.data) updates.suspended_at = parsed.data.suspended_at ?? null
+  if ('features' in parsed.data) updates.features = parsed.data.features
+  if ('max_members' in parsed.data) updates.max_members = parsed.data.max_members
 
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
@@ -113,7 +117,7 @@ export async function PATCH(
     .from('organizations')
     .update(updates)
     .eq('id', id)
-    .select('id, name, business_name, plan, trial_ends_at, suspended_at')
+    .select('id, name, business_name, plan, trial_ends_at, suspended_at, features, max_members')
     .single()
 
   if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })

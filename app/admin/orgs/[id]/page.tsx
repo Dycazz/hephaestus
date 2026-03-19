@@ -18,6 +18,8 @@ interface OrgDetail {
   sms_phone_number: string | null
   review_url: string | null
   created_at: string
+  features: Record<string, any>
+  max_members: number
 }
 
 interface Member {
@@ -74,6 +76,16 @@ export default function OrgDetailPage() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState<string | null>(null)
 
+  // Member management
+  const [addMemberEmail, setAddMemberEmail] = useState('')
+  const [addMemberRole, setAddMemberRole] = useState('dispatcher')
+  const [addingMember, setAddingMember] = useState(false)
+  const [memberLoading, setMemberLoading] = useState<Record<string, boolean>>({})
+
+  // Features state
+  const [featuresText, setFeaturesText] = useState('{}')
+  const [maxMembers, setMaxMembers] = useState(5)
+
   // Trial extension state
   const [trialDate, setTrialDate] = useState('')
 
@@ -92,13 +104,15 @@ export default function OrgDetailPage() {
       if (json.org.trial_ends_at) {
         setTrialDate(json.org.trial_ends_at.slice(0, 10))
       }
+      setFeaturesText(JSON.stringify(json.org.features || {}, null, 2))
+      setMaxMembers(json.org.max_members || 5)
     }
     setLoading(false)
   }, [id])
 
   useEffect(() => { load() }, [load])
 
-  const patch = async (updates: Record<string, string | null>, label: string) => {
+  const patch = async (updates: Record<string, any>, label: string) => {
     if (!org) return
     setSaving(true)
     const res = await fetch(`/api/admin/orgs/${id}`, {
@@ -136,6 +150,51 @@ export default function OrgDetailPage() {
     } else {
       patch({ suspended_at: new Date().toISOString() }, 'Org suspended')
     }
+  }
+
+  const addMember = async () => {
+    if (!addMemberEmail) return
+    setAddingMember(true)
+    const res = await fetch(`/api/admin/orgs/${id}/members`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: addMemberEmail, password: 'Temp123!Password', role: addMemberRole })
+    })
+    if (res.ok) {
+      setAddMemberEmail('')
+      load() // Refresh members
+      setSaved('Member added')
+      setTimeout(() => setSaved(null), 2000)
+    } else {
+      const err = await res.json().catch(() => ({}))
+      alert(err.error || 'Failed to add member')
+    }
+    setAddingMember(false)
+  }
+
+  const changeMemberRole = async (memberId: string, role: string) => {
+    setMemberLoading(prev => ({ ...prev, [memberId]: true }))
+    const res = await fetch(`/api/admin/orgs/${id}/members/${memberId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role })
+    })
+    if (res.ok) {
+      load()
+    }
+    setMemberLoading(prev => ({ ...prev, [memberId]: false }))
+  }
+
+  const removeMember = async (memberId: string) => {
+    if (!confirm('Remove this member? This cannot be undone.')) return
+    setMemberLoading(prev => ({ ...prev, [memberId]: true }))
+    const res = await fetch(`/api/admin/orgs/${id}/members/${memberId}`, {
+      method: 'DELETE'
+    })
+    if (res.ok) {
+      load()
+    }
+    setMemberLoading(prev => ({ ...prev, [memberId]: false }))
   }
 
   const deleteOrg = async () => {
@@ -226,8 +285,8 @@ export default function OrgDetailPage() {
             </div>
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  {['User', 'Role', 'Push', 'Admin', 'Joined'].map(h => (
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  {['User', 'Role', 'Push', 'Admin', 'Joined', ''].map(h => (
                     <th key={h} className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600">
                       {h}
                     </th>
@@ -239,13 +298,24 @@ export default function OrgDetailPage() {
                   <tr
                     key={m.id}
                     style={{ borderBottom: i < members.length - 1 ? '1px solid rgba(255,255,255,0.04)' : undefined }}
+                    className={memberLoading[m.id] ? 'opacity-50' : ''}
                   >
                     <td className="px-4 py-3">
                       <p className="text-white text-sm font-medium">{m.email ?? m.id}</p>
                       {m.full_name && <p className="text-xs text-slate-500">{m.full_name}</p>}
                     </td>
                     <td className="px-4 py-3">
-                      <RoleBadge role={m.role} />
+                      <select
+                        value={m.role}
+                        onChange={e => changeMemberRole(m.id, e.target.value)}
+                        disabled={memberLoading[m.id]}
+                        className="text-xs rounded px-1.5 py-1 bg-black/50 text-slate-300 border border-white/10 outline-none"
+                      >
+                        <option value="owner">Owner</option>
+                        <option value="dispatcher">Dispatcher</option>
+                        <option value="viewer">Viewer</option>
+                        <option value="technician">Technician</option>
+                      </select>
                     </td>
                     <td className="px-4 py-3">
                       {m.expo_push_token
@@ -261,6 +331,15 @@ export default function OrgDetailPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {formatDate(m.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <button
+                        onClick={() => removeMember(m.id)}
+                        disabled={memberLoading[m.id]}
+                        className="p-1.5 text-slate-500 hover:text-red-400 transition-colors rounded hover:bg-red-500/10"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -418,6 +497,79 @@ export default function OrgDetailPage() {
                 </button>
               </div>
             )}
+          </ActionCard>
+
+          {/* Add Member */}
+          <ActionCard title="Add Member">
+            <div className="space-y-3">
+              <input
+                type="email"
+                placeholder="User Email"
+                value={addMemberEmail}
+                onChange={e => setAddMemberEmail(e.target.value)}
+                className="w-full px-3 py-2 text-sm text-white rounded-lg outline-none focus:ring-1 focus:ring-orange-400"
+                style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
+              />
+              <select
+                value={addMemberRole}
+                onChange={e => setAddMemberRole(e.target.value)}
+                className="w-full px-3 py-2 text-sm text-white rounded-lg outline-none focus:ring-1 focus:ring-orange-400"
+                style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                <option value="owner">Owner</option>
+                <option value="dispatcher">Dispatcher</option>
+                <option value="viewer">Viewer</option>
+                <option value="technician">Technician</option>
+              </select>
+              <button
+                onClick={addMember}
+                disabled={addingMember || !addMemberEmail}
+                className="w-full py-2 text-sm font-semibold text-black bg-orange-500 hover:bg-orange-400 rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {addingMember ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <User className="w-3.5 h-3.5" />}
+                Add Member
+              </button>
+            </div>
+          </ActionCard>
+
+          {/* Features & Limits */}
+          <ActionCard title="Features & Limits">
+            <div className="space-y-3">
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Max Members</p>
+                <input
+                  type="number"
+                  value={maxMembers.toString()}
+                  onChange={e => setMaxMembers(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 text-sm text-white rounded-lg outline-none focus:ring-1 focus:ring-orange-400"
+                  style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
+                />
+              </div>
+              <div>
+                <p className="text-xs text-slate-500 mb-1">Feature Flags (JSON)</p>
+                <textarea
+                  value={featuresText}
+                  onChange={e => setFeaturesText(e.target.value)}
+                  className="w-full px-3 py-2 text-xs text-white rounded-lg outline-none focus:ring-1 focus:ring-orange-400 font-mono h-24"
+                  style={{ background: '#1a1d26', border: '1px solid rgba(255,255,255,0.1)' }}
+                />
+              </div>
+              <button
+                onClick={() => {
+                  try {
+                    const parsed = JSON.parse(featuresText)
+                    patch({ features: parsed, max_members: maxMembers }, 'Config saved')
+                  } catch (e) {
+                    alert('Invalid JSON in features map.')
+                  }
+                }}
+                disabled={saving}
+                className="w-full py-2 text-sm font-semibold text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors disabled:opacity-50"
+                style={{ border: '1px solid rgba(255,255,255,0.1)' }}
+              >
+                Save Config
+              </button>
+            </div>
           </ActionCard>
 
           {/* Delete org */}

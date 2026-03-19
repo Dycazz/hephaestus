@@ -67,6 +67,7 @@ function trialRemaining(iso: string) {
 export default function AdminOrgsPage() {
   const router = useRouter()
   const [orgs, setOrgs] = useState<OrgRow[]>([])
+  const [stats, setStats] = useState<{ totalOrgs: number; activeTrials: number; totalMembers: number; recentAppts: number } | null>(null)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
@@ -84,7 +85,14 @@ export default function AdminOrgsPage() {
     setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  const loadStats = async () => {
+    const res = await fetch('/api/admin/orgs/stats')
+    if (res.ok) {
+      setStats(await res.json())
+    }
+  }
+
+  useEffect(() => { load(); loadStats(); }, [])
 
   const filtered = useMemo(() => {
     let list = orgs
@@ -158,6 +166,28 @@ export default function AdminOrgsPage() {
           Refresh
         </button>
       </div>
+
+      {/* Global Stats */}
+      {stats && (
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="rounded-xl p-4" style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-xs text-slate-500 mb-1">Total Organizations</p>
+            <p className="text-2xl font-bold text-white">{stats.totalOrgs}</p>
+          </div>
+          <div className="rounded-xl p-4" style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-xs text-slate-500 mb-1">Active Trials</p>
+            <p className="text-2xl font-bold text-amber-400">{stats.activeTrials}</p>
+          </div>
+          <div className="rounded-xl p-4" style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-xs text-slate-500 mb-1">Total Members</p>
+            <p className="text-2xl font-bold text-white">{stats.totalMembers}</p>
+          </div>
+          <div className="rounded-xl p-4" style={{ background: '#0d0f17', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <p className="text-xs text-slate-500 mb-1">Appointments (30d)</p>
+            <p className="text-2xl font-bold text-white">{stats.recentAppts}</p>
+          </div>
+        </div>
+      )}
 
       {/* Search + filters */}
       <div className="flex items-center gap-3 mb-4">

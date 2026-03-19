@@ -93,47 +93,6 @@ export const PAID_PLANS: Record<PaidPlanKey, PlanConfig> = {
 
 export const PLAN_ORDER: PaidPlanKey[] = ['starter', 'pro', 'enterprise']
 
-// ── Invoice payment links ───────────────────────────────────────────────────
-
-/**
- * Create a one-time Stripe Payment Link for an invoice.
- * Returns the payment link URL to share with the client.
- */
-export async function createInvoicePaymentLink(params: {
-  invoiceId: string
-  invoiceNumber: string
-  totalCents: number
-  orgId: string
-}): Promise<string> {
-  const stripe = getStripe()
-
-  // Create a one-time price for this invoice amount
-  const price = await stripe.prices.create({
-    currency: 'usd',
-    unit_amount: params.totalCents,
-    product_data: {
-      name: `Invoice ${params.invoiceNumber}`,
-    },
-  })
-
-  // Create a reusable payment link for this price
-  const link = await stripe.paymentLinks.create({
-    line_items: [{ price: price.id, quantity: 1 }],
-    metadata: {
-      invoice_id: params.invoiceId,
-      org_id: params.orgId,
-    },
-    after_completion: {
-      type: 'hosted_confirmation',
-      hosted_confirmation: {
-        custom_message: 'Thank you for your payment! Your invoice has been paid.',
-      },
-    },
-  })
-
-  return link.url
-}
-
 /** Map from Stripe Price ID → plan key (resolved at call-time) */
 export function priceIdToPlanKey(priceId: string): PaidPlanKey | null {
   for (const [key, cfg] of Object.entries(PAID_PLANS) as [PaidPlanKey, PlanConfig][]) {
