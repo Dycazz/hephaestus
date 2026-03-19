@@ -89,7 +89,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
 
         <div className="shrink-0 space-y-2.5 border-t border-border bg-surface-elevated/30 p-4">
           {canComplete && (
-            <div className="rounded-xl border border-border bg-surface-elevated/50 p-3">
+            <div className="rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-3">
               <p className="mb-2 text-xs font-medium text-text-muted">Job options</p>
               <button
                 onClick={() => {
@@ -104,7 +104,7 @@ export function SMSDrawer({ appointment, onClose, onMarkComplete, onScheduleFoll
           )}
 
           {isCompleted && !readOnly && (
-            <div className="rounded-xl border border-border bg-surface-elevated/50 p-3">
+            <div className="rounded-xl border border-[rgba(44,52,64,0.3)] bg-[rgba(44,52,64,0.1)] p-3">
               <p className="mb-2 text-xs font-medium text-text-muted">Follow-up</p>
               <div className="space-y-2">
                 <button
