@@ -163,23 +163,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#059669',
   },
-  // Payment section
-  paymentSection: {
-    marginTop: 32,
-    padding: 14,
-    backgroundColor: '#f9fafb',
-    borderRadius: 6,
-  },
-  paymentTitle: {
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 9,
-    marginBottom: 6,
-    color: '#374151',
-  },
-  paymentLink: {
-    color: '#d97706',
-    fontSize: 9,
-  },
   // Notes
   notesSection: {
     marginTop: 24,

@@ -437,7 +437,7 @@ function StepWelcome({ onStart }: { onStart: () => void }) {
     {
       icon: <BarChart3 className="w-5 h-5" />,
       title: 'Analytics',
-      desc: 'Track revenue, technician commissions, and expenses',
+      desc: 'Track revenue and technician commissions',
     },
   ]
 

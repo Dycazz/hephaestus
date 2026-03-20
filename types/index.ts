@@ -174,27 +174,6 @@ export interface BookingOverride {
   end_time: string | null
 }
 
-// ── Tax Rates ─────────────────────────────────────────────────────────────────
-
-export interface TaxRate {
-  id: string
-  org_id: string
-  name: string
-  rate_percent: number   // e.g. 8.250
-  is_default: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface InvoiceTax {
-  id: string
-  invoice_id: string
-  tax_rate_id: string | null
-  name: string          // snapshot at time of invoice
-  rate_percent: number  // snapshot
-  tax_cents: number
-}
-
 // ── Estimates ─────────────────────────────────────────────────────────────────
 
 export type EstimateStatus =
@@ -258,43 +237,6 @@ export interface Estimate {
   }
   line_items?: EstimateLineItem[]
   taxes?: EstimateTax[]
-}
-
-// ── Job Costing ───────────────────────────────────────────────────────────────
-
-export type CostCategory =
-  | 'labor'
-  | 'material'
-  | 'equipment'
-  | 'subcontractor'
-  | 'overhead'
-
-export interface JobCostItem {
-  id: string
-  org_id: string
-  appointment_id: string
-  category: CostCategory
-  description: string
-  quantity: number
-  unit_cost_cents: number
-  total_cost_cents: number
-  technician_id: string | null
-  hours: number | null
-  created_at: string
-  updated_at: string
-  // joined
-  technician?: {
-    id: string
-    name: string
-    hourly_rate_cents: number | null
-  }
-}
-
-export interface JobProfitability {
-  revenue_cents: number
-  cost_cents: number
-  gross_profit_cents: number
-  margin_percent: number
 }
 
 // ── QuickBooks Online ─────────────────────────────────────────────────────────

@@ -54,14 +54,6 @@ export function planIncludesEstimates(plan: AllPlanKey): boolean {
 }
 
 /**
- * Returns true if the org's plan includes the job costing feature.
- * Job costing requires starter or above.
- */
-export function planIncludesJobCosting(plan: AllPlanKey): boolean {
-  return plan !== 'trial'
-}
-
-/**
  * Returns true if the org's plan includes QuickBooks Online sync.
  * QBO sync requires pro or enterprise (or gifted).
  */

@@ -33,7 +33,6 @@ const CreateInvoiceSchema = z.object({
   due_date:     z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   notes:        z.string().nullable().optional(),
   line_items:   z.array(LineItemSchema).min(1),
-  tax_rate_ids: z.array(z.string().uuid()).optional().default([]),
 })
 
 // ── GET ────────────────────────────────────────────────────────────────────────
@@ -113,7 +112,7 @@ export async function POST(request: NextRequest) {
 
   const { data: org } = await serviceClient
     .from('organizations')
-    .select('next_invoice_number')
+    .select('next_invoice_number, tax_rate_percent')
     .eq('id', orgId)
     .single()
 
@@ -127,17 +126,7 @@ export async function POST(request: NextRequest) {
     .update({ next_invoice_number: org.next_invoice_number + 1 })
     .eq('id', orgId)
 
-  // Fetch selected tax rates (if any)
-  let taxRates: { id: string; name: string; rate_percent: number }[] = []
-  if (d.tax_rate_ids.length > 0) {
-    const { data: rates } = await supabase
-      .from('tax_rates')
-      .select('id, name, rate_percent')
-      .in('id', d.tax_rate_ids)
-    taxRates = rates ?? []
-  }
-
-  // Compute subtotal from non-tax-exempt line items only for tax calc
+  // Compute totals using org-level tax rate
   const subtotal_cents = d.line_items.reduce(
     (sum, li) => sum + li.quantity * li.unit_price_cents,
     0
@@ -145,15 +134,7 @@ export async function POST(request: NextRequest) {
   const taxableSubtotal = d.line_items
     .filter(li => !li.tax_exempt)
     .reduce((sum, li) => sum + li.quantity * li.unit_price_cents, 0)
-
-  // Compute per-rate tax amounts
-  const taxBreakdown = taxRates.map(r => ({
-    tax_rate_id: r.id,
-    name: r.name,
-    rate_percent: r.rate_percent,
-    tax_cents: Math.round(taxableSubtotal * r.rate_percent / 100),
-  }))
-  const tax_cents = taxBreakdown.reduce((s, t) => s + t.tax_cents, 0)
+  const tax_cents = Math.round(taxableSubtotal * (org.tax_rate_percent ?? 0) / 100)
   const total_cents = subtotal_cents + tax_cents
 
   // Insert invoice
@@ -191,18 +172,6 @@ export async function POST(request: NextRequest) {
     .insert(lineItemRows)
 
   if (liError) return NextResponse.json({ error: liError.message }, { status: 500 })
-
-  // Insert invoice_taxes rows (snapshots)
-  if (taxBreakdown.length > 0) {
-    const taxRows = taxBreakdown.map(t => ({
-      invoice_id:   invoice.id,
-      tax_rate_id:  t.tax_rate_id,
-      name:         t.name,
-      rate_percent: t.rate_percent,
-      tax_cents:    t.tax_cents,
-    }))
-    await supabase.from('invoice_taxes').insert(taxRows)
-  }
 
   return NextResponse.json({ invoice }, { status: 201 })
 }
