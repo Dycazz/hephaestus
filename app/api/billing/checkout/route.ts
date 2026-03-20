@@ -50,16 +50,28 @@ export async function POST(request: NextRequest) {
 
   if (!org) return NextResponse.json({ error: 'Organization not found' }, { status: 404 })
 
-  const stripe = getStripe()
+  let stripe: ReturnType<typeof getStripe>
+  try {
+    stripe = getStripe()
+  } catch (err) {
+    console.error('[Billing/Checkout] Stripe init failed:', err)
+    return NextResponse.json({ error: 'Billing service unavailable. Please try again.' }, { status: 503 })
+  }
 
   // Prevent duplicate active subscriptions — but verify with Stripe first to self-heal stale DB state
   if (org.subscription_status === 'active' && org.stripe_subscription_id) {
     let stripeSub: Stripe.Subscription | null = null
+    let subLookupErr: unknown = null
     try {
       stripeSub = await stripe.subscriptions.retrieve(org.stripe_subscription_id)
-    } catch {
+    } catch (err) {
+      subLookupErr = err
       // subscription not found in Stripe — stale DB record
     }
+
+    // Only treat as stale if Stripe says the resource doesn't exist (404).
+    // For auth or network errors, fail safely rather than clearing valid state.
+    const isNotFound = subLookupErr && typeof subLookupErr === 'object' && 'statusCode' in subLookupErr && (subLookupErr as { statusCode: number }).statusCode === 404
 
     if (stripeSub && (stripeSub.status === 'active' || stripeSub.status === 'trialing')) {
       return NextResponse.json(
@@ -68,7 +80,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Stale state — subscription is gone in Stripe; clear and proceed
+    if (!isNotFound && subLookupErr) {
+      // Auth or network error looking up subscription — don't clear state, just fail
+      const msg = subLookupErr instanceof Error ? subLookupErr.message : 'Stripe lookup failed'
+      console.error('[Billing/Checkout] Subscription lookup error:', subLookupErr)
+      return NextResponse.json({ error: `Failed to verify subscription status: ${msg}` }, { status: 502 })
+    }
+
+    // Stale state — subscription is gone in Stripe (404); clear and proceed
     console.warn('[Billing/Checkout] Clearing stale subscription for org', org.id, org.stripe_subscription_id)
     await supabase
       .from('organizations')
@@ -130,8 +149,9 @@ export async function POST(request: NextRequest) {
       },
     })
   } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
     console.error('[Billing/Checkout] Stripe session create failed:', err)
-    return NextResponse.json({ error: 'Failed to start checkout. Please try again.' }, { status: 502 })
+    return NextResponse.json({ error: `Failed to start checkout: ${msg}` }, { status: 502 })
   }
 
   if (!session.url) {
